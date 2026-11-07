@@ -13,7 +13,7 @@ The look follows Apple's design language: the system font (San Francisco), `#f5f
 | Landing | `index.html` | Frosted nav, countdown to the exam (Wed, Nov 11, 2:00 pm; changeable per device), **Continue** (resumes the drill used last at its weakest subject), module bar, exam panel |
 | Multiple-Choice Drill | `drill/` | 203 questions in 8 subject tabs, plus **Mixed**, **Missed** and **Progress**. **Group by: Source** practices chosen sources together |
 | Bio-pardy | `board/` | A Jeopardy-style board: 6 categories × 5 values, one hidden ×2 tile |
-| Word Roots | `roots/` | 59 Greek and Latin roots behind course terms, with a drill |
+| Word Roots | `roots/` | 94 Greek and Latin roots, sorted into the drill's 8 subjects, with a drill for all of them or one subject at a time (`roots/roots.js`) |
 | HW 3 | `hw3/` | Its own drill (like anthro's Classification): the 89 HW 3 questions in 5 tabs that follow the homework's sections, with separate progress (`bio-hw3-v1`). `hw3/key.html` is the answer key, **answers hidden by default** |
 | Mock Exam | `mock/` | A fresh 50- or 100-question exam each time from the drill, 40% from HW 3. Change answers until you submit; flagged questions go to the Review List |
 | Review List | `review/` | Every question marked ⚑ for review, from both drills and mock exams |

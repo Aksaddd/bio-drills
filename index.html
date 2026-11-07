@@ -226,7 +226,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
       <article class="card">
         <div class="chead"><span class="ico t i-purple">Aa</span>
           <div><h3><a href="roots/index.html">Word Roots</a></h3>
-          <p>Optional, but recommended if the terms feel unfamiliar. <i>thigmo-</i> (touch) + <i>-tropism</i> (turning) = growing in response to touch. Mark roots as mastered and the pool shrinks until you know them all.</p></div></div>
+          <p>94 Greek and Latin roots, sorted by subject: land plants, seed plants, signals, hormones, light, defense and fungi. <i>thigmo-</i> (touch) + <i>-tropism</i> (turning) = growing in response to touch. Drill them all or one subject at a time.</p></div></div>
         <div class="prow"><span class="ptext" id="rootsTxt">Not started</span><a class="plink" href="roots/index.html">Open</a></div>
       </article>
       <article class="card wide" data-key="bio-hw3-v1" data-total="89">
@@ -324,7 +324,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
   });
   // Bio-pardy best game, roots mastered, last mock exam
   try { const g = read("bio-board-v1") || {}; if (g.unit && g.unit.best != null) $("boardTxt").textContent = "Best game: $" + g.unit.best.toLocaleString("en-US") } catch (e) { }
-  try { const rs = read("bio-roots-v1") || {}, n = Object.keys((rs.unit || {}).m || {}).length; if (n) $("rootsTxt").textContent = `${n} of 59 mastered` } catch (e) { }
+  try { const rs = read("bio-roots-v1") || {}, n = Object.keys((rs.unit || {}).m || {}).length; if (n) $("rootsTxt").textContent = `${n} of 94 mastered` } catch (e) { }
   try { const h = read("bio-mock-history-v1") || []; if (h.length) { const l = h[h.length - 1]; $("mockLast").textContent = `Last exam: ${l.pct}% (${l.right}/${l.total}) · ${h.length} taken` } } catch (e) { }
   // Review List: marked questions across both drills. HW questions share ids (HW0…HW88) in both, so each counts once.
   try {
