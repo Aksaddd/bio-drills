@@ -1,6 +1,6 @@
 // Bio Drills · Settings (every page)
 // Load in <head>, right after the stylesheet, so the theme is set before the page paints.
-// - Appearance: Light / Dark / Automatic (follows the device). Saved as "bio-theme".
+// - Appearance: Light (default) / Dark / Automatic (follows the device). Saved as "bio-theme".
 // - Exam date for the home-page countdown. Saved as "bio-exam-date" (default below).
 // - Reading font and text size, shared with the drills' Options menu. Saved as "bio-reading".
 // Adds a "Settings" button to the top of the page: beside "← All drills" on inner pages,
@@ -23,7 +23,7 @@
 
   // ===== Appearance
   const mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
-  const themePref = () => { const t = get(THEME_KEY); return t === "light" || t === "dark" ? t : "auto" };
+  const themePref = () => { const t = get(THEME_KEY); return t === "dark" || t === "auto" ? t : "light" };   // Light by default
   function applyTheme() {
     const t = themePref(), dark = t === "dark" || (t === "auto" && mq && mq.matches);
     root.dataset.theme = dark ? "dark" : "light";
@@ -111,7 +111,7 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
     return `<div class="st-head"><h2 id="stTitle">Settings</h2><button type="button" class="st-done" id="stDone">Done</button></div>
       <p class="st-cap">Appearance</p>
       <div class="st-sec" style="margin-top:0"><div class="st-group"><div class="st-modes" role="radiogroup" aria-label="Appearance">${mode("light", "Light", "l")}${mode("dark", "Dark", "d")}${mode("auto", "Automatic", "a")}</div></div>
-        <p class="st-foot">Automatic matches your device's light or dark setting.</p></div>
+        <p class="st-foot">Light is the default. Automatic matches your device's light or dark setting.</p></div>
       <p class="st-cap">Exam</p>
       <div class="st-sec" style="margin-top:0"><div class="st-group">
         <label class="st-row"><span class="st-l">Date &amp; time</span><input type="datetime-local" class="st-date" id="stDate" value="${d ? localISO(d) : ""}"></label>
@@ -131,7 +131,7 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
     const sh = veil.querySelector(".st-sheet"), y = sh.scrollTop;
     sh.innerHTML = sheetHTML(); sh.scrollTop = y;
     sh.querySelector("#stDone").onclick = close;
-    sh.querySelectorAll("[data-theme-pick]").forEach(b => b.onclick = () => { set(THEME_KEY, b.dataset.themePick === "auto" ? null : b.dataset.themePick); applyTheme(); emit("bio:theme", themePref()); paint() });
+    sh.querySelectorAll("[data-theme-pick]").forEach(b => b.onclick = () => { set(THEME_KEY, b.dataset.themePick === "light" ? null : b.dataset.themePick); applyTheme(); emit("bio:theme", themePref()); paint() });
     sh.querySelectorAll("[data-font-pick]").forEach(b => b.onclick = () => { const r = reading(); r.font = b.dataset.fontPick; set(READ_KEY, JSON.stringify(r)); applyReading(r); emit("bio:reading", r); paint() });
     sh.querySelectorAll("[data-size-pick]").forEach(b => b.onclick = () => { const r = reading(); r.size = +b.dataset.sizePick; set(READ_KEY, JSON.stringify(r)); applyReading(r); emit("bio:reading", r); paint() });
     const di = sh.querySelector("#stDate");
