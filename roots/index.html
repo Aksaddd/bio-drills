@@ -51,6 +51,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .badge{font:600 11.5px var(--body);padding:3px 8px;border-radius:999px;margin-left:auto}
 .badge.m{background:var(--good-soft);color:var(--good)}
 .badge.r{background:var(--gold-soft);color:var(--gold)}
+.badge.x{background:var(--bad-soft);color:var(--bad)}
+.badge+.badge{margin-left:0}
 .root.done{opacity:.6}
 .marks{align-items:center}
 .mk{font:600 14px var(--body);border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;min-height:46px;cursor:pointer}
@@ -95,6 +97,15 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .jump a .n{opacity:.7;margin-left:4px;font-variant-numeric:tabular-nums}
 .grp h2{font:700 22px var(--display);letter-spacing:-.02em;margin:0}
 .tip{border:0}
+/* Retrying missed roots */
+.retrybtn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.85);cursor:pointer;background:rgba(255,255,255,.14);color:#fff;font:600 16px var(--body);padding:12px 20px;min-height:52px;border-radius:980px;transition:background .15s}
+.retrybtn:hover{background:rgba(255,255,255,.26)}
+.gbtn.x{background:var(--bad-soft);color:var(--bad)}
+.gbtn.x:hover{background:var(--bad);color:#fff}
+.missnote{color:var(--bad);font-weight:600}
+.misslist{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.misslist li{font:600 13px var(--body);background:var(--bad-soft);color:var(--bad);border-radius:980px;padding:4px 11px}
+.misslist li span{font-weight:400;color:var(--ink);opacity:.8;margin-left:4px}
 @media (prefers-reduced-motion:reduce){.startbtn.fresh{animation:none}.fab{transition:none}}
 </style>
 <!-- Vercel Web Analytics: anonymous page views, no cookies (enable Analytics for the project in the Vercel dashboard) -->
@@ -122,9 +133,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
   // Saved per exam: m = mastered roots, r = roots marked for review. Only this page uses it.
   const SKEY = "bio-roots-v1";
   let ST = {}; try { ST = JSON.parse(localStorage.getItem(SKEY) || "{}") || {} } catch (e) { }
-  const st = () => (ST[ex] = ST[ex] || { m: {}, r: {} });
+  const st = () => { const S = (ST[ex] = ST[ex] || { m: {}, r: {} }); S.x = S.x || {}; return S };   // m mastered · r review · x missed (last answer wrong)
   const saveST = () => { try { localStorage.setItem(SKEY, JSON.stringify(ST)) } catch (e) { } };
-  const isM = r => !!st().m[r.root], isR = r => !!st().r[r.root];
+  const isM = r => !!st().m[r.root], isR = r => !!st().r[r.root], isX = r => !isM(r) && !!st().x[r.root];
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const shuffle = a => { a = a.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.random() * (k + 1) | 0; [a[k], a[j]] = [a[j], a[k]] } return a };
@@ -167,7 +178,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
     const q = query.trim().toLowerCase();
     const hit = r => !q || [r.root, r.mean, r.orig, ...r.exs.flat()].join(" ").toLowerCase().includes(q);
     const groups = R[ex].groups.map(([g]) => [g, all(ex).filter(r => r.g === g && hit(r))]).filter(([, rs]) => rs.length);
-    const leftIn = g => all(ex).filter(r => r.g === g && !isM(r)).length;
+    const leftIn = g => all(ex).filter(r => r.g === g && !isM(r)).length, missIn = g => all(ex).filter(r => r.g === g && isX(r)).length;
     $("app").innerHTML = `
       ${panel()}
       <p class="sub">${esc(R[ex].sub)}</p>
@@ -176,28 +187,30 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
       ${q ? "" : `<nav class="jump" aria-label="Jump to a subject">${groups.map(([g, rs]) => `<a href="#${slug(g)}">${esc(g)}<span class="n">${rs.length}</span></a>`).join("")}</nav>`}
       ${groups.length ? groups.map(([g, rs]) => { const m = meta(g), left = leftIn(g); return `<section class="grp" id="${slug(g)}">
         <div class="ghead"><div><h2>${esc(g)}</h2>${m.sub ? `<p>${esc(m.sub)}</p>` : ""}</div>
-          ${left ? `<button class="gbtn" type="button" data-g="${esc(g)}"><span class="play"></span>Drill ${left === rs.length ? `these ${left}` : `the ${left} left`}</button>` : `<span class="gcount">✓ All ${rs.length} mastered</span>`}</div>
+          <div class="row">${missIn(g) ? `<button class="gbtn x" type="button" data-gx="${esc(g)}">↻ Retry ${missIn(g)} missed</button>` : ""}${left ? `<button class="gbtn" type="button" data-g="${esc(g)}"><span class="play"></span>Drill ${left === rs.length ? `these ${left}` : `the ${left} left`}</button>` : `<span class="gcount">✓ All ${rs.length} mastered</span>`}</div></div>
         <div class="grid">${rs.map(card).join("")}</div></section>` }).join("") : `<p class="none">No roots match “${esc(query)}”.</p>`}
       ${q ? "" : `<div class="row" style="justify-content:center;padding-top:6px">${nextStep()}</div>`}`;
     wirePanel();
     document.querySelectorAll(".gbtn[data-g]").forEach(b => b.onclick = () => startDrill(b.dataset.g));
+    document.querySelectorAll(".gbtn[data-gx]").forEach(b => b.onclick = () => startDrill(MISSED, b.dataset.gx));
     const s = $("search");
     s.oninput = () => { query = s.value; const pos = s.selectionStart; list(); const n = $("search"); n.focus(); n.setSelectionRange(pos, pos) };
     watchFab();
   }
-  const card = r => `<article class="root${isM(r) ? " done" : ""}"><div class="rt"><b>${esc(r.root)}</b><span class="mean">${esc(r.mean)}</span>${isM(r) ? `<span class="badge m">✓ Mastered</span>` : isR(r) ? `<span class="badge r">⚑ Review</span>` : ""}</div><span class="orig">${esc(r.orig)}</span><ul class="ex">${r.exs.map(([t, m]) => `<li><span class="term">${mark(t, r.root)}</span>: ${esc(m)}</li>`).join("")}</ul></article>`;
+  const card = r => `<article class="root${isM(r) ? " done" : ""}"><div class="rt"><b>${esc(r.root)}</b><span class="mean">${esc(r.mean)}</span>${isM(r) ? `<span class="badge m">✓ Mastered</span>` : (isX(r) ? `<span class="badge x">✗ Missed</span>` : "") + (isR(r) ? `<span class="badge r">⚑ Review</span>` : "")}</div><span class="orig">${esc(r.orig)}</span><ul class="ex">${r.exs.map(([t, m]) => `<li><span class="term">${mark(t, r.root)}</span>: ${esc(m)}</li>`).join("")}</ul></article>`;
 
   // ===== Progress panel: how much of the pool is left
-  function counts() { const a = all(ex), m = a.filter(isM).length, r = a.filter(x => !isM(x) && isR(x)).length; return { total: a.length, m, r, left: a.length - m } }
+  function counts() { const a = all(ex), m = a.filter(isM).length, r = a.filter(x => !isM(x) && isR(x)).length, x = a.filter(isX).length; return { total: a.length, m, r, x, left: a.length - m } }
   function panel() {
     const c = counts(), pct = Math.round(c.m / c.total * 100), mins = Math.max(2, Math.round(c.left * 7 / 60));
     return `<section class="start" aria-labelledby="startTitle"><span class="deco" aria-hidden="true">Aa</span>
       <span class="eb">Root drill · ${c.total} roots in ${R[ex].groups.length} subjects</span>
       <h2 id="startTitle">${c.left ? (c.m ? `${c.left} roots left to master` : `Drill all ${c.total} roots`) : "Every root mastered"}</h2>
-      <p>${c.left ? `Quick multiple choice, about ${mins} minutes for the whole pool. Mark a root <b>mastered</b> and it leaves the pool; mark it for <b>review</b> and it comes back first.` : "Put them back any time for a refresher."}</p>
+      <p>${c.left ? `Quick multiple choice, about ${mins} minutes for the whole pool. Mark a root <b>mastered</b> and it leaves the pool. Anything you miss is saved so you can <b>retry</b> it.` : "Put them back any time for a refresher."}</p>
       <div class="pbar" role="img" aria-label="${c.m} of ${c.total} mastered"><i style="width:${pct}%"></i></div>
-      <p class="pstats"><b>${c.m}</b> of ${c.total} mastered · <b>${c.r}</b> marked for review · <b>${c.left}</b> left in the pool</p>
-      <div class="sbrow">${c.left ? `<button class="startbtn${c.m || c.r ? "" : " fresh"}" id="drillBtn" type="button"><span class="play" aria-hidden="true"></span>${c.m || c.r ? "Continue drilling" : "Start drilling"}</button>` : `<span class="alldone">✓ All ${c.total} mastered</span>`}
+      <p class="pstats"><b>${c.m}</b> of ${c.total} mastered · <b>${c.x}</b> missed · <b>${c.r}</b> marked for review · <b>${c.left}</b> left in the pool</p>
+      <div class="sbrow">${c.left ? `<button class="startbtn${c.m || c.r ? "" : " fresh"}" id="drillBtn" type="button"><span class="play" aria-hidden="true"></span>${c.m || c.r || c.x ? "Continue drilling" : "Start drilling"}</button>` : `<span class="alldone">✓ All ${c.total} mastered</span>`}
+      ${c.x ? `<button class="retrybtn" id="retryAll" type="button">↻ Retry ${c.x} missed</button>` : ""}
       ${c.m ? `<button class="reset" id="resetBtn" type="button">Put mastered roots back</button>` : ""}</div>
     </section>`;
   }
@@ -215,6 +228,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
   }
   function wirePanel() {
     if ($("drillBtn")) $("drillBtn").onclick = () => startDrill();
+    if ($("retryAll")) $("retryAll").onclick = () => startDrill(MISSED);
     if ($("resetBtn")) $("resetBtn").onclick = () => { if (!confirm(`Put all ${counts().m} mastered ${R[ex].name} roots back in the pool?`)) return; st().m = {}; saveST(); list() };
   }
 
@@ -227,21 +241,29 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
     for (const o of others) { if (picks.length === 3) break; if (!picks.some(p => clash(p, o))) picks.push(o) }
     return { r, dir: Math.random() < .5 ? 1 : 0, opts: shuffle([r, ...picks]) };
   }
-  // scope: one subject (section name) or every root
-  function startDrill(scope) {
-    const left = all(ex).filter(r => !isM(r) && (!scope || r.g === scope));
-    if (!left.length) return list();
-    quiz = { scope: scope || "", i: 0, right: 0, done: 0, items: [...shuffle(left.filter(isR)), ...shuffle(left.filter(r => !isR(r)))].map(item) };
+  // scope: "" (every root), a subject name, or MISSED (the missed bank, optionally within one subject)
+  const MISSED = "\u0000missed";
+  const scopeName = q => q.retry ? "Retry: missed this round" : q.scope === MISSED ? (q.sub ? `Missed · ${q.sub}` : "Missed roots") : q.scope || "All roots";
+  function begin(q) {
+    quiz = Object.assign({ i: 0, right: 0, done: 0, missed: [] }, q);
     if (fabObs) fabObs.disconnect(); $("fab").classList.remove("show");
     window.scrollTo({ top: 0 }); ask();
   }
+  function startDrill(scope, sub) {
+    const pick = scope === MISSED ? r => isX(r) && (!sub || r.g === sub) : r => !isM(r) && (!scope || r.g === scope);
+    const left = all(ex).filter(pick);
+    if (!left.length) return list();
+    begin({ scope: scope || "", sub: sub || "", items: [...shuffle(left.filter(isR)), ...shuffle(left.filter(r => !isR(r)))].map(item) });
+  }
+  // Retry exactly the questions missed in the round just finished: same root, same direction, options reshuffled
+  function retryRound(prev) { begin({ retry: true, scope: prev.scope, sub: prev.sub, items: shuffle(prev.missed).map(it => ({ r: it.r, dir: it.dir, opts: shuffle(it.opts) })) }) }
   function ask() {
     const it = quiz.items[quiz.i], { r, dir } = it, ex1 = r.exs[0];
     $("app").innerHTML = `<article class="card">
-      <div class="qtop"><span>${esc(quiz.scope || "All roots")} · ${quiz.i + 1} of ${quiz.items.length} this round · <b id="leftN">${counts().left}</b> left in the pool</span><button class="chip" id="quit" type="button">Back to the list</button></div>
+      <div class="qtop"><span>${esc(scopeName(quiz))} · ${quiz.i + 1} of ${quiz.items.length} this round · <b id="leftN">${counts().left}</b> left in the pool</span><button class="chip" id="quit" type="button">Back to the list</button></div>
       <p class="qbig">${dir ? `Which root means “${esc(r.mean)}”?` : `What does <code>${esc(r.root)}</code> mean?`}</p>
       <div class="opts">${it.opts.map((o, k) => `<button class="opt" data-k="${k}" type="button"><span class="bub">${"ABCD"[k]}</span><span>${esc(dir ? o.root : o.mean)}</span></button>`).join("")}</div>
-      <p class="fb" id="fb" hidden><b>${esc(r.root)}</b> = ${esc(r.mean)}. As in <b>${mark(ex1[0], r.root)}</b>: ${esc(ex1[1])}.</p>
+      <p class="fb" id="fb" hidden><span class="missnote" id="missNote" hidden>Missed: you'll get to retry this one. </span><b>${esc(r.root)}</b> = ${esc(r.mean)}. As in <b>${mark(ex1[0], r.root)}</b>: ${esc(ex1[1])}.</p>
       <div class="row marks"><button class="mk m" id="mkM" type="button" aria-pressed="${isM(r)}">✓ Mastered</button><button class="mk r" id="mkR" type="button" aria-pressed="${isR(r)}">⚑ Review</button>
         <button class="btn" id="next" type="button" hidden>${quiz.i + 1 < quiz.items.length ? "Next →" : "Finish round"}</button></div>
     </article>`;
@@ -250,20 +272,29 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
     $("mkM").onclick = () => { const S = st(); if (S.m[r.root]) delete S.m[r.root]; else { S.m[r.root] = 1; delete S.r[r.root] } saveST(); paint() };
     $("mkR").onclick = () => { const S = st(); if (S.r[r.root]) delete S.r[r.root]; else { S.r[r.root] = 1; delete S.m[r.root] } saveST(); paint() };
     document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
-      const ok = it.opts[+b.dataset.k] === r;
-      if (ok) quiz.right++; quiz.done++;
+      const ok = it.opts[+b.dataset.k] === r, S = st();
+      if (ok) { quiz.right++; delete S.x[r.root] } else { quiz.missed.push(it); S.x[r.root] = 1; $("missNote").hidden = false }
+      quiz.done++; saveST();
       document.querySelectorAll(".opt").forEach(x => { x.disabled = true; const o = it.opts[+x.dataset.k]; if (o === r) x.classList.add("right"); else if (x === b) x.classList.add("wrong") });
       $("fb").hidden = false; $("next").hidden = false; $("next").focus();
     });
     $("next").onclick = () => { quiz.i++; quiz.i < quiz.items.length ? ask() : done() };
   }
   function done() {
-    const { right, done: n } = quiz, c = counts();
+    const q = quiz, { right, done: n } = q, c = counts(), miss = q.missed;
+    const more = q.retry ? 0 : all(ex).filter(q.scope === MISSED ? r => isX(r) && (!q.sub || r.g === q.sub) : r => !isM(r) && (!q.scope || r.g === q.scope)).length;
     $("app").innerHTML = `<article class="card" style="align-items:flex-start">
-      <p class="sub">${esc(quiz.scope || "All roots")} · round finished</p><p class="score">${right} / ${n}</p>
-      <p class="fb">${c.left ? `<b>${c.m}</b> of ${c.total} mastered. <b>${c.left}</b> roots are still in the pool${c.r ? `, and the ${c.r} marked for review come first next round` : ""}.` : `You've mastered every ${esc(R[ex].name)} root.`}</p>
-      <div class="row">${(() => { const n = all(ex).filter(r => !isM(r) && (!quiz.scope || r.g === quiz.scope)).length; return n ? `<button class="btn" id="again" type="button">Next round (${n})</button>` : "" })()}<button class="btn ghost" id="back" type="button">Back to the list</button>${nextStep()}</div></article>`;
-    if ($("again")) { const sc = quiz.scope; $("again").onclick = () => startDrill(sc) }
+      <p class="sub">${esc(scopeName(q))} · round finished</p><p class="score">${right} / ${n}</p>
+      ${miss.length ? `<p class="fb" style="margin:0">You missed ${miss.length === 1 ? "this one" : `these ${miss.length}`}:</p><ul class="misslist">${miss.map(it => `<li>${esc(it.r.root)}<span>${esc(it.r.mean)}</span></li>`).join("")}</ul>`
+        : `<p class="fb" style="margin:0">${q.retry ? "You got every missed root right this time. They've left your missed list." : "No misses this round."}</p>`}
+      <p class="fb">${c.left ? `<b>${c.m}</b> of ${c.total} mastered · <b>${c.x}</b> on your missed list · <b>${c.left}</b> still in the pool.` : `You've mastered every ${esc(R[ex].name)} root.`}</p>
+      <div class="row">${miss.length ? `<button class="btn" id="retry" type="button">↻ Retry the ${miss.length} you missed</button>` : ""}
+        ${more ? `<button class="btn${miss.length ? " ghost" : ""}" id="again" type="button">${q.scope === MISSED ? `Missed roots (${more})` : `Next round (${more})`}</button>` : ""}
+        ${(() => { if (miss.length || !q.retry) return ""; const sc = q.scope === MISSED ? "" : q.scope, k = all(ex).filter(r => !isM(r) && (!sc || r.g === sc)).length; return k ? `<button class="btn" id="again2" type="button">Keep drilling ${esc(sc || "all roots")} (${k})</button>` : "" })()}
+        <button class="btn ghost" id="back" type="button">Back to the list</button>${nextStep()}</div></article>`;
+    if ($("retry")) $("retry").onclick = () => retryRound(q);
+    if ($("again")) $("again").onclick = () => startDrill(q.scope, q.sub);
+    if ($("again2")) $("again2").onclick = () => startDrill(q.scope === MISSED ? "" : q.scope);
     $("back").onclick = () => { quiz = null; list() };
   }
 
