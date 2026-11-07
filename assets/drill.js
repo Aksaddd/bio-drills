@@ -615,7 +615,15 @@
     $("menu").insertBefore(g, $("restartBtn"));
     g.querySelectorAll("[data-fontpick]").forEach(b => b.onclick = e => { e.stopPropagation(); reading.font = b.dataset.fontpick; applyReading() });
     g.querySelectorAll("[data-sizepick]").forEach(b => b.onclick = e => { e.stopPropagation(); reading.size = +b.dataset.sizepick; applyReading() });
+    if (window.BioSettings) {   // the full Settings sheet: appearance (light/dark), exam date, font, size
+      const more = document.createElement("button"); more.className = "mi"; more.setAttribute("role", "menuitem");
+      more.innerHTML = `<span class="dot" style="border:0">⚙︎</span>All settings: appearance, exam date…`;
+      more.onclick = e => { e.stopPropagation(); setMenu(false); window.BioSettings.open() };
+      g.appendChild(more);
+    }
   }
+  // Changes made in the Settings sheet update this drill's font and size too
+  window.addEventListener("bio:reading", e => { if (e.detail && FONTS[e.detail.font]) { reading.font = e.detail.font; reading.size = e.detail.size; applyReading() } });
 
   // ===== Options menu
   function setMenu(open) { menuOpen = open; $("menu").hidden = !open; $("optBtn").setAttribute("aria-expanded", open) }

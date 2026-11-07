@@ -18,6 +18,14 @@ The look follows Apple's design language: the system font (San Francisco), `#f5f
 | Mock Exam | `mock/` | A fresh 50- or 100-question exam each time from the drill, 40% from HW 3. Change answers until you submit; flagged questions go to the Review List |
 | Review List | `review/` | Every question marked ⚑ for review, from both drills and mock exams |
 
+## Settings
+
+Every page has **Settings** at the top: in the home page's nav bar, and beside "← All drills" on the other pages. It opens an iOS-style sheet (`assets/settings.js`, loaded in each page's `<head>` so the theme applies before the page paints):
+
+- **Appearance**: Light, Dark, or Automatic (follows the device). Saved as `bio-theme`. Dark mode uses Apple's dark system colors (`:root[data-theme="dark"]` in `assets/drill.css`).
+- **Exam date**: drives the home-page countdown. The default (Wed, Nov 11, 2:00 pm) is `DEFAULT_EXAM` in `assets/settings.js`. A change is saved per device as `bio-exam-date` and can be reset.
+- **Reading font** and **text size**, shared with the drill's Options menu (`bio-reading`).
+
 ## Subject tabs
 
 Land plants · Seedless vascular · Seed plants · Signals · Hormones · Light & time · Stress & defense · Fungi

@@ -6,6 +6,7 @@
 <meta name="description" content="A fresh 50- or 100-question Bi 239 practice exam every time, drawn from the drill, with 40% from Homework 3.">
 <meta name="theme-color" content="#f5f5f7">
 <link rel="stylesheet" href="../assets/drill.css">
+<script src="../assets/settings.js"></script>
 <style>
 /* Layout: one study column. Start screen → exam (sticky bar with timer + numbered grid, one question card) → results. */
 .examhead{display:flex;flex-direction:column;gap:6px}
@@ -45,7 +46,7 @@
 .ebar .info b{color:var(--ink)}
 .ebar .acts{display:flex;gap:6px;flex-wrap:wrap}
 .grid100{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px}
-.gq{height:20px;border:0;border-radius:4px;background:#e7ebf2;font:600 9.5px var(--mono);color:var(--muted);cursor:pointer;padding:0}
+.gq{height:20px;border:0;border-radius:4px;background:var(--sq-new,#e7ebf2);font:600 9.5px var(--mono);color:var(--muted);cursor:pointer;padding:0}
 .gq.ans{background:var(--accent);color:var(--accent-ink)}
 .gq.flag{background:var(--lv-shaky);color:#1b1503}
 .gq.cur{outline:2px solid var(--ink);outline-offset:1px}

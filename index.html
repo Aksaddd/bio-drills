@@ -5,6 +5,7 @@
 <title>Bi 239 Study Drills · Plants, Fungi &amp; Signals</title>
 <meta name="description" content="Practice drills for Bi 239: land plants, seed plants, fungi, and plant responses to signals. Multiple-choice drill, HW 3, Bio-pardy, word roots, mock exam and review list.">
 <meta name="theme-color" content="#f5f5f7">
+<script src="assets/settings.js"></script>
 <style>
 /* Layout (same organization as the anthro site): frosted nav → hero (course, countdown, Continue)
    → module bar (which modules go with the exam) → exam panel with module cards in a fixed order:
@@ -21,6 +22,21 @@
   --shadow:0 2px 14px rgba(0,0,0,.06); --shadow-hover:0 8px 30px rgba(0,0,0,.1);
   color-scheme:light;
 }
+:root[data-theme="dark"]{
+  --bg:#000; --paper:#1c1c1e; --ink:#f5f5f7; --muted:#98989f; --line:#38383a; --fill:#2c2c2e;
+  --accent:#0a84ff; --accent-hover:#409cff; --link:#2997ff; --st-new:#3a3a3c;
+  --shadow:0 0 0 .5px rgba(255,255,255,.07); --shadow-hover:0 0 0 .5px rgba(255,255,255,.12),0 8px 30px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+[data-theme="dark"] .gnav{background:rgba(22,22,23,.8);border-bottom-color:rgba(255,255,255,.1)}
+[data-theme="dark"] .gnav nav a{color:rgba(255,255,255,.8)}
+[data-theme="dark"] .hero,[data-theme="dark"] .modbar{background:var(--bg)}
+[data-theme="dark"] .modbar{border-bottom-color:rgba(255,255,255,.1)}
+[data-theme="dark"] .unit{background:var(--paper)}
+[data-theme="dark"] .tags span,[data-theme="dark"] .cta{background:#2c2c2e}
+[data-theme="dark"] .cta:hover{background:#3a3a3c}
+[data-theme="dark"] .plink.ghost:hover{background:#3a3a3c}
+[data-theme="dark"] .hero h1 .grad{background-image:linear-gradient(95deg,#4cd964 0%,#2997ff 55%,#c77dff 100%)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:60px}
@@ -38,7 +54,10 @@ a{color:var(--link)}
 .gnav nav::-webkit-scrollbar{display:none}
 .gnav nav a{font:400 12.5px var(--body);color:rgba(0,0,0,.8);text-decoration:none;white-space:nowrap;letter-spacing:-.01em}
 .gnav nav a:hover{color:var(--accent)}
-@media (max-width:700px){.gnav nav{display:none}}
+@media (max-width:700px){.gnav nav{display:none}.setbtn{margin-left:auto}}
+.setbtn{flex:none;display:inline-flex;align-items:center;gap:6px;font:400 12.5px var(--body);color:var(--ink);opacity:.8;background:none;border:0;padding:6px 0;cursor:pointer;letter-spacing:-.01em}
+.setbtn:hover{opacity:1;color:var(--accent)}
+.setbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* ===== Hero */
 .hero{background:var(--paper);text-align:center;padding:56px 0 34px}
@@ -53,13 +72,6 @@ a{color:var(--link)}
 .unit span{font:400 12px var(--body);color:var(--muted)}
 .exam{font:400 15px var(--body);color:var(--muted)}
 .exam strong{color:var(--ink);font-weight:600}
-.exam button{font:inherit;color:var(--link);background:none;border:0;padding:0;cursor:pointer;margin-left:6px}
-.exam button:hover{text-decoration:underline}
-.setdate{margin:28px auto 0;max-width:460px;background:var(--bg);border-radius:18px;padding:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
-.setdate label{flex-basis:100%;font:600 15px var(--body)}
-.setdate input{font:400 16px var(--body);border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)}
-.setdate .save{font:500 15px var(--body);border:0;border-radius:980px;background:var(--accent);color:#fff;padding:9px 18px;cursor:pointer}
-.setdate .skip{font:400 15px var(--body);border:0;background:none;color:var(--link);cursor:pointer}
 .actions{margin-top:28px;display:flex;justify-content:center;align-items:center;gap:14px 26px;flex-wrap:wrap}
 .go{display:inline-flex;align-items:center;background:var(--accent);color:#fff;font:400 17px var(--body);padding:12px 24px;border-radius:980px;text-decoration:none;transition:background .15s}
 .go:hover{background:var(--accent-hover)}
@@ -162,6 +174,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
   <nav aria-label="Modules">
     <a href="drill/index.html">Drill</a><a href="board/index.html">Bio-pardy</a><a href="roots/index.html">Word Roots</a><a href="hw3/index.html">HW 3</a><a href="mock/index.html">Mock Exam</a><a href="review/index.html">Review List</a>
   </nav>
+  <button type="button" class="setbtn" id="settingsBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
 </div></header>
 
 <section class="hero" aria-labelledby="courseTitle"><div class="inner">
@@ -175,14 +188,8 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
       <div class="unit"><b id="cM">–</b><span>minutes</span></div>
       <div class="unit"><b id="cS">–</b><span>seconds</span></div>
     </div>
-    <div class="exam"><strong id="examTitle">Exam</strong> · Ch 29, 30, 31 &amp; 39<button type="button" id="editDate">Change</button></div>
+    <div class="exam"><strong id="examTitle">Exam</strong> · Ch 29, 30, 31 &amp; 39</div>
   </div>
-  <form class="setdate" id="setdate" hidden>
-    <label for="examDate">When is your exam?</label>
-    <input type="datetime-local" id="examDate" required>
-    <button class="save" type="submit">Start countdown</button>
-    <button class="skip" type="button" id="skipDate">Not now</button>
-  </form>
   <div class="actions">
     <a class="go" id="goBtn" href="roots/index.html">Let's begin</a>
     <a class="more" href="hw3/index.html">Practice HW 3</a>
@@ -332,18 +339,14 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
     d.addEventListener("toggle", () => { try { localStorage.setItem(k, d.open ? "1" : "0") } catch (e) { } });
   });
 
-  // Countdown. The exam date is built in; the student can change it on her device ("Change").
-  const DEFAULT_EXAM = "2026-11-11T14:00", DATE_KEY = "bio-exam-date", SKIP_KEY = "bio-exam-date-skip";
+  // Countdown to the exam. The date lives in Settings (assets/settings.js): built in, changeable per device.
   const pad = n => String(n).padStart(2, "0");
-  const localISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  let exam = null, timer = null;
-  function showForm() { $("countdown").hidden = true; $("setdate").hidden = false; if (exam) $("examDate").value = localISO(exam) }
+  let timer = null;
   function startClock() {
     clearInterval(timer);
-    const raw = localStorage.getItem(DATE_KEY) || DEFAULT_EXAM;
-    exam = raw ? new Date(raw) : null;
-    if (!exam || isNaN(exam)) { exam = null; if (!localStorage.getItem(SKIP_KEY)) showForm(); return }
-    $("setdate").hidden = true; $("countdown").hidden = false;
+    const exam = window.BioSettings ? window.BioSettings.examDate() : new Date("2026-11-11T14:00");
+    if (!exam) { $("countdown").hidden = true; return }
+    $("countdown").hidden = false;
     const when = exam.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     $("examTitle").textContent = "Exam · " + when; $("examWhen").textContent = when.replace(/ (AM|PM)$/, m => m.toLowerCase()) + ".";
     const tick = () => {
@@ -355,10 +358,8 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
     };
     tick(); timer = setInterval(tick, 1000);
   }
-  $("setdate").onsubmit = e => { e.preventDefault(); const v = $("examDate").value; if (!v) return; try { localStorage.setItem(DATE_KEY, v); localStorage.removeItem(SKIP_KEY) } catch (err) { } startClock() };
-  $("skipDate").onclick = () => { try { localStorage.setItem(SKIP_KEY, "1") } catch (err) { } $("setdate").hidden = true };
-  $("editDate").onclick = showForm;
   startClock();
+  window.addEventListener("bio:exam", startClock);   // changed in Settings
 
   // Continue: new visitors warm up on the word roots; returning visitors resume the drill they used last, at its weakest subject.
   const used = [["drill", read(KEYS.drill)], ["hw3", read(KEYS.hw3)]].filter(([, s]) => s && s.stats && Object.keys(s.stats).length)
