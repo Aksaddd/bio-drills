@@ -203,7 +203,7 @@ h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
 
   // Countdown: the student sets her exam date once; it's saved on this device.
   // To build a date into the site for everyone, set DEFAULT_EXAM, e.g. "2026-11-20T09:30".
-  const DEFAULT_EXAM = "", DATE_KEY = "bio-exam-date", SKIP_KEY = "bio-exam-date-skip";
+  const DEFAULT_EXAM = "2026-11-11T14:00", DATE_KEY = "bio-exam-date", SKIP_KEY = "bio-exam-date-skip";
   const pad = n => String(n).padStart(2, "0");
   let exam = null, timer = null;
   function showForm() { $("countdown").hidden = true; $("setdate").hidden = false; if (exam) $("examDate").value = localISO(exam) }
