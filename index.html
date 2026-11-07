@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bi 239 Study Drills · Plants, Fungi &amp; Signals</title>
+<meta name="description" content="Practice drills for Bi 239: land plants, seed plants, fungi, and plant responses to signals. HW 3 answer key, clicker questions, Bio-pardy and word roots.">
+<meta name="theme-color" content="#1f2a1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: full-bleed hero (botanical line art over deep moss green; course name, countdown, Continue),
+   then one study column: study cards, where the questions come from, how progress is saved. */
+:root{
+  --bg:#f1f3ea; --paper:#fff; --ink:#1c2418; --muted:#5d6656; --line:#d8dccd; --sunk:#f6f8f0;
+  --accent:#6b3fa0; --accent-soft:#efe6f7; --moss:#1f2a1c; --moss-2:#2c3b27; --leaf:#c9e7a1; --bloom:#e3c6ff; --cream:#f7f5ec;
+  --st-right:#16a34a; --st-wrong:#e2572b; --st-review:#d4a017; --lv-new:#d8dccd;
+  --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgba(28,36,24,.06),0 6px 24px rgba(28,36,24,.07);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body)}
+:is(a,button,summary,input):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.inner{max-width:720px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* ===== Hero */
+.hero{position:relative;color:var(--cream);background:radial-gradient(120% 90% at 85% 0%,#3d5a33 0%,var(--moss-2) 38%,var(--moss) 100%);overflow:hidden;isolation:isolate;padding:max(30px,env(safe-area-inset-top,0px)) 0 34px}
+.hero svg.art{position:absolute;right:-40px;top:-10px;width:min(460px,80vw);height:auto;z-index:-1;opacity:.55}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--leaf);margin:0 0 10px}
+.hero h1{font:800 clamp(34px,8vw,56px)/1 var(--display);letter-spacing:-.025em;margin:0;max-width:14ch;text-wrap:balance}
+.hero h1 em{font-style:italic;font-weight:600;color:var(--bloom)}
+.hero .lede{max-width:46ch;color:color-mix(in srgb,var(--cream) 85%,transparent);margin:14px 0 0;font-size:16.5px;text-wrap:pretty}
+.countdown{margin-top:24px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.clock{display:flex;align-items:flex-start;gap:6px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 14px}
+.unit{display:flex;flex-direction:column;align-items:center;min-width:44px}
+.unit b{font:600 26px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.unit span{font:500 10.5px var(--mono);text-transform:uppercase;letter-spacing:.08em;opacity:.7}
+.sep{font:600 22px/1.2 var(--mono);opacity:.4}
+.exam{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.exam strong{font:600 15px var(--body)}
+.exam button,.setdate button{font:600 12.5px var(--body);color:var(--leaf);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}
+.setdate{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 14px;max-width:560px}
+.setdate label{font:600 14px var(--body);flex-basis:100%}
+.setdate input{font:500 15px var(--body);border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.95);color:var(--ink);padding:7px 10px}
+.setdate .save{font:600 14px var(--body);color:var(--moss);background:var(--leaf);border:0;border-radius:10px;padding:8px 14px;cursor:pointer;text-decoration:none}
+.actions{margin-top:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.go{display:inline-flex;align-items:center;gap:8px;background:var(--leaf);color:var(--moss);font:700 17px var(--body);padding:13px 24px;border-radius:999px;text-decoration:none;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.go:hover{background:#d8f0b6}
+.go::after{content:"→"}
+.today{font:500 13px var(--mono);color:color-mix(in srgb,var(--cream) 78%,transparent)}
+
+/* ===== Study cards */
+main.inner{padding-top:26px;padding-bottom:60px;display:flex;flex-direction:column;gap:12px}
+h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.card.wide{grid-column:1/-1}
+.chead{display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font:800 17px var(--display);background:var(--accent-soft);color:var(--accent)}
+.wide .num{background:var(--accent);color:#fff}
+.chead h3{margin:0;font:700 18px/1.2 var(--display)}
+.chead p{margin:3px 0 0;font-size:14px;color:var(--muted);text-wrap:pretty}
+.prow{display:flex;align-items:center;gap:10px;margin-top:auto}
+.stack{flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--lv-new);min-width:40px}
+.stack:empty{display:none}
+.stack i{display:block;height:100%}
+.c-right{background:var(--st-right)} .c-wrong{background:var(--st-wrong)} .c-review{background:var(--st-review)}
+.ptext{flex:1;font:500 12.5px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.stack:not(:empty)+.ptext{flex:none}
+.plink{flex:none;font:600 14px var(--body);color:#fff;background:var(--accent);text-decoration:none;border-radius:999px;padding:7px 16px}
+.plink:hover{background:#5a3389}
+.plink.ghost{background:var(--accent-soft);color:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font:500 12px var(--body);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 18px;font-size:14.5px}
+.box ul{margin:6px 0 0;padding-left:20px} .box li{margin:3px 0}
+.box p{margin:0 0 6px}
+.foot{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
+@media (max-width:560px){.cards{grid-template-columns:1fr}.hero svg.art{opacity:.3}}
+</style>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head><body>
+<header class="hero" aria-labelledby="courseTitle">
+  <svg class="art" viewBox="0 0 400 400" fill="none" stroke="#c9e7a1" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+    <path d="M200 395 C200 300 205 220 230 140 C245 95 270 60 300 30"/>
+    <path d="M214 270 C170 250 130 255 95 280 C130 300 175 300 214 270Z"/>
+    <path d="M222 205 C265 180 310 182 345 205 C310 230 262 228 222 205Z"/>
+    <path d="M232 150 C200 120 190 85 198 50 C228 70 242 108 232 150Z"/>
+    <path d="M95 280 L214 270 M345 205 L222 205 M198 50 L232 150" opacity=".55"/>
+    <circle cx="300" cy="30" r="10" stroke="#e3c6ff"/><circle cx="300" cy="30" r="22" stroke="#e3c6ff" opacity=".6"/>
+    <path d="M60 395 C62 360 70 340 88 325 M88 325 C70 322 58 328 50 340 M88 325 C100 312 116 312 126 318" opacity=".7"/>
+    <path d="M330 395 C330 375 336 362 350 352 C340 350 330 352 322 360" opacity=".7"/>
+    <ellipse cx="350" cy="340" rx="24" ry="9" opacity=".7"/>
+  </svg>
+  <div class="inner">
+    <p class="eyebrow">Bi 239 · Fall 2026 · Study drills</p>
+    <h1 id="courseTitle">Plants, fungi <em>&amp;</em> plant signals</h1>
+    <p class="lede">Practice by subject, mark what you still need to review, and spend your time on what you don't know yet. Built from your lecture slides, clicker questions and Homework 3.</p>
+    <div class="countdown" id="countdown" hidden>
+      <div class="clock" id="clock" role="timer" aria-live="off" aria-label="Time until the exam">
+        <div class="unit"><b id="cD">–</b><span>days</span></div><span class="sep" aria-hidden="true">:</span>
+        <div class="unit"><b id="cH">–</b><span>hrs</span></div><span class="sep" aria-hidden="true">:</span>
+        <div class="unit"><b id="cM">–</b><span>min</span></div><span class="sep" aria-hidden="true">:</span>
+        <div class="unit"><b id="cS">–</b><span>sec</span></div>
+      </div>
+      <div class="exam"><strong id="examTitle">Exam</strong><span>Ch 29, 30, 31 &amp; 39</span><button type="button" id="editDate">Change date</button></div>
+    </div>
+    <form class="setdate" id="setdate" hidden>
+      <label for="examDate">When is your exam? Set it once for a countdown on this device.</label>
+      <input type="datetime-local" id="examDate" required>
+      <button class="save" type="submit">Start countdown</button>
+      <button type="button" id="skipDate">Not now</button>
+    </form>
+    <div class="actions">
+      <a class="go" id="goBtn" href="roots/index.html">Let's begin</a>
+      <span class="today" id="todayTxt"></span>
+    </div>
+  </div>
+</header>
+
+<main class="inner">
+  <h2>Study</h2>
+  <div class="cards">
+    <article class="card wide" data-key="bio-u3-progress-v1" data-total="203" data-optional="bio-u3-progress-v1-include-AP:30">
+      <div class="chead"><span class="num" aria-hidden="true">✿</span>
+        <div><h3>Multiple-choice drill</h3><p>Every question in one place, sorted into eight subject tabs, with a Mixed tab and a Progress tab that shows your weakest topics first.</p></div></div>
+      <div class="tags"><span>Land plants</span><span>Seedless vascular</span><span>Seed plants</span><span>Signals</span><span>Hormones</span><span>Light &amp; time</span><span>Stress &amp; defense</span><span>Fungi</span></div>
+      <div class="prow"><div class="stack"></div><span class="ptext">203 questions · not started</span><a class="plink" href="drill/index.html">Start</a></div>
+    </article>
+    <article class="card">
+      <div class="chead"><span class="num" aria-hidden="true">3</span>
+        <div><h3>HW 3 answer key</h3><p>All the homework questions as multiple choice, with the answer and a short explanation for each. Hide the answers to quiz yourself, or print it.</p></div></div>
+      <div class="prow"><span class="ptext">89 questions</span><a class="plink" href="hw3/index.html">Open</a></div>
+    </article>
+    <article class="card">
+      <div class="chead"><span class="num" aria-hidden="true">Aa</span>
+        <div><h3>Word roots</h3><p>The Greek and Latin parts behind gametophyte, thigmotropism and karyogamy. Learn them once and many terms decode themselves.</p></div></div>
+      <div class="prow"><span class="ptext" id="rootsTxt">Not started</span><a class="plink" href="roots/index.html">Open</a></div>
+    </article>
+    <article class="card">
+      <div class="chead"><span class="num" aria-hidden="true">$</span>
+        <div><h3>Bio-pardy</h3><p>A Jeopardy-style board: six categories, five values each, and one hidden ×2 tile.</p></div></div>
+      <div class="prow"><span class="ptext" id="boardTxt">No games played yet</span><a class="plink" href="board/index.html">Play</a></div>
+    </article>
+    <article class="card">
+      <div class="chead"><span class="num" aria-hidden="true">⚑</span>
+        <div><h3>Review list</h3><p>Every question you've marked for review, in one place. Show the answers or quiz yourself on just those.</p></div></div>
+      <div class="prow"><span class="ptext" id="reviewCount">Nothing marked yet</span><a class="plink ghost" href="review/index.html">Open</a></div>
+    </article>
+  </div>
+
+  <h2 id="sources">Where the questions come from</h2>
+  <div class="box">
+    <ul>
+      <li><b>Homework 3</b> · 89: the professor's questions, written as multiple choice and answered from the slides.</li>
+      <li><b>Clicker questions</b> · 57: Ch 29 (17), Ch 30 (8), Ch 31 (15) and Ch 39 (17), with the professor's answer keys.</li>
+      <li><b>Lecture slides practice</b> · 27: details from the Ch 39 lecture (Plant Responses to Internal and External Signals) that the homework doesn't ask about directly.</li>
+      <li><b>Bio-pardy</b> · 30: short review clues. You can switch them in or out of the drill.</li>
+    </ul>
+    <p style="margin-top:10px;color:var(--muted)">The Ch 39 answers come straight from the lecture slides. The Ch 29–31 answers follow the clicker questions and the Campbell <i>Biology</i> chapters they come from. If an answer differs from what your professor said in class, go with the professor.</p>
+  </div>
+  <div class="box">
+    <p><b>Your progress stays on your device.</b> It's saved in this browser only: no account, nothing sent anywhere. It won't carry over to another phone or browser, and clearing your browser data erases it.</p>
+  </div>
+  <p class="foot">Figures are cropped from course slides as a study aid. This isn't official course material.</p>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || "null") } catch (e) { return null } };
+  const dayKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const DRILL_KEY = "bio-u3-progress-v1";
+  // Same statuses as the drill: right / wrong (last answer) or marked for review (takes priority).
+  function levels(s, total) {
+    const n = { right: 0, wrong: 0, review: 0 }; let a = 0, c = 0, seen = 0;
+    const st = (s && s.stats) || {}, hist = (s && s.hist) || {}, mark = (s && s.mark) || {};
+    for (const k in mark) if (mark[k] && mark[k].m === "review") n.review++;
+    for (const k in st) {
+      if (!st[k][0]) continue; seen++; a += st[k][0]; c += st[k][1];
+      if (!(mark[k] && mark[k].m === "review")) n[hist[k] === 1 ? "right" : "wrong"]++;
+    }
+    return { n, seen: Math.min(seen, total), acc: a ? Math.round(c / a * 100) : 0, total };
+  }
+  document.querySelectorAll(".card[data-key]").forEach(card => {
+    let total = +card.dataset.total;
+    if (card.dataset.optional) {   // Bio-pardy switched out of the drill
+      const [k, n] = card.dataset.optional.split(":");
+      try { if (localStorage.getItem(k) === "0") { total -= +n; card.querySelector(".ptext").textContent = `${total} questions · not started` } } catch (e) { }
+    }
+    const s = read(card.dataset.key), L = levels(s, total);
+    if (!L.seen && !L.n.review) return;
+    card.querySelector(".stack").innerHTML = ["right", "wrong", "review"].map(l => L.n[l] ? `<i class="c-${l}" style="width:${L.n[l] / L.total * 100}%"></i>` : "").join("");
+    card.querySelector(".ptext").textContent = `${L.seen} of ${L.total} answered · ${L.acc}% right`;
+    if (L.seen) card.querySelector(".plink").textContent = "Resume";
+  });
+  // Bio-pardy best game, roots mastered, review count
+  try { const g = read("bio-board-v1") || {}; if (g.unit && g.unit.best != null) $("boardTxt").textContent = "Best game: $" + g.unit.best.toLocaleString("en-US") } catch (e) { }
+  try { const rs = read("bio-roots-v1") || {}, n = Object.keys((rs.unit || {}).m || {}).length; if (n) $("rootsTxt").textContent = `${n} mastered` } catch (e) { }
+  try { const st = read(DRILL_KEY), n = st && st.mark ? Object.values(st.mark).filter(m => m.m === "review").length : 0; if (n) $("reviewCount").textContent = n === 1 ? "1 question marked" : n + " questions marked" } catch (e) { }
+
+  // Countdown: the student sets her exam date once; it's saved on this device.
+  // To build a date into the site for everyone, set DEFAULT_EXAM, e.g. "2026-11-20T09:30".
+  const DEFAULT_EXAM = "", DATE_KEY = "bio-exam-date", SKIP_KEY = "bio-exam-date-skip";
+  const pad = n => String(n).padStart(2, "0");
+  let exam = null, timer = null;
+  function showForm() { $("countdown").hidden = true; $("setdate").hidden = false; if (exam) $("examDate").value = localISO(exam) }
+  const localISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function startClock() {
+    clearInterval(timer);
+    const raw = localStorage.getItem(DATE_KEY) || DEFAULT_EXAM;
+    exam = raw ? new Date(raw) : null;
+    if (!exam || isNaN(exam)) { exam = null; if (!localStorage.getItem(SKIP_KEY)) showForm(); return }
+    $("setdate").hidden = true; $("countdown").hidden = false;
+    $("examTitle").textContent = "Exam · " + exam.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    const tick = () => {
+      const ms = exam - Date.now();
+      if (ms <= 0) { clearInterval(timer); $("countdown").hidden = true; return }
+      const s = Math.floor(ms / 1000), v = { cD: Math.floor(s / 86400), cH: pad(Math.floor(s / 3600) % 24), cM: pad(Math.floor(s / 60) % 60), cS: pad(s % 60) };
+      for (const id in v) $(id).textContent = v[id];
+      $("clock").setAttribute("aria-label", `${v.cD} days, ${+v.cH} hours, ${+v.cM} minutes until the exam`);
+    };
+    tick(); timer = setInterval(tick, 1000);
+  }
+  $("setdate").onsubmit = e => { e.preventDefault(); const v = $("examDate").value; if (!v) return; try { localStorage.setItem(DATE_KEY, v); localStorage.removeItem(SKIP_KEY) } catch (err) { } startClock() };
+  $("skipDate").onclick = () => { try { localStorage.setItem(SKIP_KEY, "1") } catch (err) { } $("setdate").hidden = true };
+  $("editDate").onclick = showForm;
+  startClock();
+
+  // Continue button + today's activity. New visitors warm up on the word roots; returning visitors jump to their weakest subject.
+  const s = read(DRILL_KEY);
+  if ((s && s.stats && Object.keys(s.stats).length) || localStorage.getItem("bio-roots-seen")) { $("goBtn").textContent = "Continue"; $("goBtn").href = "drill/index.html#continue" }
+  const t = s && s.days ? (s.days[dayKey(new Date())] | 0) : 0;
+  let streak = 0; if (s && s.days) { const d = new Date(); if (!s.days[dayKey(d)]) d.setDate(d.getDate() - 1); while (s.days[dayKey(d)]) { streak++; d.setDate(d.getDate() - 1) } }
+  $("todayTxt").textContent = t || streak ? `${t} answered today` + (streak ? ` · ${streak}-day streak` : "") : "";
+})();
+</script>
+</body></html>

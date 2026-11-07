@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Word Roots · Bi 239</title>
+<meta name="description" content="The Greek and Latin word parts behind Bi 239 terms for plants, fungi and plant signals, with a quick quiz.">
+<meta name="theme-color" content="#6b3fa0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="../assets/drill.css">
+<style>
+/* Layout: header → exam switch (Exam 1 / Exam 2) → search + Quiz me → roots grouped by theme.
+   Quiz mode replaces the list with one question card at a time (10 per round). */
+.xtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.xtabs:has(.xtab:only-child){grid-template-columns:1fr}
+.xtab{border:1.5px solid var(--line);background:var(--paper);border-radius:14px;padding:12px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.xtab b{font:800 18px var(--display)}
+.xtab span{font:500 12.5px var(--mono);color:var(--muted)}
+.xtab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.xtab[aria-selected="true"] span{color:var(--accent-ink);opacity:.85}
+.tools{display:flex;gap:8px;align-items:center}
+.search{flex:1;min-width:0;font:calc(15px * var(--rs)) var(--read);padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink)}
+.search:focus{outline:none;border-color:var(--accent)}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump a{font:500 12.5px var(--body);color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;text-decoration:none}
+.grp h2{font:800 20px var(--display);margin:10px 0 8px;scroll-margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.root{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.rt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rt b{font:600 calc(19px * var(--rs)) var(--mono);color:var(--accent)}
+.rt .mean{font:600 calc(16px * var(--rs)) var(--read)}
+.orig{font-size:12.5px;color:var(--muted);font-style:italic}
+.ex{margin:2px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:calc(14.5px * var(--rs))}
+.ex li{border-top:1px dashed var(--line);padding-top:5px}
+.ex .term{font-weight:600}
+mark{background:var(--gold-soft);color:inherit;border-radius:3px;padding:0 1px;box-shadow:inset 0 -2px 0 var(--gold)}
+.none{text-align:center;color:var(--muted);padding:24px 0}
+.tip{background:var(--gold-soft);border:1px solid #ecd9ae;border-radius:14px;padding:12px 16px;font-size:calc(14.5px * var(--rs))}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;color:var(--muted)}
+.qbig{font:600 calc(19px * var(--rs))/1.4 var(--read);margin:0}
+.qbig code{font:600 1.05em var(--mono);color:var(--accent)}
+.fb{font-size:calc(14.5px * var(--rs));color:var(--muted)}
+.score{font:800 44px var(--display);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.pool{gap:10px;padding:16px 18px}
+.pbar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--good);transition:width .3s}
+.pstats{margin:0;font-size:calc(14.5px * var(--rs));color:var(--muted)}
+.pstats b{color:var(--ink)}
+.alldone{font-weight:600;color:var(--good);align-self:center}
+.badge{font:600 11.5px var(--body);padding:3px 8px;border-radius:999px;margin-left:auto}
+.badge.m{background:var(--good-soft);color:var(--good)}
+.badge.r{background:var(--gold-soft);color:var(--gold)}
+.root.done{opacity:.6}
+.marks{align-items:center}
+.mk{font:600 14px var(--body);border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;min-height:46px;cursor:pointer}
+.mk.m[aria-pressed="true"]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.mk.r[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+.marks .btn{margin-left:auto}
+</style>
+<!-- Vercel Web Analytics: anonymous page views, no cookies (enable Analytics for the project in the Vercel dashboard) -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head><body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <a class="back" href="../index.html">← All drills</a>
+    <h1>Word Roots</h1>
+    <p class="sub">Most course terms are built from a few Greek and Latin parts. Drill every root for your exam: mark the ones you know as <b>mastered</b> and they leave the pool, mark tricky ones for <b>review</b> and they come back first. Keep going until the pool is empty.</p>
+  </header>
+  <div class="xtabs" role="tablist" id="xtabs"></div>
+  <main id="app" style="display:flex;flex-direction:column;gap:12px"></main>
+  <p class="foot">Root meanings are standard Greek and Latin etymologies. The example terms all come from the course material for that exam.</p>
+</div>
+<script src="roots.js"></script>
+<script>
+(() => {
+  const R = window.ROOTS, EX = Object.keys(R), KEY = "bio-roots-tab";
+  try { localStorage.setItem("bio-roots-seen", "1") } catch (e) { }
+  const DRILL = { unit: "../drill/index.html#continue" };
+  const nextStep = (cls = "btn ghost") => `<a class="${cls}" href="${DRILL[ex]}">Go to the ${esc(R[ex].name)} drill →</a>`;
+  // Saved per exam: m = mastered roots, r = roots marked for review. Only this page uses it.
+  const SKEY = "bio-roots-v1";
+  let ST = {}; try { ST = JSON.parse(localStorage.getItem(SKEY) || "{}") || {} } catch (e) { }
+  const st = () => (ST[ex] = ST[ex] || { m: {}, r: {} });
+  const saveST = () => { try { localStorage.setItem(SKEY, JSON.stringify(ST)) } catch (e) { } };
+  const isM = r => !!st().m[r.root], isR = r => !!st().r[r.root];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const shuffle = a => { a = a.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.random() * (k + 1) | 0; [a[k], a[j]] = [a[j], a[k]] } return a };
+  const fromHash = location.hash.slice(1);   // the home page links straight to an exam: roots/index.html#exam1
+  let ex = EX.includes(fromHash) ? fromHash : EX.includes(localStorage.getItem(KEY)) ? localStorage.getItem(KEY) : EX[0], query = "", quiz = null;
+  if (EX.includes(fromHash)) try { localStorage.setItem(KEY, ex) } catch (e) { }
+
+  // Reading settings from the drills apply here too
+  try {
+    const r = JSON.parse(localStorage.getItem("bio-reading") || "null");
+    const stacks = { atkinson: ['"Atkinson Hyperlegible Next",system-ui,sans-serif', "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap"], literata: ['Literata,Georgia,serif', "https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;600;700&display=swap"], system: ['system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'] };
+    if (r && stacks[r.font]) { const [st, href] = stacks[r.font]; if (href) { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = href; document.head.appendChild(l) } document.documentElement.style.setProperty("--read", st) }
+    if (r && [.9, 1, 1.12, 1.25][r.size]) document.documentElement.style.setProperty("--rs", [.9, 1, 1.12, 1.25][r.size]);
+  } catch (e) { }
+
+  const all = e => R[e].groups.flatMap(([g, rows]) => rows.map(([root, mean, orig, exs]) => ({ g, root, mean, orig, exs })));
+  // The letters of a root to highlight inside a term: "rhin- / -rrhine" → ["rrhin", "rhin"]
+  const keys = root => root.split(/[/ ]/).map(s => s.replace(/[^a-zA-Z]/g, "").toLowerCase()).filter(s => s.length > 1).sort((a, b) => b.length - a.length);
+  function mark(term, root) {
+    const low = term.toLowerCase();
+    for (let k of keys(root)) {
+      // try the full root, then drop a final vowel (chromo- → chrom in "chromatid")
+      for (const t of [k, k.replace(/[aeiouy]$/, "")]) {
+        const i = t.length > 1 ? low.indexOf(t) : -1;
+        if (i >= 0) return esc(term.slice(0, i)) + "<mark>" + esc(term.slice(i, i + t.length)) + "</mark>" + esc(term.slice(i + t.length));
+      }
+    }
+    return esc(term);
+  }
+
+  function tabs() {
+    $("xtabs").innerHTML = EX.map(e => `<button class="xtab" role="tab" aria-selected="${e === ex}" data-e="${e}"><b>${esc(R[e].name)}</b><span>${all(e).length} roots</span></button>`).join("");
+    $("xtabs").querySelectorAll(".xtab").forEach(b => b.onclick = () => { ex = b.dataset.e; localStorage.setItem(KEY, ex); quiz = null; query = ""; tabs(); list() });
+  }
+
+  function list() {
+    const q = query.trim().toLowerCase();
+    const hit = r => !q || [r.root, r.mean, r.orig, ...r.exs.flat()].join(" ").toLowerCase().includes(q);
+    const groups = R[ex].groups.map(([g]) => [g, all(ex).filter(r => r.g === g && hit(r))]).filter(([, rs]) => rs.length);
+    const slug = g => "g-" + g.toLowerCase().replace(/[^a-z]+/g, "-");
+    $("app").innerHTML = `
+      <p class="sub">${esc(R[ex].sub)}</p>
+      <div class="tip"><b>How to use it:</b> split a new word into its parts. <i>Gameto-</i> (spouse) + <i>-phyte</i> (plant) = the gamete-making plant. <i>Thigmo-</i> (touch) + <i>-tropism</i> (turning) = growing in response to touch.</div>
+      ${panel()}
+      <div class="tools"><input class="search" id="search" type="search" placeholder="Search a root, meaning or term…" value="${esc(query)}" aria-label="Search roots"></div>
+      ${q ? "" : `<nav class="jump" aria-label="Jump to a section">${groups.map(([g]) => `<a href="#${slug(g)}">${esc(g)}</a>`).join("")}</nav>`}
+      ${groups.length ? groups.map(([g, rs]) => `<section class="grp"><h2 id="${slug(g)}">${esc(g)}</h2><div class="grid">${rs.map(card).join("")}</div></section>`).join("") : `<p class="none">No roots match “${esc(query)}”.</p>`}
+      ${q ? "" : `<div class="row" style="justify-content:center;padding-top:6px">${nextStep()}</div>`}`;
+    wirePanel();
+    const s = $("search");
+    s.oninput = () => { query = s.value; const pos = s.selectionStart; list(); const n = $("search"); n.focus(); n.setSelectionRange(pos, pos) };
+  }
+  const card = r => `<article class="root${isM(r) ? " done" : ""}"><div class="rt"><b>${esc(r.root)}</b><span class="mean">${esc(r.mean)}</span>${isM(r) ? `<span class="badge m">✓ Mastered</span>` : isR(r) ? `<span class="badge r">⚑ Review</span>` : ""}</div><span class="orig">${esc(r.orig)}</span><ul class="ex">${r.exs.map(([t, m]) => `<li><span class="term">${mark(t, r.root)}</span>: ${esc(m)}</li>`).join("")}</ul></article>`;
+
+  // ===== Progress panel: how much of the pool is left
+  function counts() { const a = all(ex), m = a.filter(isM).length, r = a.filter(x => !isM(x) && isR(x)).length; return { total: a.length, m, r, left: a.length - m } }
+  function panel() {
+    const c = counts(), pct = Math.round(c.m / c.total * 100);
+    return `<section class="card pool">
+      <div class="pbar" role="img" aria-label="${c.m} of ${c.total} mastered"><i style="width:${pct}%"></i></div>
+      <p class="pstats"><b>${c.m}</b> of ${c.total} mastered · <b>${c.r}</b> marked for review · <b>${c.left}</b> left in the pool</p>
+      <div class="row">${c.left ? `<button class="btn" id="drillBtn" type="button">${c.m ? `Drill the ${c.left} left` : `Drill all ${c.total} roots`}</button>` : `<span class="alldone">Every ${esc(R[ex].name)} root mastered.</span>`}
+      ${c.m ? `<button class="btn ghost" id="resetBtn" type="button">Put mastered roots back</button>` : ""}</div>
+    </section>`;
+  }
+  function wirePanel() {
+    if ($("drillBtn")) $("drillBtn").onclick = startDrill;
+    if ($("resetBtn")) $("resetBtn").onclick = () => { if (!confirm(`Put all ${counts().m} mastered ${R[ex].name} roots back in the pool?`)) return; st().m = {}; saveST(); list() };
+  }
+
+  // ===== Drill: every root left in the pool, review-marked ones first. Mastered roots leave the pool.
+  const STOP = new Set(["a", "an", "the", "of", "to", "on", "and", "or", "by", "for", "from", "it", "its", "ending", "latin", "greek"]);
+  const words = m => new Set(m.toLowerCase().split(/[^a-z]+/).filter(w => w && !STOP.has(w)));
+  const clash = (a, b) => { const A = words(a.mean); return [...words(b.mean)].some(w => A.has(w)) };   // e.g. allo- and altru- both mean "other"
+  function item(r) {
+    const others = shuffle(all(ex).filter(o => o !== r && !clash(o, r))), picks = [];
+    for (const o of others) { if (picks.length === 3) break; if (!picks.some(p => clash(p, o))) picks.push(o) }
+    return { r, dir: Math.random() < .5 ? 1 : 0, opts: shuffle([r, ...picks]) };
+  }
+  function startDrill() {
+    const left = all(ex).filter(r => !isM(r));
+    if (!left.length) return list();
+    quiz = { i: 0, right: 0, done: 0, items: [...shuffle(left.filter(isR)), ...shuffle(left.filter(r => !isR(r)))].map(item) };
+    ask();
+  }
+  function ask() {
+    const it = quiz.items[quiz.i], { r, dir } = it, ex1 = r.exs[0];
+    $("app").innerHTML = `<article class="card">
+      <div class="qtop"><span>${esc(R[ex].name)} roots · ${quiz.i + 1} of ${quiz.items.length} this round · <b id="leftN">${counts().left}</b> left in the pool</span><button class="chip" id="quit" type="button">Back to the list</button></div>
+      <p class="qbig">${dir ? `Which root means “${esc(r.mean)}”?` : `What does <code>${esc(r.root)}</code> mean?`}</p>
+      <div class="opts">${it.opts.map((o, k) => `<button class="opt" data-k="${k}" type="button"><span class="bub">${"ABCD"[k]}</span><span>${esc(dir ? o.root : o.mean)}</span></button>`).join("")}</div>
+      <p class="fb" id="fb" hidden><b>${esc(r.root)}</b> = ${esc(r.mean)}. As in <b>${mark(ex1[0], r.root)}</b>: ${esc(ex1[1])}.</p>
+      <div class="row marks"><button class="mk m" id="mkM" type="button" aria-pressed="${isM(r)}">✓ Mastered</button><button class="mk r" id="mkR" type="button" aria-pressed="${isR(r)}">⚑ Review</button>
+        <button class="btn" id="next" type="button" hidden>${quiz.i + 1 < quiz.items.length ? "Next →" : "Finish round"}</button></div>
+    </article>`;
+    $("quit").onclick = () => { quiz = null; list() };
+    const paint = () => { $("mkM").setAttribute("aria-pressed", isM(r)); $("mkR").setAttribute("aria-pressed", isR(r)); $("leftN").textContent = counts().left };
+    $("mkM").onclick = () => { const S = st(); if (S.m[r.root]) delete S.m[r.root]; else { S.m[r.root] = 1; delete S.r[r.root] } saveST(); paint() };
+    $("mkR").onclick = () => { const S = st(); if (S.r[r.root]) delete S.r[r.root]; else { S.r[r.root] = 1; delete S.m[r.root] } saveST(); paint() };
+    document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      const ok = it.opts[+b.dataset.k] === r;
+      if (ok) quiz.right++; quiz.done++;
+      document.querySelectorAll(".opt").forEach(x => { x.disabled = true; const o = it.opts[+x.dataset.k]; if (o === r) x.classList.add("right"); else if (x === b) x.classList.add("wrong") });
+      $("fb").hidden = false; $("next").hidden = false; $("next").focus();
+    });
+    $("next").onclick = () => { quiz.i++; quiz.i < quiz.items.length ? ask() : done() };
+  }
+  function done() {
+    const { right, done: n } = quiz, c = counts();
+    $("app").innerHTML = `<article class="card" style="align-items:flex-start">
+      <p class="sub">${esc(R[ex].name)} roots · round finished</p><p class="score">${right} / ${n}</p>
+      <p class="fb">${c.left ? `<b>${c.m}</b> of ${c.total} mastered. <b>${c.left}</b> roots are still in the pool${c.r ? `, and the ${c.r} marked for review come first next round` : ""}.` : `You've mastered every ${esc(R[ex].name)} root.`}</p>
+      <div class="row">${c.left ? `<button class="btn" id="again" type="button">Next round (${c.left})</button>` : ""}<button class="btn ghost" id="back" type="button">Back to the list</button>${nextStep()}</div></article>`;
+    if ($("again")) $("again").onclick = startDrill;
+    $("back").onclick = () => { quiz = null; list() };
+  }
+
+  tabs(); list();
+})();
+</script>
+</body></html>
