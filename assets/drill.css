@@ -1,17 +1,18 @@
-/* Bio Drills · shared styles
+/* Bio Drills · shared styles (Apple design language: system font, #f5f5f7, Apple blue, pills, frosted surfaces)
    Layout: one study column. Header (title + daily ring) → subject tabs with mini mastery bars →
    subject map (one square per question) → slim round toolbar → question card. */
 :root{
-  --bg:#f1f3ea; --paper:#ffffff; --ink:#1c2418; --muted:#5d6656; --line:#d8dccd; --sunk:#f6f8f0;
-  --accent:#6b3fa0; --accent-ink:#ffffff; --accent-soft:#efe6f7;
-  --gold:#b7791f; --gold-soft:#fbf1dc;
-  --good:#15803d; --good-soft:#dcf3e3; --bad:#c2410c; --bad-soft:#fde8dc;
-  --lv-mastered:#16a34a; --lv-due:#9a6bd1; --lv-shaky:#d4a017; --lv-learning:#e2572b; --lv-new:#d8dccd;
-  --display:"Fraunces","Segoe UI",system-ui,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  /* Apple design tokens: system gray background, near-black ink, Apple blue for everything you can tap */
+  --bg:#f5f5f7; --paper:#ffffff; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --sunk:#f5f5f7; --fill:#e8e8ed;
+  --accent:#0071e3; --accent-ink:#ffffff; --accent-soft:#e8f1fc; --accent-hover:#0077ed;
+  --gold:#b25000; --gold-soft:#fff4e5;
+  --good:#248a3d; --good-soft:#e5f6e9; --bad:#d70015; --bad-soft:#ffecee;
+  --lv-mastered:#34c759; --lv-due:#5e5ce6; --lv-shaky:#ff9f0a; --lv-learning:#ff453a; --lv-new:#e5e5ea;
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
   --read:var(--body); --rs:1;   /* reading font and text-size multiplier, set from Options */
-  --radius:16px; --shadow:0 1px 2px rgba(28,36,24,.06),0 6px 24px rgba(28,36,24,.06);
+  --radius:18px; --shadow:0 2px 14px rgba(0,0,0,.06);
   color-scheme:light;
 }
 
@@ -63,7 +64,7 @@ h1{font:800 clamp(24px,6vw,32px)/1.05 var(--display);margin:0;letter-spacing:-.0
 .sq:hover{transform:scale(1.2)}
 /* solid colors: questions not yet answered in this round are a lighter tint of their level color */
 .sq:not(.done){opacity:.42}
-.sq.lv-c-new:not(.done){opacity:1;background:#e7ebf2!important}
+.sq.lv-c-new:not(.done){opacity:1;background:#e8e8ed!important}
 .sq.cur{outline:2px solid var(--ink);outline-offset:2px;opacity:1}
 .sq.just{animation:pulse .6s ease}
 .btn:disabled{opacity:.4;cursor:default}
@@ -256,7 +257,7 @@ h1{font:800 clamp(24px,6vw,32px)/1.05 var(--display);margin:0;letter-spacing:-.0
 .fclose:hover{background:rgba(0,0,0,.06);color:var(--ink)}
 
 /* ===== Drag-and-drop chart promo */
-.ddpromo{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;background:linear-gradient(135deg,var(--accent) 0%,#4f6bed 100%);color:#fff;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);text-decoration:none}
+.ddpromo{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;background:linear-gradient(135deg,#0071e3 0%,#40a0ff 100%);color:#fff;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);text-decoration:none}
 .ddpromo .dd-illu{grid-row:span 3;width:132px;height:84px;background:rgba(255,255,255,.12);border-radius:12px;padding:6px}
 .ddpromo .eyebrow2{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.85}
 .ddpromo strong{font:800 19px/1.2 var(--display)}
@@ -277,12 +278,12 @@ h1{font:800 clamp(24px,6vw,32px)/1.05 var(--display);margin:0;letter-spacing:-.0
 @media (prefers-reduced-motion:reduce){.dd-chip,.dd-hand,.dd-target{animation:none}.dd-chip{transform:translate(76px,32px)}.dd-hand{transform:translate(102px,38px)}}
 
 /* ===== Question status colors (replaces the old mastery levels) */
-:root{--st-right:#16a34a;--st-wrong:#e2572b;--st-review:#d4a017;--st-new:#d6dbe6;--st-mastered:#0f766e}
+:root{--st-right:#34c759;--st-wrong:#ff453a;--st-review:#ff9f0a;--st-new:#e5e5ea;--st-mastered:#30b0c7}
 .lv-c-mastered{background:var(--st-mastered)!important} .stack i.lv-c-mastered,.mini i.lv-c-mastered{background:var(--st-mastered)}
 .lv-c-right{background:var(--st-right)!important} .lv-c-wrong{background:var(--st-wrong)!important}
 .lv-c-review{background:var(--st-review)!important} .lv-c-new{background:var(--st-new)!important}
 .stack i.lv-c-right,.mini i.lv-c-right{background:var(--st-right)} .stack i.lv-c-wrong,.mini i.lv-c-wrong{background:var(--st-wrong)} .stack i.lv-c-review,.mini i.lv-c-review{background:var(--st-review)}
-.sq.lv-c-new:not(.done){opacity:1;background:#e7ebf2!important}
+.sq.lv-c-new:not(.done){opacity:1;background:#e8e8ed!important}
 .tbtns{display:flex;align-items:center;gap:6px;flex:none}
 #randBtn span{font-weight:700;margin-right:2px}
 
@@ -337,3 +338,117 @@ h1{font:800 clamp(24px,6vw,32px)/1.05 var(--display);margin:0;letter-spacing:-.0
 .explain .exwhy,.explain .whynot{display:block;margin-top:6px}
 .explain .whynot{padding-top:6px;border-top:1px dashed color-mix(in srgb,currentColor 25%,transparent)}
 .explain .exwhy b,.explain .whynot b{font-weight:700}
+
+/* ===================================================================
+   Apple layer: overrides that give every page the look and feel of Apple's own sites and iOS.
+   Borderless white cards on system gray, pill buttons, gray "tinted" secondary buttons,
+   iOS segmented controls, frosted menus, tight bold headlines, tabular numbers everywhere.
+   =================================================================== */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-.011em;font-feature-settings:"tnum" 0}
+.wrap{gap:16px}
+h1{font:700 clamp(28px,7vw,40px)/1.08 var(--display);letter-spacing:-.028em}
+.back{font:400 15px var(--body);display:inline-flex;align-items:center;gap:2px}
+.back:hover{text-decoration:none;opacity:.75}
+.sub{font-size:calc(15px * var(--rs));line-height:1.47;color:var(--muted)}
+/* Surfaces */
+.card,.srcpick,.tabs,.optdeck,.tabsbar.collapsed{border-color:transparent;box-shadow:var(--shadow)}
+.card{padding:24px;border-radius:22px;gap:18px}
+.card.review{border:1.5px dashed var(--line);box-shadow:none}
+/* Subject tiles */
+.tabs{padding:8px;gap:6px;border-radius:22px}
+.tab{border-radius:14px;padding:10px 10px 11px}
+.tab:hover{background:var(--sunk)}
+.tab b{font:600 14px/1.2 var(--display);letter-spacing:-.01em}
+.tab .tcount{font:400 11.5px var(--body);font-variant-numeric:tabular-nums}
+.tab-prog{border:1px dashed var(--line)}
+/* iOS segmented control (Group by) */
+.tabsbar .gb{background:var(--fill);border:0;padding:2px;border-radius:9px}
+.tabsbar .gb span{font:400 13px var(--body)}
+.tabsbar .gb button{border-radius:7px;font:500 13px var(--body);padding:5px 14px}
+.tabsbar .gb button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+.seg{background:var(--fill);border-radius:9px;padding:2px;gap:2px;margin:4px 10px 8px}
+.seg button{border:0;background:transparent;border-radius:7px;font-weight:500}
+.seg button[aria-pressed="true"]{background:#fff;border:0;color:var(--ink);box-shadow:0 3px 8px rgba(0,0,0,.12)}
+/* Buttons: filled pill (primary), gray tinted pill (secondary) */
+.btn{border-radius:980px;font:500 16px var(--body);letter-spacing:-.01em;padding:12px 24px;min-height:46px;transition:background .15s,transform .1s}
+.btn:hover:not(:disabled){background:var(--accent-hover)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn.ghost{background:var(--fill);color:var(--accent);border:0}
+.btn.ghost:hover:not(:disabled){background:#dedee3;border:0}
+.chip{border:0;background:var(--fill);color:var(--ink);border-radius:980px;font:500 13px var(--body);padding:7px 14px;transition:background .15s}
+.chip:hover{background:#dedee3;border:0}
+a.chip{color:var(--accent)}
+.mk{border:0;background:var(--fill);color:var(--ink);font:500 13px var(--body);padding:7px 14px}
+.mk:hover{background:#dedee3;border:0}
+.mk-review[aria-pressed="true"]{border:0;background:var(--gold-soft);color:var(--gold)}
+.mk-mastered[aria-pressed="true"]{border:0;background:#e3f5f8;color:#0e7490}
+/* Menus and popovers: frosted, like macOS */
+.menu{background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border:.5px solid rgba(0,0,0,.12);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.16);padding:6px}
+.mi{border-radius:8px;font-size:14px}
+.mi:hover{background:var(--accent);color:#fff}
+.mi:hover .box,.mi:hover .dot{border-color:#fff}
+.mi:hover .fname small{color:rgba(255,255,255,.8)}
+.mi.warn:hover{background:var(--bad);color:#fff}
+.mlabel{font:600 11px var(--body);letter-spacing:.02em;text-transform:none;color:var(--muted)}
+/* Progress bar + map */
+.bar{height:3px;background:var(--fill)}
+.sq{border-radius:5px}
+.sq.cur{outline:2px solid var(--accent)}
+/* Question card */
+.meta-l{text-transform:none;letter-spacing:0}
+.meta>span:last-child{font:500 13px var(--body);font-variant-numeric:tabular-nums;color:var(--muted)}
+.origin{font:500 12px/1.2 var(--body);background:var(--fill);color:var(--muted);padding:4px 10px}
+.revtag{font:600 12px var(--body);letter-spacing:0;text-transform:none}
+.q{font:600 calc(clamp(19px,4.8vw,22px) * var(--rs))/1.36 var(--read);letter-spacing:-.017em}
+.fig button{border:0;background:var(--sunk);border-radius:14px}
+.opts{gap:10px}
+.opt{border:1px solid var(--line);border-radius:14px;padding:13px 16px;min-height:54px;letter-spacing:-.01em}
+.opt:hover:not(:disabled){border-color:var(--accent);background:#fafafc}
+.bub{border:1px solid var(--line);font:600 13px var(--body);color:var(--muted)}
+.opt.picked .bub{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.right{background:var(--good-soft);border-color:var(--lv-mastered)}
+.opt.right .bub{background:var(--lv-mastered);border-color:var(--lv-mastered)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--lv-learning)}
+.opt.wrong .bub{background:var(--lv-learning);border-color:var(--lv-learning)}
+.explain{border-left:0;border-radius:14px;padding:14px 16px;background:var(--sunk);line-height:1.5}
+.explain.good{background:var(--good-soft)} .explain.bad{background:var(--bad-soft)}
+.explain.good strong{color:var(--good)} .explain.bad strong{color:var(--bad)}
+.prof{font:600 11.5px/1.2 var(--body);color:var(--gold);background:var(--gold-soft);border:0;padding:4px 10px}
+.based{font:500 11.5px/1.2 var(--body);color:var(--muted);background:transparent;border:1px solid var(--line);padding:3px 9px}
+/* Source picker: iOS grouped list */
+.sp-head b,.ph3{font:600 17px var(--display);letter-spacing:-.02em}
+.sp-row{border-radius:12px;border:0}
+.sp-row:has(input:checked){background:var(--accent-soft);border:0}
+.sp-n{font:400 12.5px var(--body);font-variant-numeric:tabular-nums}
+.tabsbar .tbnow b{font:600 15px var(--display)}
+.tabsbar .tbnow span{font:400 13px var(--body)}
+/* Results and progress */
+.result h2,.ph{font:700 28px/1.12 var(--display);letter-spacing:-.025em}
+.bigring b{font:700 32px var(--display);letter-spacing:-.02em}
+.pgrid b{font:600 24px/1.15 var(--display);letter-spacing:-.02em}
+.suggest{border:0;background:var(--sunk);border-radius:14px}
+.suggest b{font:600 17px var(--display)}
+.gain{border:0;background:var(--fill)}
+.feature{border:0;border-radius:18px}
+.feature strong{font:600 16px var(--display)}
+.callout{border-radius:12px}
+.callout strong{text-transform:none;letter-spacing:0;font-size:13px}
+.day i{background:#d9e8fb}
+.tname span,.ring b,.week .goal span,.day,.feature .fprog,.habit-text strong,.legend span,.roundinfo{font-family:var(--body);font-variant-numeric:tabular-nums}
+.ring b{font-weight:600}
+/* Toasts: dark frosted pill */
+.toast{background:rgba(29,29,31,.86);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);font:500 14px var(--body);padding:10px 18px}
+.lightbox{background:rgba(0,0,0,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.lightbox button{font:500 14px var(--body);color:var(--ink)}
+.foot{font-size:12px;line-height:1.5}
+@media (max-width:440px){.card{padding:20px;border-radius:20px}}
+/* Answer-key promo illustration (HW 3 drill) */
+.key-l{fill:rgba(255,255,255,.85)} .key-l.dim{fill:rgba(255,255,255,.45)}
+.key-ck{fill:none;stroke:#7cf5a0;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;animation:keyCk 3.6s ease infinite}
+.key-ck.k2{animation-delay:.5s} .key-ck.k3{animation-delay:1s}
+@keyframes keyCk{0%,10%{stroke-dashoffset:16}25%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:16}}
+@media (prefers-reduced-motion:reduce){.key-ck{animation:none;stroke-dashoffset:0}}
+.ddpromo{border-radius:22px}
+.ddpromo strong{font:700 20px/1.2 var(--display);letter-spacing:-.02em}
+.ddpromo .eyebrow2{font:600 12px var(--body);letter-spacing:.02em;text-transform:none}
+.ddpromo .ddbtn{border-radius:980px;font:500 15px var(--body);color:#0071e3}

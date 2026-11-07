@@ -263,7 +263,15 @@
   <g class="dd-chip"><rect x="0" y="0" width="46" height="13" rx="6.5"/><rect x="7" y="5" width="26" height="3" rx="1.5" class="dd-line"/></g>
   <path class="dd-hand" d="M0 0 L0 13 L3.5 10 L6 15.5 L8.2 14.5 L5.8 9.2 L10.5 9 Z"/>
 </svg>`;
-  const promoHTML = P => `<span class="eyebrow2">${esc(P.eyebrow || "Try it")}</span>${PROMO_ILLU}<strong>${esc(P.title)}</strong><p class="ddtext">${esc(P.text)}</p><a class="ddbtn" href="${P.href}">${esc(P.label)} →</a>`;
+  // Answer-key variant: a page of questions with a check mark appearing beside each answer
+  const KEY_ILLU = `<svg class="dd-illu" viewBox="0 0 132 84" aria-hidden="true">
+  <rect x="22" y="2" width="88" height="80" rx="7" class="dd-box" style="stroke-dasharray:0"/>
+  <rect x="31" y="11" width="56" height="4" rx="2" class="key-l"/><rect x="31" y="20" width="40" height="3" rx="1.5" class="key-l dim"/>
+  <rect x="31" y="33" width="56" height="4" rx="2" class="key-l"/><rect x="31" y="42" width="44" height="3" rx="1.5" class="key-l dim"/>
+  <rect x="31" y="55" width="56" height="4" rx="2" class="key-l"/><rect x="31" y="64" width="36" height="3" rx="1.5" class="key-l dim"/>
+  <path class="key-ck k1" d="M93 20 l3 3 l6 -7"/><path class="key-ck k2" d="M93 42 l3 3 l6 -7"/><path class="key-ck k3" d="M93 64 l3 3 l6 -7"/>
+</svg>`;
+  const promoHTML = P => `<span class="eyebrow2">${esc(P.eyebrow || "Try it")}</span>${P.illu === "key" ? KEY_ILLU : PROMO_ILLU}<strong>${esc(P.title)}</strong><p class="ddtext">${esc(P.text)}</p><a class="ddbtn" href="${P.href}">${esc(P.label)} →</a>`;
   function paintPromo() {
     const P = B.promo; if (!P) return;
     let el = $("promo");
@@ -579,13 +587,13 @@
   // Research (Wallace et al., 2022) found no single font is fastest for everyone, so readers choose.
   const READ_KEY = "bio-reading";
   const FONTS = {
-    plex: { label: "IBM Plex Sans", note: "The default", stack: '"IBM Plex Sans",system-ui,-apple-system,sans-serif' },
+    system: { label: "San Francisco", note: "The default: Apple's system font", stack: '-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif' },
+    plex: { label: "IBM Plex Sans", note: "Open and even", stack: '"IBM Plex Sans",system-ui,sans-serif', href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" },
     atkinson: { label: "Atkinson Hyperlegible", note: "Every letter easy to tell apart", stack: '"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,sans-serif', href: "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" },
     literata: { label: "Literata", note: "A serif made for screen reading", stack: 'Literata,Georgia,"Times New Roman",serif', href: "https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;600;700&display=swap" },
-    system: { label: "Your device's font", note: "Familiar, nothing to download", stack: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif' }
   };
   const SIZES = [{ k: .9, label: "A−", name: "Small" }, { k: 1, label: "A", name: "Default" }, { k: 1.12, label: "A+", name: "Large" }, { k: 1.25, label: "A++", name: "Extra large" }];
-  let reading = { font: "plex", size: 1 };
+  let reading = { font: "system", size: 1 };
   try { const r = JSON.parse(localStorage.getItem(READ_KEY) || "null"); if (r && FONTS[r.font]) reading.font = r.font; if (r && SIZES[r.size]) reading.size = r.size } catch (e) { }
   function applyReading() {
     const f = FONTS[reading.font];

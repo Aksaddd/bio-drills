@@ -3,177 +3,295 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bi 239 Study Drills · Plants, Fungi &amp; Signals</title>
-<meta name="description" content="Practice drills for Bi 239: land plants, seed plants, fungi, and plant responses to signals. HW 3 answer key, clicker questions, Bio-pardy and word roots.">
-<meta name="theme-color" content="#1f2a1c">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<meta name="description" content="Practice drills for Bi 239: land plants, seed plants, fungi, and plant responses to signals. Multiple-choice drill, HW 3, Bio-pardy, word roots, mock exam and review list.">
+<meta name="theme-color" content="#f5f5f7">
 <style>
-/* Layout: full-bleed hero (botanical line art over deep moss green; course name, countdown, Continue),
-   then one study column: study cards, where the questions come from, how progress is saved. */
+/* Layout (same organization as the anthro site): frosted nav → hero (course, countdown, Continue)
+   → module bar (which modules go with the exam) → exam panel with module cards in a fixed order:
+   Drill · Bio-pardy · Word Roots · HW 3 (multiple choice + answer key) · Mock Exam · Review List
+   → How it works + legend → where the questions come from → footer.
+   Visual language: Apple (system font, #f5f5f7, Apple blue, borderless cards, pills, frosted bars). */
 :root{
-  --bg:#f1f3ea; --paper:#fff; --ink:#1c2418; --muted:#5d6656; --line:#d8dccd; --sunk:#f6f8f0;
-  --accent:#6b3fa0; --accent-soft:#efe6f7; --moss:#1f2a1c; --moss-2:#2c3b27; --leaf:#c9e7a1; --bloom:#e3c6ff; --cream:#f7f5ec;
-  --st-right:#16a34a; --st-wrong:#e2572b; --st-review:#d4a017; --lv-new:#d8dccd;
-  --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --shadow:0 1px 2px rgba(28,36,24,.06),0 6px 24px rgba(28,36,24,.07);
+  --bg:#f5f5f7; --paper:#fff; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --fill:#e8e8ed;
+  --accent:#0071e3; --accent-hover:#0077ed; --link:#0066cc;
+  --st-right:#34c759; --st-wrong:#ff453a; --st-review:#ff9f0a; --st-new:#e5e5ea;
+  --i-blue:#0a84ff; --i-orange:#ff9500; --i-purple:#af52de; --i-green:#30b350; --i-red:#ff375f; --i-yellow:#ffb800;
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --shadow:0 2px 14px rgba(0,0,0,.06); --shadow-hover:0 8px 30px rgba(0,0,0,.1);
   color-scheme:light;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body)}
-:is(a,button,summary,input):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.inner{max-width:720px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:60px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.47 var(--body);letter-spacing:-.022em;-webkit-font-smoothing:antialiased}
+a{color:var(--link)}
+:is(a,button,summary,input):focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.inner{max-width:980px;margin:0 auto;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+
+/* ===== Global nav: frosted bar */
+.gnav{position:sticky;top:0;z-index:30;background:rgba(251,251,253,.8);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.1);padding-top:env(safe-area-inset-top,0px)}
+.gnav .inner{display:flex;align-items:center;gap:22px;height:48px}
+.gnav .brand{font:600 17px var(--display);color:var(--ink);text-decoration:none;letter-spacing:-.02em;white-space:nowrap}
+.gnav nav{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.gnav nav::-webkit-scrollbar{display:none}
+.gnav nav a{font:400 12.5px var(--body);color:rgba(0,0,0,.8);text-decoration:none;white-space:nowrap;letter-spacing:-.01em}
+.gnav nav a:hover{color:var(--accent)}
+@media (max-width:700px){.gnav nav{display:none}}
 
 /* ===== Hero */
-.hero{position:relative;color:var(--cream);background:radial-gradient(120% 90% at 85% 0%,#3d5a33 0%,var(--moss-2) 38%,var(--moss) 100%);overflow:hidden;isolation:isolate;padding:max(30px,env(safe-area-inset-top,0px)) 0 34px}
-.hero svg.art{position:absolute;right:-40px;top:-10px;width:min(460px,80vw);height:auto;z-index:-1;opacity:.55}
-.eyebrow{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--leaf);margin:0 0 10px}
-.hero h1{font:800 clamp(34px,8vw,56px)/1 var(--display);letter-spacing:-.025em;margin:0;max-width:14ch;text-wrap:balance}
-.hero h1 em{font-style:italic;font-weight:600;color:var(--bloom)}
-.hero .lede{max-width:46ch;color:color-mix(in srgb,var(--cream) 85%,transparent);margin:14px 0 0;font-size:16.5px;text-wrap:pretty}
-.countdown{margin-top:24px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
-.clock{display:flex;align-items:flex-start;gap:6px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 14px}
-.unit{display:flex;flex-direction:column;align-items:center;min-width:44px}
-.unit b{font:600 26px/1.1 var(--mono);font-variant-numeric:tabular-nums}
-.unit span{font:500 10.5px var(--mono);text-transform:uppercase;letter-spacing:.08em;opacity:.7}
-.sep{font:600 22px/1.2 var(--mono);opacity:.4}
-.exam{display:flex;flex-direction:column;gap:2px;font-size:14px}
-.exam strong{font:600 15px var(--body)}
-.exam button,.setdate button{font:600 12.5px var(--body);color:var(--leaf);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}
-.setdate{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 14px;max-width:560px}
-.setdate label{font:600 14px var(--body);flex-basis:100%}
-.setdate input{font:500 15px var(--body);border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.95);color:var(--ink);padding:7px 10px}
-.setdate .save{font:600 14px var(--body);color:var(--moss);background:var(--leaf);border:0;border-radius:10px;padding:8px 14px;cursor:pointer;text-decoration:none}
-.actions{margin-top:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.go{display:inline-flex;align-items:center;gap:8px;background:var(--leaf);color:var(--moss);font:700 17px var(--body);padding:13px 24px;border-radius:999px;text-decoration:none;box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.go:hover{background:#d8f0b6}
-.go::after{content:"→"}
-.today{font:500 13px var(--mono);color:color-mix(in srgb,var(--cream) 78%,transparent)}
+.hero{background:var(--paper);text-align:center;padding:56px 0 34px}
+.eyebrow{font:600 17px var(--display);color:var(--i-orange);margin:0 0 6px;letter-spacing:-.01em}
+.hero h1{font:700 clamp(40px,9vw,80px)/1.04 var(--display);letter-spacing:-.035em;margin:0 auto;max-width:12ch;text-wrap:balance}
+.hero h1 .grad{background:linear-gradient(95deg,#2f9e44 0%,#0a84ff 55%,#af52de 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lede{font:400 clamp(19px,2.6vw,24px)/1.35 var(--display);color:var(--muted);max-width:30ch;margin:16px auto 0;letter-spacing:-.02em;text-wrap:balance}
+.countdown{margin:30px auto 0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.clock{display:flex;gap:10px}
+.unit{width:76px;padding:10px 0 8px;background:var(--bg);border-radius:16px;display:flex;flex-direction:column;align-items:center}
+.unit b{font:600 32px/1.05 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.unit span{font:400 12px var(--body);color:var(--muted)}
+.exam{font:400 15px var(--body);color:var(--muted)}
+.exam strong{color:var(--ink);font-weight:600}
+.exam button{font:inherit;color:var(--link);background:none;border:0;padding:0;cursor:pointer;margin-left:6px}
+.exam button:hover{text-decoration:underline}
+.setdate{margin:28px auto 0;max-width:460px;background:var(--bg);border-radius:18px;padding:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+.setdate label{flex-basis:100%;font:600 15px var(--body)}
+.setdate input{font:400 16px var(--body);border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)}
+.setdate .save{font:500 15px var(--body);border:0;border-radius:980px;background:var(--accent);color:#fff;padding:9px 18px;cursor:pointer}
+.setdate .skip{font:400 15px var(--body);border:0;background:none;color:var(--link);cursor:pointer}
+.actions{margin-top:28px;display:flex;justify-content:center;align-items:center;gap:14px 26px;flex-wrap:wrap}
+.go{display:inline-flex;align-items:center;background:var(--accent);color:#fff;font:400 17px var(--body);padding:12px 24px;border-radius:980px;text-decoration:none;transition:background .15s}
+.go:hover{background:var(--accent-hover)}
+.more{font:400 17px var(--body);color:var(--link);text-decoration:none}
+.more:hover{text-decoration:underline}
+.more::after{content:" ›"}
+.today{display:block;margin-top:14px;font:400 14px var(--body);color:var(--muted);font-variant-numeric:tabular-nums}
+.today:empty{display:none}
 
-/* ===== Study cards */
-main.inner{padding-top:26px;padding-bottom:60px;display:flex;flex-direction:column;gap:12px}
-h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+/* ===== Module bar (Apple "chapter nav"): which modules go with the exam */
+.modbar{background:var(--paper);border-bottom:.5px solid rgba(0,0,0,.08)}
+.modbar ul{list-style:none;margin:0 auto;padding:6px 0 18px;display:flex;justify-content:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+.modbar ul::-webkit-scrollbar{display:none}
+.modbar a{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:86px;padding:8px 6px;text-decoration:none;color:var(--ink);font:400 12px/1.2 var(--body);text-align:center;letter-spacing:-.01em;border-radius:12px}
+.modbar a:hover{color:var(--accent)}
+.modbar a:hover .ico{transform:translateY(-2px)}
+@media (max-width:640px){.modbar ul{justify-content:flex-start;padding-left:14px;padding-right:14px}}
+
+/* App-icon style squircles */
+.ico{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:#fff;transition:transform .2s;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.06)}
+.ico svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ico.t{font:700 19px var(--display);letter-spacing:-.02em}
+.i-blue{background:linear-gradient(180deg,#3fa2ff,#0a7cff)} .i-orange{background:linear-gradient(180deg,#ffb340,#ff9500)}
+.i-purple{background:linear-gradient(180deg,#c77dff,#a64bd9)} .i-green{background:linear-gradient(180deg,#4fd06c,#28a745)}
+.i-red{background:linear-gradient(180deg,#ff6482,#ff2d55)} .i-yellow{background:linear-gradient(180deg,#ffd03c,#ffb000)}
+
+/* ===== Exam panel */
+main.inner{padding-top:48px;padding-bottom:64px;display:flex;flex-direction:column;gap:20px}
+.exampanel{background:transparent}
+.ephead{list-style:none;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:0 4px 4px}
+.ephead::-webkit-details-marker{display:none}
+.ephead h2{font:700 clamp(30px,5vw,40px)/1.1 var(--display);letter-spacing:-.03em;margin:0}
+.ephead p{margin:6px 0 0;color:var(--muted);font-size:17px;max-width:52ch}
+.eptools{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.epgo{flex:none;width:32px;height:32px;border-radius:50%;background:var(--fill);display:grid;place-items:center;transition:transform .25s}
+.epgo::before{content:"";width:9px;height:9px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateY(-2px) rotate(45deg)}
+.exampanel[open] .epgo{transform:rotate(180deg)}
+.cards{margin-top:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:640px){.cards{grid-template-columns:1fr}}
+.card{background:var(--paper);border-radius:22px;box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:14px;transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
 .card.wide{grid-column:1/-1}
-.chead{display:flex;gap:12px;align-items:flex-start}
-.num{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font:800 17px var(--display);background:var(--accent-soft);color:var(--accent)}
-.wide .num{background:var(--accent);color:#fff}
-.chead h3{margin:0;font:700 18px/1.2 var(--display)}
-.chead p{margin:3px 0 0;font-size:14px;color:var(--muted);text-wrap:pretty}
-.prow{display:flex;align-items:center;gap:10px;margin-top:auto}
-.stack{flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--lv-new);min-width:40px}
+.chead{display:flex;gap:14px;align-items:flex-start}
+.chead h3{margin:0;font:600 21px/1.2 var(--display);letter-spacing:-.02em}
+.chead h3 a{color:inherit;text-decoration:none}
+.chead p{margin:5px 0 0;font-size:15px;line-height:1.45;color:var(--muted);text-wrap:pretty}
+.prow{display:flex;align-items:center;gap:12px;margin-top:auto}
+.stack{flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--st-new);min-width:40px}
 .stack:empty{display:none}
 .stack i{display:block;height:100%}
-.c-right{background:var(--st-right)} .c-wrong{background:var(--st-wrong)} .c-review{background:var(--st-review)}
-.ptext{flex:1;font:500 12.5px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.c-right{background:var(--st-right)} .c-wrong{background:var(--st-wrong)} .c-review{background:var(--st-review)} .c-new{background:var(--st-new)}
+.ptext{flex:1;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
 .stack:not(:empty)+.ptext{flex:none}
-.plink{flex:none;font:600 14px var(--body);color:#fff;background:var(--accent);text-decoration:none;border-radius:999px;padding:7px 16px}
-.plink:hover{background:#5a3389}
-.plink.ghost{background:var(--accent-soft);color:var(--accent)}
+.plink{flex:none;font:400 15px var(--body);color:#fff;background:var(--accent);text-decoration:none;border-radius:980px;padding:8px 17px;transition:background .15s}
+.plink:hover{background:var(--accent-hover)}
+.plink.ghost{background:var(--fill);color:var(--accent)}
+.plink.ghost:hover{background:#dedee3}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tags span{font:500 12px var(--body);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
-.box{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 18px;font-size:14.5px}
-.box ul{margin:6px 0 0;padding-left:20px} .box li{margin:3px 0}
-.box p{margin:0 0 6px}
-.foot{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
-@media (max-width:560px){.cards{grid-template-columns:1fr}.hero svg.art{opacity:.3}}
+.tags span{font-size:13px;background:var(--bg);border-radius:980px;padding:3px 11px;color:var(--muted)}
+/* Two-way module (HW 3: multiple choice + answer key), like anthro's Classification card */
+.ctas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cta{display:flex;flex-direction:column;gap:3px;background:var(--bg);border-radius:16px;padding:14px 16px;text-decoration:none;color:var(--ink);transition:background .15s}
+.cta:hover{background:#ececf0}
+.cta strong{font:600 16px var(--display);letter-spacing:-.015em}
+.cta small{font-size:13.5px;color:var(--muted);line-height:1.4}
+.cta .go2{margin-top:6px;font-size:14px;color:var(--link)}
+.cta .go2::after{content:" ›"}
+.cta .mini{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--st-new);margin-top:6px}
+.cta .mini:empty{display:none}
+.cta .mini i{display:block;height:100%}
+@media (max-width:520px){.ctas{grid-template-columns:1fr}}
+
+/* ===== How it works + sources */
+.how{background:var(--paper);border-radius:22px;box-shadow:var(--shadow);padding:24px 26px;font-size:15px}
+.how>b{display:block;font:600 21px var(--display);letter-spacing:-.02em;margin-bottom:4px}
+.how ul{margin:8px 0 0;padding-left:20px} .how li{margin:6px 0}
+.how p{margin:6px 0 0;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px}
+.tablewrap{overflow-x:auto;margin-top:12px}
+.srctable{width:100%;border-collapse:collapse;font-size:15px}
+.srctable th,.srctable td{text-align:left;padding:9px 4px;border-bottom:.5px solid var(--line)}
+.srctable .n{text-align:right;font-variant-numeric:tabular-nums;width:90px}
+.srctable thead th{font-size:13px;color:var(--muted);font-weight:500}
+.srctable .grp th{font:600 17px var(--display);letter-spacing:-.015em;padding-top:20px;border-bottom:0}
+.srctable .tot td{font-weight:600;border-bottom:0}
+.pstar{color:var(--i-orange);font-size:13px;margin-left:4px}
+.pstar.based-star{color:var(--muted)}
+footer.site{border-top:.5px solid var(--line);padding:20px 0 40px;font-size:12px;color:var(--muted)}
+footer.site .inner{display:flex;flex-direction:column;gap:6px}
+@media (max-width:560px){.hero{padding-top:40px}.unit{width:66px}.unit b{font-size:27px}.card{padding:20px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head><body>
-<header class="hero" aria-labelledby="courseTitle">
-  <svg class="art" viewBox="0 0 400 400" fill="none" stroke="#c9e7a1" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
-    <path d="M200 395 C200 300 205 220 230 140 C245 95 270 60 300 30"/>
-    <path d="M214 270 C170 250 130 255 95 280 C130 300 175 300 214 270Z"/>
-    <path d="M222 205 C265 180 310 182 345 205 C310 230 262 228 222 205Z"/>
-    <path d="M232 150 C200 120 190 85 198 50 C228 70 242 108 232 150Z"/>
-    <path d="M95 280 L214 270 M345 205 L222 205 M198 50 L232 150" opacity=".55"/>
-    <circle cx="300" cy="30" r="10" stroke="#e3c6ff"/><circle cx="300" cy="30" r="22" stroke="#e3c6ff" opacity=".6"/>
-    <path d="M60 395 C62 360 70 340 88 325 M88 325 C70 322 58 328 50 340 M88 325 C100 312 116 312 126 318" opacity=".7"/>
-    <path d="M330 395 C330 375 336 362 350 352 C340 350 330 352 322 360" opacity=".7"/>
-    <ellipse cx="350" cy="340" rx="24" ry="9" opacity=".7"/>
-  </svg>
-  <div class="inner">
-    <p class="eyebrow">Bi 239 · Fall 2026 · Study drills</p>
-    <h1 id="courseTitle">Plants, fungi <em>&amp;</em> plant signals</h1>
-    <p class="lede">Practice by subject, mark what you still need to review, and spend your time on what you don't know yet. Built from your lecture slides, clicker questions and Homework 3.</p>
-    <div class="countdown" id="countdown" hidden>
-      <div class="clock" id="clock" role="timer" aria-live="off" aria-label="Time until the exam">
-        <div class="unit"><b id="cD">–</b><span>days</span></div><span class="sep" aria-hidden="true">:</span>
-        <div class="unit"><b id="cH">–</b><span>hrs</span></div><span class="sep" aria-hidden="true">:</span>
-        <div class="unit"><b id="cM">–</b><span>min</span></div><span class="sep" aria-hidden="true">:</span>
-        <div class="unit"><b id="cS">–</b><span>sec</span></div>
-      </div>
-      <div class="exam"><strong id="examTitle">Exam</strong><span>Ch 29, 30, 31 &amp; 39</span><button type="button" id="editDate">Change date</button></div>
+<header class="gnav"><div class="inner">
+  <a class="brand" href="index.html">Bi 239</a>
+  <nav aria-label="Modules">
+    <a href="drill/index.html">Drill</a><a href="board/index.html">Bio-pardy</a><a href="roots/index.html">Word Roots</a><a href="hw3/index.html">HW 3</a><a href="mock/index.html">Mock Exam</a><a href="review/index.html">Review List</a>
+  </nav>
+</div></header>
+
+<section class="hero" aria-labelledby="courseTitle"><div class="inner">
+  <p class="eyebrow">Bi 239 · Fall 2026</p>
+  <h1 id="courseTitle">Plants, fungi &amp; <span class="grad">plant signals.</span></h1>
+  <p class="lede">Practice by subject. Mark what you still need to review. Spend your time on what you don't know yet.</p>
+  <div class="countdown" id="countdown" hidden>
+    <div class="clock" id="clock" role="timer" aria-live="off" aria-label="Time until the exam">
+      <div class="unit"><b id="cD">–</b><span>days</span></div>
+      <div class="unit"><b id="cH">–</b><span>hours</span></div>
+      <div class="unit"><b id="cM">–</b><span>minutes</span></div>
+      <div class="unit"><b id="cS">–</b><span>seconds</span></div>
     </div>
-    <form class="setdate" id="setdate" hidden>
-      <label for="examDate">When is your exam? Set it once for a countdown on this device.</label>
-      <input type="datetime-local" id="examDate" required>
-      <button class="save" type="submit">Start countdown</button>
-      <button type="button" id="skipDate">Not now</button>
-    </form>
-    <div class="actions">
-      <a class="go" id="goBtn" href="roots/index.html">Let's begin</a>
-      <span class="today" id="todayTxt"></span>
-    </div>
+    <div class="exam"><strong id="examTitle">Exam</strong> · Ch 29, 30, 31 &amp; 39<button type="button" id="editDate">Change</button></div>
   </div>
-</header>
+  <form class="setdate" id="setdate" hidden>
+    <label for="examDate">When is your exam?</label>
+    <input type="datetime-local" id="examDate" required>
+    <button class="save" type="submit">Start countdown</button>
+    <button class="skip" type="button" id="skipDate">Not now</button>
+  </form>
+  <div class="actions">
+    <a class="go" id="goBtn" href="roots/index.html">Let's begin</a>
+    <a class="more" href="hw3/index.html">Practice HW 3</a>
+  </div>
+  <span class="today" id="todayTxt"></span>
+</div></section>
+
+<nav class="modbar" aria-label="Which modules go with the exam"><ul>
+  <li><a href="drill/index.html"><span class="ico i-blue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span>Multiple&#8209;Choice Drill</a></li>
+  <li><a href="board/index.html"><span class="ico t i-orange">$</span>Bio&#8209;pardy</a></li>
+  <li><a href="roots/index.html"><span class="ico t i-purple">Aa</span>Word Roots</a></li>
+  <li><a href="hw3/index.html"><span class="ico t i-green">3</span>HW 3</a></li>
+  <li><a href="mock/index.html"><span class="ico i-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 2M10 3h4"/></svg></span>Mock Exam</a></li>
+  <li><a href="review/index.html"><span class="ico i-yellow"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"/></svg></span>Review List</a></li>
+</ul></nav>
 
 <main class="inner">
-  <h2>Study</h2>
-  <div class="cards">
-    <article class="card wide" data-key="bio-u3-progress-v1" data-total="203" data-optional="bio-u3-progress-v1-include-AP:30">
-      <div class="chead"><span class="num" aria-hidden="true">✿</span>
-        <div><h3>Multiple-choice drill</h3><p>Every question in one place, sorted into eight subject tabs, with a Mixed tab and a Progress tab that shows your weakest topics first.</p></div></div>
-      <div class="tags"><span>Land plants</span><span>Seedless vascular</span><span>Seed plants</span><span>Signals</span><span>Hormones</span><span>Light &amp; time</span><span>Stress &amp; defense</span><span>Fungi</span></div>
-      <div class="prow"><div class="stack"></div><span class="ptext">203 questions · not started</span><a class="plink" href="drill/index.html">Start</a></div>
-    </article>
-    <article class="card">
-      <div class="chead"><span class="num" aria-hidden="true">3</span>
-        <div><h3>HW 3 answer key</h3><p>All the homework questions as multiple choice, with the answer and a short explanation for each. Hide the answers to quiz yourself, or print it.</p></div></div>
-      <div class="prow"><span class="ptext">89 questions</span><a class="plink" href="hw3/index.html">Open</a></div>
-    </article>
-    <article class="card">
-      <div class="chead"><span class="num" aria-hidden="true">Aa</span>
-        <div><h3>Word roots</h3><p>The Greek and Latin parts behind gametophyte, thigmotropism and karyogamy. Learn them once and many terms decode themselves.</p></div></div>
-      <div class="prow"><span class="ptext" id="rootsTxt">Not started</span><a class="plink" href="roots/index.html">Open</a></div>
-    </article>
-    <article class="card">
-      <div class="chead"><span class="num" aria-hidden="true">$</span>
-        <div><h3>Bio-pardy</h3><p>A Jeopardy-style board: six categories, five values each, and one hidden ×2 tile.</p></div></div>
-      <div class="prow"><span class="ptext" id="boardTxt">No games played yet</span><a class="plink" href="board/index.html">Play</a></div>
-    </article>
-    <article class="card">
-      <div class="chead"><span class="num" aria-hidden="true">⚑</span>
-        <div><h3>Review list</h3><p>Every question you've marked for review, in one place. Show the answers or quiz yourself on just those.</p></div></div>
-      <div class="prow"><span class="ptext" id="reviewCount">Nothing marked yet</span><a class="plink ghost" href="review/index.html">Open</a></div>
-    </article>
+  <details class="exampanel" data-ep="u3" open>
+    <summary class="ephead"><span class="eptext"><h2 id="ep">The exam</h2><p>Plant diversity, seed plants, fungi, and plant responses to signals: Ch 29, 30, 31 and 39. <span id="examWhen">Wed, Nov 11, 2:00 pm.</span></p><span class="eptools">Multiple-Choice Drill · Bio-pardy · Word Roots · HW 3 · Mock Exam · Review List</span></span><span class="epgo" aria-hidden="true"></span></summary>
+    <div class="cards">
+      <article class="card wide" data-key="bio-u3-progress-v1" data-total="203" data-optional="bio-u3-progress-v1-include-AP:30">
+        <div class="chead"><span class="ico i-blue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span>
+          <div><h3><a href="drill/index.html">Multiple&#8209;Choice Drill</a></h3>
+          <p>Every question in one place: HW 3, the clicker questions, lecture-slide practice and Bio-pardy. Weakest questions come first.</p></div></div>
+        <div class="tags"><span>Land plants</span><span>Seedless vascular</span><span>Seed plants</span><span>Signals</span><span>Hormones</span><span>Light &amp; time</span><span>Stress &amp; defense</span><span>Fungi</span></div>
+        <div class="prow"><div class="stack"></div><span class="ptext">203 questions · not started</span><a class="plink" href="drill/index.html">Start</a></div>
+      </article>
+      <article class="card">
+        <div class="chead"><span class="ico t i-orange">$</span>
+          <div><h3><a href="board/index.html">Bio-pardy</a></h3>
+          <p>A colorful review board: 6 categories, 30 clues. Pick a category and a value, answer the multiple-choice question, earn the money.</p></div></div>
+        <div class="prow"><span class="ptext" id="boardTxt">No games played yet</span><a class="plink" href="board/index.html">Play</a></div>
+      </article>
+      <article class="card">
+        <div class="chead"><span class="ico t i-purple">Aa</span>
+          <div><h3><a href="roots/index.html">Word Roots</a></h3>
+          <p>Optional, but recommended if the terms feel unfamiliar. <i>thigmo-</i> (touch) + <i>-tropism</i> (turning) = growing in response to touch. Mark roots as mastered and the pool shrinks until you know them all.</p></div></div>
+        <div class="prow"><span class="ptext" id="rootsTxt">Not started</span><a class="plink" href="roots/index.html">Open</a></div>
+      </article>
+      <article class="card wide" data-key="bio-hw3-v1" data-total="89">
+        <div class="chead"><span class="ico t i-green">3</span>
+          <div><h3><a href="hw3/index.html">HW 3</a></h3>
+          <p>Every Homework 3 question as multiple choice, in the homework's own sections, with its own progress. The answer key keeps the answers hidden until you reveal them.</p></div></div>
+        <div class="prow"><div class="stack"></div><span class="ptext">89 questions · not started</span><a class="plink" href="hw3/index.html">Start</a></div>
+        <div class="ctas">
+          <a class="cta" href="hw3/index.html"><strong>Multiple choice</strong><small>89 questions in 5 tabs: land plants, seed plants, signals &amp; hormones, light &amp; defense, fungi</small><span class="go2">Practice</span></a>
+          <a class="cta" href="hw3/key.html"><strong>Answer key</strong><small>All of HW 3 on one page, answers hidden until you tap. Printable.</small><span class="go2">Open</span></a>
+        </div>
+      </article>
+      <article class="card">
+        <div class="chead"><span class="ico i-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 2M10 3h4"/></svg></span>
+          <div><h3><a href="mock/index.html">Mock Exam</a></h3>
+          <p>50 or 100 random questions, 40% from HW 3. Every exam is a brand-new set; change answers until you submit.</p></div></div>
+        <div class="prow"><span class="ptext" id="mockLast">No exams taken yet</span><a class="plink" href="mock/index.html">Start an exam</a></div>
+      </article>
+      <article class="card">
+        <div class="chead"><span class="ico i-yellow"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"/></svg></span>
+          <div><h3><a href="review/index.html">Review List</a></h3>
+          <p>Every question you've marked for review, from both drills and your mock exams. Quiz yourself on them.</p></div></div>
+        <div class="prow"><span class="ptext" id="reviewCount">Nothing marked yet</span><a class="plink ghost" href="review/index.html">Open</a></div>
+      </article>
+    </div>
+  </details>
+
+  <div class="how">
+    <b>How it works</b>
+    <ul>
+      <li>Pick a subject and answer. Your weakest questions come first, and you can jump to any question with the squares at the top.</li>
+      <li>Tap <b>⚑ Mark for review</b> on any question you want to come back to. They all collect in your <a href="review/index.html">Review List</a>.</li>
+      <li>Every question shows its source. Your progress and answers are saved only in this browser on this device. The site counts anonymous visits with Vercel Web Analytics (no cookies, nothing about you or your answers).</li>
+    </ul>
+    <div class="legend"><span><i class="c-right"></i>Got it right</span><span><i class="c-wrong"></i>Got it wrong</span><span><i class="c-review"></i>Marked for review</span><span><i class="c-new"></i>Not answered yet</span></div>
   </div>
 
-  <h2 id="sources">Where the questions come from</h2>
-  <div class="box">
-    <ul>
-      <li><b>Homework 3</b> · 89: the professor's questions, written as multiple choice and answered from the slides.</li>
-      <li><b>Clicker questions</b> · 57: Ch 29 (17), Ch 30 (8), Ch 31 (15) and Ch 39 (17), with the professor's answer keys.</li>
-      <li><b>Lecture slides practice</b> · 27: details from the Ch 39 lecture (Plant Responses to Internal and External Signals) that the homework doesn't ask about directly.</li>
-      <li><b>Bio-pardy</b> · 30: short review clues. You can switch them in or out of the drill.</li>
-    </ul>
-    <p style="margin-top:10px;color:var(--muted)">The Ch 39 answers come straight from the lecture slides. The Ch 29–31 answers follow the clicker questions and the Campbell <i>Biology</i> chapters they come from. If an answer differs from what your professor said in class, go with the professor.</p>
-  </div>
-  <div class="box">
-    <p><b>Your progress stays on your device.</b> It's saved in this browser only: no account, nothing sent anywhere. It won't carry over to another phone or browser, and clearing your browser data erases it.</p>
-  </div>
-  <p class="foot">Figures are cropped from course slides as a study aid. This isn't official course material.</p>
+  <section class="how" id="sources" aria-labelledby="srcTitle">
+    <b id="srcTitle">Where the questions come from</b>
+    <p>Every question was taken from Bi 239 class materials or written to match them. <span class="pstar" style="margin:0">★</span> marks questions that come straight from the professor (the homework and the clicker questions). <span class="pstar based-star" style="margin:0">✎</span> marks practice written for this site from the lecture slides. The HW 3 answers are written from the slides: Ch 39 straight from the lecture, and Ch 29–31 from the clicker questions and the Campbell <i>Biology</i> chapters they come from.</p>
+    <div class="tablewrap">
+      <table class="srctable">
+        <thead><tr><th scope="col">Source</th><th scope="col" class="n">Questions</th></tr></thead>
+        <tbody>
+          <tr class="grp"><th scope="colgroup" colspan="2">Multiple-Choice Drill</th></tr>
+          <tr><td>Homework 3 <span class="pstar" title="Straight from the professor">★</span></td><td class="n">89</td></tr>
+          <tr><td>Clicker questions · Ch 29 <span class="pstar" title="Straight from the professor">★</span></td><td class="n">17</td></tr>
+          <tr><td>Clicker questions · Ch 30 <span class="pstar" title="Straight from the professor">★</span></td><td class="n">8</td></tr>
+          <tr><td>Clicker questions · Ch 31 <span class="pstar" title="Straight from the professor">★</span></td><td class="n">15</td></tr>
+          <tr><td>Clicker questions · Ch 39 <span class="pstar" title="Straight from the professor">★</span></td><td class="n">17</td></tr>
+          <tr><td>Practice from the lecture slides <span class="pstar based-star" title="Written for this site from the professor's material">✎</span></td><td class="n">27</td></tr>
+          <tr><td>Bio-pardy review game <span class="pstar based-star" title="Written for this site from the professor's material">✎</span></td><td class="n">30</td></tr>
+          <tr class="tot"><td>Total</td><td class="n">203</td></tr>
+          <tr class="grp"><th scope="colgroup" colspan="2">HW 3</th></tr>
+          <tr><td>Homework 3, the same questions as in the drill, with their own progress <span class="pstar" title="Straight from the professor">★</span></td><td class="n">89</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </main>
+<footer class="site"><div class="inner">
+  <span>Made as a study aid. Not official course material: check anything you're unsure of against the lecture slides.</span>
+  <span>Figures are cropped from course slides. Homework questions 29–35 weren't in the homework file.</span>
+</div></footer>
 
 <script>
 (() => {
   const $ = id => document.getElementById(id);
   const read = k => { try { return JSON.parse(localStorage.getItem(k) || "null") } catch (e) { return null } };
   const dayKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  const DRILL_KEY = "bio-u3-progress-v1";
-  // Same statuses as the drill: right / wrong (last answer) or marked for review (takes priority).
+  const KEYS = { drill: "bio-u3-progress-v1", hw3: "bio-hw3-v1" };
+  // Same statuses as the drills: right / wrong (last answer) or marked for review (takes priority).
   function levels(s, total) {
     const n = { right: 0, wrong: 0, review: 0 }; let a = 0, c = 0, seen = 0;
     const st = (s && s.stats) || {}, hist = (s && s.hist) || {}, mark = (s && s.mark) || {};
@@ -184,6 +302,7 @@ h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
     }
     return { n, seen: Math.min(seen, total), acc: a ? Math.round(c / a * 100) : 0, total };
   }
+  const bar = L => ["right", "wrong", "review"].map(l => L.n[l] ? `<i class="c-${l}" style="width:${L.n[l] / L.total * 100}%"></i>` : "").join("");
   document.querySelectorAll(".card[data-key]").forEach(card => {
     let total = +card.dataset.total;
     if (card.dataset.optional) {   // Bio-pardy switched out of the drill
@@ -192,32 +311,44 @@ h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
     }
     const s = read(card.dataset.key), L = levels(s, total);
     if (!L.seen && !L.n.review) return;
-    card.querySelector(".stack").innerHTML = ["right", "wrong", "review"].map(l => L.n[l] ? `<i class="c-${l}" style="width:${L.n[l] / L.total * 100}%"></i>` : "").join("");
+    card.querySelector(".stack").innerHTML = bar(L);
     card.querySelector(".ptext").textContent = `${L.seen} of ${L.total} answered · ${L.acc}% right`;
-    if (L.seen) card.querySelector(".plink").textContent = "Resume";
+    if (L.seen) card.querySelector(".prow .plink").textContent = "Resume";
   });
-  // Bio-pardy best game, roots mastered, review count
+  // Bio-pardy best game, roots mastered, last mock exam
   try { const g = read("bio-board-v1") || {}; if (g.unit && g.unit.best != null) $("boardTxt").textContent = "Best game: $" + g.unit.best.toLocaleString("en-US") } catch (e) { }
-  try { const rs = read("bio-roots-v1") || {}, n = Object.keys((rs.unit || {}).m || {}).length; if (n) $("rootsTxt").textContent = `${n} mastered` } catch (e) { }
-  try { const st = read(DRILL_KEY), n = st && st.mark ? Object.values(st.mark).filter(m => m.m === "review").length : 0; if (n) $("reviewCount").textContent = n === 1 ? "1 question marked" : n + " questions marked" } catch (e) { }
+  try { const rs = read("bio-roots-v1") || {}, n = Object.keys((rs.unit || {}).m || {}).length; if (n) $("rootsTxt").textContent = `${n} of 59 mastered` } catch (e) { }
+  try { const h = read("bio-mock-history-v1") || []; if (h.length) { const l = h[h.length - 1]; $("mockLast").textContent = `Last exam: ${l.pct}% (${l.right}/${l.total}) · ${h.length} taken` } } catch (e) { }
+  // Review List: marked questions across both drills. HW questions share ids (HW0…HW88) in both, so each counts once.
+  try {
+    const seen = new Set();
+    for (const k of Object.values(KEYS)) { const st = read(k); if (st && st.mark) for (const id in st.mark) if (st.mark[id].m === "review") seen.add(/^HW\d+$/.test(id) ? id : k + id) }
+    const n = seen.size; if (n) $("reviewCount").textContent = n === 1 ? "1 question marked for review" : n + " questions marked for review";
+  } catch (e) { }
+  // Exam panel: open by default; remember if the student closes it
+  document.querySelectorAll("details.exampanel").forEach(d => {
+    const k = "bio-home-open-" + d.dataset.ep;
+    try { if (localStorage.getItem(k) === "0") d.open = false } catch (e) { }
+    d.addEventListener("toggle", () => { try { localStorage.setItem(k, d.open ? "1" : "0") } catch (e) { } });
+  });
 
-  // Countdown: the student sets her exam date once; it's saved on this device.
-  // To build a date into the site for everyone, set DEFAULT_EXAM, e.g. "2026-11-20T09:30".
+  // Countdown. The exam date is built in; the student can change it on her device ("Change").
   const DEFAULT_EXAM = "2026-11-11T14:00", DATE_KEY = "bio-exam-date", SKIP_KEY = "bio-exam-date-skip";
   const pad = n => String(n).padStart(2, "0");
+  const localISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   let exam = null, timer = null;
   function showForm() { $("countdown").hidden = true; $("setdate").hidden = false; if (exam) $("examDate").value = localISO(exam) }
-  const localISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   function startClock() {
     clearInterval(timer);
     const raw = localStorage.getItem(DATE_KEY) || DEFAULT_EXAM;
     exam = raw ? new Date(raw) : null;
     if (!exam || isNaN(exam)) { exam = null; if (!localStorage.getItem(SKIP_KEY)) showForm(); return }
     $("setdate").hidden = true; $("countdown").hidden = false;
-    $("examTitle").textContent = "Exam · " + exam.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    const when = exam.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    $("examTitle").textContent = "Exam · " + when; $("examWhen").textContent = when.replace(/ (AM|PM)$/, m => m.toLowerCase()) + ".";
     const tick = () => {
       const ms = exam - Date.now();
-      if (ms <= 0) { clearInterval(timer); $("countdown").hidden = true; return }
+      if (ms <= 0) { clearInterval(timer); $("countdown").hidden = true; $("goBtn").textContent = "Keep practicing"; return }
       const s = Math.floor(ms / 1000), v = { cD: Math.floor(s / 86400), cH: pad(Math.floor(s / 3600) % 24), cM: pad(Math.floor(s / 60) % 60), cS: pad(s % 60) };
       for (const id in v) $(id).textContent = v[id];
       $("clock").setAttribute("aria-label", `${v.cD} days, ${+v.cH} hours, ${+v.cM} minutes until the exam`);
@@ -229,11 +360,14 @@ h2{font:800 24px/1.15 var(--display);letter-spacing:-.015em;margin:14px 0 2px}
   $("editDate").onclick = showForm;
   startClock();
 
-  // Continue button + today's activity. New visitors warm up on the word roots; returning visitors jump to their weakest subject.
-  const s = read(DRILL_KEY);
-  if ((s && s.stats && Object.keys(s.stats).length) || localStorage.getItem("bio-roots-seen")) { $("goBtn").textContent = "Continue"; $("goBtn").href = "drill/index.html#continue" }
-  const t = s && s.days ? (s.days[dayKey(new Date())] | 0) : 0;
-  let streak = 0; if (s && s.days) { const d = new Date(); if (!s.days[dayKey(d)]) d.setDate(d.getDate() - 1); while (s.days[dayKey(d)]) { streak++; d.setDate(d.getDate() - 1) } }
+  // Continue: new visitors warm up on the word roots; returning visitors resume the drill they used last, at its weakest subject.
+  const used = [["drill", read(KEYS.drill)], ["hw3", read(KEYS.hw3)]].filter(([, s]) => s && s.stats && Object.keys(s.stats).length)
+    .sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
+  if (used.length || localStorage.getItem("bio-roots-seen")) { $("goBtn").textContent = "Continue"; $("goBtn").href = (used.length ? used[0][0] : "drill") + "/index.html#continue" }
+  // Today's activity and streak, across both drills
+  const days = {}; for (const k of Object.values(KEYS)) { const s = read(k); if (s && s.days) for (const d in s.days) days[d] = (days[d] || 0) + s.days[d] }
+  const t = days[dayKey(new Date())] | 0;
+  let streak = 0; { const d = new Date(); if (!days[dayKey(d)]) d.setDate(d.getDate() - 1); while (days[dayKey(d)]) { streak++; d.setDate(d.getDate() - 1) } }
   $("todayTxt").textContent = t || streak ? `${t} answered today` + (streak ? ` · ${streak}-day streak` : "") : "";
 })();
 </script>
