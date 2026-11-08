@@ -31,72 +31,86 @@
   const nextAt = k => STAGES[k + 1] ? STAGES[k + 1].at : null;
   const level = xp => xp + 1;
 
-  // ===== Artwork (viewBox 0 0 120 120), side view facing right. uid keeps gradient ids unique.
-  let uidN = 0;
-  const INK = "#23301f";
-  // Head with one big eye (side view), cheek and smile. wise = closed, content eye.
-  function head(hx, hy, r, wise) {
-    const eye = wise
-      ? `<path d="M${hx - 1} ${hy - 2} q3.5 -4 7 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
-      : `<ellipse cx="${hx + 2.5}" cy="${hy - 2.5}" rx="3.3" ry="4.1" fill="${INK}"/><circle cx="${hx + 3.6}" cy="${hy - 4}" r="1.3" fill="#fff"/>`;
-    return `${eye}<ellipse cx="${hx + 1}" cy="${hy + 4.5}" rx="3.6" ry="2.1" fill="#ff7a9a" opacity=".5"/>
-      <path d="M${hx + r * .55} ${hy + 3} q2.5 2.6 5 .4" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+  // ===== Artwork (viewBox 0 0 120 120), side view facing right.
+  // Design rules: readable silhouette per stage, clean dark outlines, flat color (one dominant
+  // grass green + cream + one accent), round/baby proportions early → longer, angular, majestic later.
+  const OL = "#2b3a24", GREEN = "#6cc36e", GREEN_D = "#4a9a57", CREAM = "#f3e8c6", OW = 2.2;
+  const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round"`;
+  const leaf = (x, y, len, rot, fill) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0 C${len * .35} ${-len * .32} ${len * .8} ${-len * .3} ${len} 0 C${len * .8} ${len * .3} ${len * .35} ${len * .32} 0 0Z" fill="${fill}" ${ln}/><path d="M2 0 L${len * .82} 0" stroke="${OL}" stroke-width="1" opacity=".55"/></g>`;
+  const plate = (x, y, h, w, rot, fill) => `<path d="M${x - w / 2} ${y} L${x} ${y - h} L${x + w / 2} ${y}Z" fill="${fill}" ${ln} transform="rotate(${rot} ${x} ${y})"/>`;
+  const flower = (x, y, r, c) => `${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${x}" cy="${y - r * .9}" rx="${r * .55}" ry="${r * .9}" fill="${c}" stroke="${OL}" stroke-width="1.4" transform="rotate(${a} ${x} ${y})"/>`).join("")}<circle cx="${x}" cy="${y}" r="${r * .5}" fill="#ffd54f" stroke="${OL}" stroke-width="1.2"/>`;
+  function eyeAt(x, y, r, mode) {
+    if (mode === "wise") return `<path d="M${x - r} ${y + r * .2} q${r} ${-r * 1.3} ${r * 2} 0" stroke="${OL}" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M${x - r * 1.1} ${y - r * 2.3} L${x + r * 1.3} ${y - r * 1.8}" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>`;
+    return `<ellipse cx="${x}" cy="${y}" rx="${r * .82}" ry="${r}" fill="${OL}"/><circle cx="${x + r * .3}" cy="${y - r * .4}" r="${r * .38}" fill="#fff"/>` +
+      (mode === "brow" ? `<path d="M${x - r * 1.1} ${y - r * 1.55} L${x + r * 1.2} ${y - r * 1.15}" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>` : "");
   }
-  const leafShape = (x, y, len, rot, fill, vein) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0 C${len * .35} ${-len * .3} ${len * .8} ${-len * .28} ${len} 0 C${len * .8} ${len * .28} ${len * .35} ${len * .3} 0 0Z" fill="${fill}"/>${vein ? `<path d="M1 0 L${len * .9} 0" stroke="${vein}" stroke-width=".9" opacity=".6"/>` : ""}</g>`;
-  const flower = (x, y, r, c) => `${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${x}" cy="${y - r}" rx="${r * .62}" ry="${r}" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join("")}<circle cx="${x}" cy="${y}" r="${r * .55}" fill="#ffd54f"/>`;
-  // The dino: tail, legs, body, belly, neck and head. Returns the head position for decorations.
-  function dino(u, o) {
-    const { bx = 54, by = 80, rx = 26, ry = 17, hx = 92, hy = 38, neck = 11, wise = false } = o;
-    const legs = [[bx - 18, "a"], [bx - 6, "b"], [bx + 8, "a"], [bx + 18, "b"]].map(([x, t]) => `<rect x="${x - 5}" y="${by + 2}" width="10" height="${22 - (t === "b" ? 2 : 0)}" rx="5" fill="url(#${u}${t === "b" ? "d" : "b"})"/><ellipse cx="${x}" cy="${by + 23 - (t === "b" ? 2 : 0)}" rx="5.5" ry="2.4" fill="#f4ecd2"/>`).join("");
-    return `<path d="M${bx - rx + 6} ${by - 4} C${bx - rx - 10} ${by - 2} ${bx - rx - 22} ${by - 10} ${bx - rx - 26} ${by - 22} C${bx - rx - 18} ${by - 8} ${bx - rx - 6} ${by + 8} ${bx - rx + 8} ${by + 8}Z" fill="url(#${u}b)"/>
-      ${legs}
-      <ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="url(#${u}b)"/>
-      <ellipse cx="${bx + 4}" cy="${by + ry * .5}" rx="${rx * .62}" ry="${ry * .38}" fill="#f4ecd2" opacity=".9"/>
-      <path d="M${bx + rx * .55} ${by - ry * .45} C${bx + rx * .95} ${by - ry * 1.4} ${hx - 10} ${hy + 14} ${hx - 3} ${hy + 3}" stroke="url(#${u}b)" stroke-width="${neck}" fill="none" stroke-linecap="round"/>
-      <ellipse cx="${hx}" cy="${hy}" rx="11.5" ry="9.5" fill="url(#${u}b)"/>
-      ${head(hx, hy, 11.5, wise)}`;
+  // The dino, built from proportions. a = 0 (round baby) … 1 (long, angular adult).
+  function dino(o) {
+    const { bx, by, rx, ry, hx, hy, hr, eye, leg, legW, neck, a, eyeMode, tail } = o;
+    const headRx = hr * (1 + .38 * a), headRy = hr * (1 - .14 * a), hcx = hx + hr * .32 * a;
+    const L = (x, far) => `<rect x="${x - legW / 2}" y="${by + ry * .35}" width="${legW}" height="${leg}" rx="${legW / 2}" fill="${far ? GREEN_D : GREEN}" ${ln}/><path d="M${x - legW / 2 + 1.5} ${by + ry * .35 + leg - 2.4} h${legW - 3}" stroke="${CREAM}" stroke-width="2.6" stroke-linecap="round"/>`;
+    const nx0 = bx + rx * .5, ny0 = by - ry * .55, c1x = bx + rx * .95, c1y = by - ry * 1.3, c2x = hx - hr * .9, c2y = hy + hr * 1.4, nx1 = hx - hr * .3, ny1 = hy + hr * .35;
+    const neckPath = `M${nx0} ${ny0} C${c1x} ${c1y} ${c2x} ${c2y} ${nx1} ${ny1}`;
+    return {
+      back: `<path d="M${bx - rx * .7} ${by - ry * .35} C${bx - rx - tail * .45} ${by - ry * .4} ${bx - rx - tail * .85} ${by - ry * .9} ${bx - rx - tail} ${by - ry * 1.6} C${bx - rx - tail * .6} ${by - ry * .3} ${bx - rx - tail * .2} ${by + ry * .5} ${bx - rx * .55} ${by + ry * .55}Z" fill="${GREEN}" ${ln}/>
+        ${L(bx - rx * .55, true)}${L(bx + rx * .35, true)}`,
+      body: `<ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="${GREEN}" ${ln}/>
+        <path d="M${bx - rx * .55} ${by + ry * .45} Q${bx + rx * .05} ${by + ry * 1.05} ${bx + rx * .7} ${by + ry * .35}" fill="${CREAM}" stroke="none"/>
+        ${L(bx - rx * .25, false)}${L(bx + rx * .65, false)}
+        <path d="${neckPath}" stroke="${OL}" stroke-width="${neck + OW * 2}" fill="none" stroke-linecap="round"/>
+        <path d="${neckPath}" stroke="${GREEN}" stroke-width="${neck}" fill="none" stroke-linecap="round"/>
+        <ellipse cx="${hcx}" cy="${hy}" rx="${headRx}" ry="${headRy}" fill="${GREEN}" ${ln}/>
+        <ellipse cx="${hcx + headRx * .15}" cy="${hy + headRy * .55}" rx="${headRx * .5}" ry="${headRy * .22}" fill="${CREAM}"/>
+        ${eyeAt(hx + hr * .12, hy - hr * .22, eye, eyeMode)}
+        <ellipse cx="${hx - hr * .05}" cy="${hy + hr * .4}" rx="${hr * .28}" ry="${hr * .15}" fill="#ff7a9a" opacity=".55"/>
+        <path d="M${hcx + headRx * .55} ${hy + headRy * .3} q${hr * .22} ${hr * .2} ${hr * .45} 0" stroke="${OL}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
+      head: { x: hcx, y: hy, rx: headRx, ry: headRy }, top: { x: bx, y: by - ry }
+    };
   }
   function art(k) {
-    const u = "bb" + (++uidN);
-    const grad = (id, a, b) => `<linearGradient id="${u}${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
-    const defs = `<defs>${grad("b", "#a7e3b5", "#4f9d69")}${grad("d", "#8fcf9f", "#3f8558")}${grad("e", "#f3e0b8", "#c49a5e")}</defs>`;
-    const shadow = w => `<ellipse cx="56" cy="108" rx="${w}" ry="4.5" fill="#000" opacity=".12"/>`;
+    const shadow = (cx, w) => `<ellipse cx="${cx}" cy="111" rx="${w}" ry="4" fill="#000" opacity=".13"/>`;
     let g = "";
-    if (k === 0) {   // seed-egg with the baby peeking out
-      g = `${shadow(22)}
-        <path d="M60 104 C40 104 33 90 34 76 C35 60 46 46 60 46 C74 46 85 60 86 76 C87 90 80 104 60 104Z" fill="url(#${u}e)"/>
-        ${[[46, 86], [72, 92], [66, 80], [50, 98], [76, 74]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#8fbf6a" opacity=".55"/>`).join("")}
-        <path d="M40 66 L46 62 L51 68 L57 61 L63 68 L69 61 L75 67 L80 63" stroke="#a87d45" stroke-width="2" fill="none" stroke-linejoin="round"/>
-        <path d="M54 64 C52 54 58 46 66 44" stroke="url(#${u}b)" stroke-width="9" fill="none" stroke-linecap="round"/>
-        <ellipse cx="69" cy="42" rx="10" ry="8.5" fill="url(#${u}b)"/>${head(68, 42, 10)}
-        <path d="M68 34 C68 29 69 27 70 25" stroke="#4f9d69" stroke-width="1.8" stroke-linecap="round"/>${leafShape(70, 26, 9, -40, "#7cc35a")}${leafShape(70, 26, 8, -150, "#8bd06a")}`;
-    } else if (k === 1) {   // hatchling: short neck, moss tufts on its back, one sprout on its head
-      g = `<g transform="translate(10 14) scale(.85)">${shadow(30)}${dino(u, { hx: 84, hy: 52, neck: 10 })}
-        ${[[36, 64], [44, 61], [52, 60], [60, 61], [68, 64]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${4 + (i % 2)}" fill="${i % 2 ? "#4f9d3a" : "#6dbb4c"}"/>`).join("")}
-        <path d="M84 43 C84 38 85 36 86 34" stroke="#3f8558" stroke-width="1.8" stroke-linecap="round"/>${leafShape(86, 35, 9, -35, "#7cc35a")}</g>`;
-    } else if (k === 2) {   // ferns along its back, a fiddlehead curl on the tail tip
-      g = `<g transform="translate(5 8) scale(.92)">${shadow(32)}${dino(u, { hx: 88, hy: 44, neck: 11 })}
-        ${leafShape(40, 64, 22, -125, "#2f8a5c", "#1f5e40")}${leafShape(52, 62, 24, -100, "#3fa36f", "#1f5e40")}${leafShape(64, 63, 22, -72, "#2f8a5c", "#1f5e40")}
-        ${[[44, 52], [47, 47], [51, 43]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#8a5a2b"/>`).join("")}
-        <path d="M8 58 C4 54 6 48 11 48 C15 48 15 53 12 54" stroke="#3f9e6a" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
-    } else if (k === 3) {   // seedlings with cotyledons sprouting on its back
-      g = `${shadow(34)}${dino(u, { hx: 92, hy: 38 })}
-        ${[[38, 64, 9], [50, 61, 12], [62, 61, 10], [72, 64, 8]].map(([x, y, h]) => `<path d="M${x} ${y} L${x} ${y - h}" stroke="#5f9e2f" stroke-width="2" stroke-linecap="round"/><ellipse cx="${x - 4}" cy="${y - h - 1}" rx="5" ry="3" fill="#8bc34a" transform="rotate(-20 ${x - 4} ${y - h - 1})"/><ellipse cx="${x + 4}" cy="${y - h - 1}" rx="5" ry="3" fill="#8bc34a" transform="rotate(20 ${x + 4} ${y - h - 1})"/>`).join("")}
-        <path d="M92 29 L92 23" stroke="#5f9e2f" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="89" cy="22" rx="4" ry="2.4" fill="#8bc34a" transform="rotate(-20 89 22)"/><ellipse cx="95" cy="22" rx="4" ry="2.4" fill="#8bc34a" transform="rotate(20 95 22)"/>`;
-    } else if (k === 4) {   // flowers bloom along its back and tail
-      g = `${shadow(34)}${dino(u, { hx: 92, hy: 38 })}
-        ${leafShape(36, 66, 12, -140, "#5fae45")}${leafShape(70, 65, 12, -40, "#5fae45")}
-        ${flower(42, 60, 5.5, "#f48fbf")}${flower(55, 57, 6.5, "#ff9ec7")}${flower(67, 59, 5.5, "#c58cf2")}${flower(12, 58, 4.5, "#f48fbf")}
-        ${[[30, 46], [80, 48], [24, 66]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#ffd54f" opacity=".9"/>`).join("")}
-        ${flower(97, 28, 3.6, "#ffb3d1")}`;
-    } else {   // a whole little tree grows from its back
-      g = `${shadow(38)}${dino(u, { bx: 54, by: 82, rx: 29, ry: 18, hx: 96, hy: 34, neck: 12, wise: true })}
-        <path d="M52 66 C52 54 50 46 46 38 M51 52 C56 46 60 44 64 40" stroke="#7a5536" stroke-width="5" fill="none" stroke-linecap="round"/>
-        ${[[44, 30, 11], [56, 24, 12], [66, 34, 10], [36, 40, 9], [52, 38, 9]].map(([x, y, r], i) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${["#4f9d3a", "#6dbb4c", "#5fae45", "#3f8f3a", "#7cc35a"][i]}"/>`).join("")}
-        ${[[42, 26], [58, 20], [68, 32], [36, 38], [50, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#f8bbd0"/>`).join("")}
-        ${[[34, 66], [44, 63], [64, 63], [74, 66]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.6" fill="#5fae45"/>`).join("")}`;
+    if (k === 0) {   // Pip: a round seed-egg, a big-eyed baby peeking out, one sprout. Silhouette: egg + sprout.
+      g = `${shadow(58, 24)}
+        <path d="M58 108 C38 108 31 93 32 79 C33 62 44 50 58 50 C72 50 83 62 84 79 C85 93 78 108 58 108Z" fill="${CREAM}" ${ln}/>
+        ${[[45, 90, 4], [70, 96, 3.4], [64, 84, 2.6], [74, 78, 2.8]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${GREEN}" stroke="${OL}" stroke-width="1.3"/>`).join("")}
+        <ellipse cx="60" cy="52" rx="15" ry="13" fill="${GREEN}" ${ln}/>
+        <path d="M37 67 L43 61 L49 68 L55 60 L61 68 L67 60 L73 67 L79 62 L83 69" fill="${CREAM}" ${ln}/>
+        ${eyeAt(64, 49, 4.6)}<ellipse cx="57" cy="56" rx="3.6" ry="2" fill="#ff7a9a" opacity=".55"/>
+        <path d="M60 39 L60 32" stroke="${OL}" stroke-width="2.2" stroke-linecap="round"/>${leaf(60, 32, 11, -35, "#8bd06a")}${leaf(60, 32, 9, -150, "#8bd06a")}`;
+    } else if (k === 1) {   // Sprig: very round, big head, short neck, stubby legs, moss bumps, one sprout.
+      const d = dino({ bx: 54, by: 84, rx: 21, ry: 16, hx: 80, hy: 60, hr: 13, eye: 4.6, leg: 11, legW: 9, neck: 11, a: 0, tail: 14 });
+      g = `${shadow(56, 30)}${d.back}${d.body}
+        ${[[40, 70, 4.5], [48, 67, 5], [57, 67, 5], [65, 70, 4.2]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4f9d3a" stroke="${OL}" stroke-width="1.6"/>`).join("")}
+        <path d="M80 47 L80 41" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>${leaf(80, 41, 10, -40, "#8bd06a")}`;
+    } else if (k === 2) {   // Frondo: a fan of fern fronds on its back, fiddlehead tail, slightly longer neck.
+      const d = dino({ bx: 52, by: 84, rx: 23, ry: 16, hx: 85, hy: 52, hr: 12, eye: 4.2, leg: 13, legW: 9.5, neck: 10.5, a: .15, tail: 18 });
+      g = `${shadow(55, 32)}${d.back}
+        ${leaf(42, 70, 24, -128, "#2f8a5c")}${leaf(52, 68, 27, -96, "#3fa36f")}${leaf(62, 69, 24, -66, "#2f8a5c")}
+        ${[[47, 57], [50, 52], [52, 47]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.5" fill="#8a5a2b"/>`).join("")}
+        ${d.body}
+        <path d="M13 65 C8 62 9 55 14 55 C18 55 18 60 15 61" stroke="${OL}" stroke-width="5.4" fill="none" stroke-linecap="round"/><path d="M13 65 C8 62 9 55 14 55 C18 55 18 60 15 61" stroke="${GREEN}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+    } else if (k === 3) {   // Sproutle: longer neck, a hint of snout, a row of seedlings with two cotyledons each.
+      const d = dino({ bx: 52, by: 84, rx: 25, ry: 16.5, hx: 88, hy: 44, hr: 11.5, eye: 3.8, leg: 15, legW: 10, neck: 10, a: .4, tail: 22 });
+      const sprout = (x, y, h) => `<path d="M${x} ${y} L${x} ${y - h}" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><ellipse cx="${x - 4.5}" cy="${y - h - 1}" rx="5.2" ry="3.2" fill="#8bc34a" stroke="${OL}" stroke-width="1.5" transform="rotate(-22 ${x - 4.5} ${y - h - 1})"/><ellipse cx="${x + 4.5}" cy="${y - h - 1}" rx="5.2" ry="3.2" fill="#8bc34a" stroke="${OL}" stroke-width="1.5" transform="rotate(22 ${x + 4.5} ${y - h - 1})"/>`;
+      g = `${shadow(55, 34)}${d.back}${d.body}${sprout(38, 72, 9)}${sprout(49, 68, 12)}${sprout(60, 68, 10)}${sprout(70, 71, 7)}`;
+    } else if (k === 4) {   // Blossaur: taller and angular, triangular leaf-plates down its back, a flower crown.
+      const d = dino({ bx: 50, by: 82, rx: 27, ry: 17, hx: 91, hy: 36, hr: 11, eye: 3.4, leg: 17, legW: 10.5, neck: 10.5, a: .7, tail: 26, eyeMode: "brow" });
+      g = `${shadow(54, 36)}${d.back}
+        ${plate(30, 72, 10, 9, -38, "#3f8f3a")}${plate(40, 67, 13, 10, -20, "#3f8f3a")}${plate(52, 65.5, 15, 11, 0, "#3f8f3a")}${plate(64, 67, 13, 10, 18, "#3f8f3a")}
+        ${d.body}
+        ${flower(42, 66, 4.6, "#ff8fb8")}${flower(57, 64, 5.4, "#ff8fb8")}${flower(14, 54, 4, "#ff8fb8")}
+        ${flower(d.head.x - 2, d.head.y - d.head.ry - 2, 4.4, "#ff8fb8")}`;
+    } else {   // Grovewalker: large, long neck held high, sharp plates, a flowering tree on its back. Majestic.
+      const d = dino({ bx: 50, by: 82, rx: 30, ry: 18.5, hx: 95, hy: 26, hr: 10.5, eye: 3, leg: 19, legW: 12, neck: 12, a: 1, tail: 30, eyeMode: "wise" });
+      g = `${shadow(54, 40)}${d.back}
+        <path d="M52 66 C51 54 48 46 43 38 M50 52 C55 47 60 44 65 40" stroke="${OL}" stroke-width="7.4" fill="none" stroke-linecap="round"/><path d="M52 66 C51 54 48 46 43 38 M50 52 C55 47 60 44 65 40" stroke="#7a5536" stroke-width="4.4" fill="none" stroke-linecap="round"/>
+        ${[[42, 30, 11], [55, 22, 12], [67, 31, 10], [35, 40, 8.5], [52, 36, 9]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4caf50" ${ln}/>`).join("")}
+        ${[[40, 26], [56, 18], [68, 29], [34, 39], [50, 33]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#ff8fb8" stroke="${OL}" stroke-width="1"/>`).join("")}
+        ${plate(26, 72, 12, 10, -40, "#3f8f3a")}${plate(68, 66, 13, 10, 22, "#3f8f3a")}${plate(76, 60, 11, 9, 35, "#3f8f3a")}
+        ${d.body}`;
     }
-    return `<svg viewBox="0 0 120 120" aria-hidden="true">${defs}${g}</svg>`;
+    return `<svg viewBox="0 0 120 120" aria-hidden="true">${g}</svg>`;
   }
 
   // ===== Styles
