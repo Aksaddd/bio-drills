@@ -454,6 +454,7 @@
     if (good) { r.streak++; r.best = Math.max(r.best | 0, r.streak); missed.delete(id) } else { r.streak = 0; missed.add(id) }
     S.hist[id] = good ? 1 : 0;
     const s = S.stats[id] || [0, 0]; S.stats[id] = [s[0] + 1, s[1] + (good ? 1 : 0)];
+    if (good) window.dispatchEvent(new CustomEvent("bio:correct", { detail: { from: B.storageKey } }));   // study buddy levels up
     const dk = dayKey(); S.days[dk] = (S.days[dk] | 0) + 1;
     save(); paintChrome();
     const sq = $("map").querySelector(`[data-k="${r.pos}"]`); if (sq) sq.classList.add("just");

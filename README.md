@@ -26,6 +26,12 @@ Every page has **Settings** at the top: in the home page's nav bar, and beside "
 - **Exam date**: drives the home-page countdown. The default (Wed, Nov 11, 2:00 pm) is `DEFAULT_EXAM` in `assets/settings.js`. A change is saved per device as `bio-exam-date` and can be reset.
 - **Reading font** and **text size**, shared with the drill's Options menu (`bio-reading`).
 
+## Study buddy
+
+`assets/buddy.js` adds an original plant creature (all artwork is drawn in the file as SVG) that lives in the bottom-right corner of every practice page. Every correct answer in the main drill, the HW 3 drill, Word Roots and Bio-pardy is +1 level; it evolves at 5, 15, 35, 70 and 120 correct answers through the plant life cycle: **Spori** (spore) → **Mossling** (moss) → **Frondle** (fern) → **Sapplet** (seedling) → **Bloomkin** (flower) → **Elderbough** (ancient tree). Each form comes with the real biology behind it. Wrong answers never hurt it. Tap it for its card (progress, evolution line, rename, hide). It can be switched off in Settings. Saved per device as `bio-buddy-v1`.
+
+Pages announce a correct answer with `window.dispatchEvent(new CustomEvent("bio:correct"))`.
+
 ## Subject tabs
 
 Land plants · Seedless vascular · Seed plants · Signals · Hormones · Light & time · Stress & defense · Fungi

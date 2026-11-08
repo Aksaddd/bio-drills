@@ -97,6 +97,9 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
 .st-row .st-l{white-space:nowrap}
 .st-row .st-l small,.st-row .st-l span{white-space:normal}
 .st-link{color:var(--s-acc);background:none;border:0;font:inherit;cursor:pointer;padding:0}
+.st-sw{appearance:none;-webkit-appearance:none;flex:none;width:51px;height:31px;border-radius:999px;background:var(--s-fill);position:relative;cursor:pointer;transition:background .2s;margin:0}
+.st-sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .2s}
+.st-sw:checked{background:#34c759} .st-sw:checked::after{transform:translateX(20px)}
 .st-sample{padding:4px 16px 14px;color:var(--s-muted);font-size:calc(15px * var(--rs,1));font-family:var(--read)}
 @keyframes stFade{from{opacity:0}} @keyframes stUp{from{opacity:0;transform:translateY(24px) scale(.98)}}
 @media (max-width:560px){.st-veil{align-items:flex-end;padding:0}.st-sheet{border-radius:16px 16px 0 0;max-height:92vh;width:100%;padding-bottom:env(safe-area-inset-bottom,0px)}}
@@ -125,7 +128,12 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
       <div class="st-sec" style="margin-top:0"><div class="st-group">
         <div class="st-seg" role="group" aria-label="Text size">${SIZES.map((s, i) => `<button type="button" aria-pressed="${r.size === i}" data-size-pick="${i}" title="${s.name}">${s.label}</button>`).join("")}</div>
         <p class="st-sample">Ethylene ripens fruit; abscisic acid closes stomata during drought.</p>
-      </div><p class="st-foot">Font and size apply to questions and explanations in every drill.</p></div>`;
+      </div><p class="st-foot">Font and size apply to questions and explanations in every drill.</p></div>
+      ${window.BioBuddy ? `<p class="st-cap">Study buddy</p>
+      <div class="st-sec" style="margin-top:0"><div class="st-group">
+        <label class="st-row"><span class="st-l"><span>Show study buddy</span><small>A plant creature that levels up with every right answer</small></span><input type="checkbox" class="st-sw" id="stBuddy"${window.BioBuddy.enabled() ? " checked" : ""}></label>
+        ${window.BioBuddy.enabled() ? `<button type="button" class="st-row" id="stBuddyOpen"><span class="st-l" style="color:var(--s-acc)">See your buddy</span></button>` : ""}
+      </div></div>` : ""}`;
   }
   function paint() {
     const sh = veil.querySelector(".st-sheet"), y = sh.scrollTop;
@@ -136,6 +144,8 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
     sh.querySelectorAll("[data-size-pick]").forEach(b => b.onclick = () => { const r = reading(); r.size = +b.dataset.sizePick; set(READ_KEY, JSON.stringify(r)); applyReading(r); emit("bio:reading", r); paint() });
     const di = sh.querySelector("#stDate");
     di.onchange = () => { if (!di.value) return; set(DATE_KEY, di.value); set(SKIP_KEY, null); emit("bio:exam", examDate()); paint() };
+    const bs = sh.querySelector("#stBuddy"); if (bs) bs.onchange = () => { window.BioBuddy.setEnabled(bs.checked); paint() };
+    const bo = sh.querySelector("#stBuddyOpen"); if (bo) bo.onclick = () => { close(); window.BioBuddy.open() };
     const rs = sh.querySelector("#stReset"); if (rs) rs.onclick = () => { set(DATE_KEY, null); emit("bio:exam", examDate()); paint() };
   }
   function open() {
