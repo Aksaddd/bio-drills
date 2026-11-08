@@ -28,7 +28,7 @@ Every page has **Settings** at the top: in the home page's nav bar, and beside "
 
 ## Study buddy
 
-`assets/buddy.js` adds an original plant creature (all artwork is drawn in the file as SVG) that lives in the bottom-right corner of every practice page. Every correct answer in the main drill, the HW 3 drill, Word Roots and Bio-pardy is +1 level; it evolves at 5, 15, 35, 70 and 120 correct answers through the plant life cycle: **Spori** (spore) → **Mossling** (moss) → **Frondle** (fern) → **Sapplet** (seedling) → **Bloomkin** (flower) → **Elderbough** (ancient tree). Each form comes with the real biology behind it. Wrong answers never hurt it. Tap it for its card (progress, evolution line, rename, hide). It can be switched off in Settings. Saved per device as `bio-buddy-v1`.
+`assets/buddy.js` adds an original character drawn in the file as SVG: a baby long-necked leafy dino that lives in the bottom-right corner of every practice page. Every correct answer in the main drill, the HW 3 drill, Word Roots and Bio-pardy is +1 level. It evolves at 5, 15, 35, 70 and 120 correct answers as plants grow on its back in the order they evolved: **Pip** (seed-egg) → **Sprig** (mossy hatchling) → **Frondo** (ferns) → **Sproutle** (seedlings) → **Blossaur** (flowers) → **Grovewalker** (a whole tree). Each form comes with the biology behind it. Wrong answers never hurt it. Tap it for its card (progress, evolution line, rename, hide). It can be switched off in Settings. Saved per device as `bio-buddy-v1`.
 
 Pages announce a correct answer with `window.dispatchEvent(new CustomEvent("bio:correct"))`.
 

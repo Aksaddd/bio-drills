@@ -131,7 +131,7 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
       </div><p class="st-foot">Font and size apply to questions and explanations in every drill.</p></div>
       ${window.BioBuddy ? `<p class="st-cap">Study buddy</p>
       <div class="st-sec" style="margin-top:0"><div class="st-group">
-        <label class="st-row"><span class="st-l"><span>Show study buddy</span><small>A plant creature that levels up with every right answer</small></span><input type="checkbox" class="st-sw" id="stBuddy"${window.BioBuddy.enabled() ? " checked" : ""}></label>
+        <label class="st-row"><span class="st-l"><span>Show study buddy</span><small>A leafy baby dino that grows with every right answer</small></span><input type="checkbox" class="st-sw" id="stBuddy"${window.BioBuddy.enabled() ? " checked" : ""}></label>
         ${window.BioBuddy.enabled() ? `<button type="button" class="st-row" id="stBuddyOpen"><span class="st-l" style="color:var(--s-acc)">See your buddy</span></button>` : ""}
       </div></div>` : ""}`;
   }
