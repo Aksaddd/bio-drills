@@ -40,6 +40,12 @@ Every right answer also earns **gold**: Easy 3, Medium 5, Hard 8, Expert 12, mul
 
 The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size "kitten space" (120 × 120), so they fit all six forms. To add one, append `{ id, slot, name, set, price, svg }` (slots: `hat`, `outfit`, `face`, `neck`, `held`); ids are saved in progress, so never reuse one. Wallet, owned items and worn items are saved with Dexter (`bio-dexter-v1`: `gold`, `owned`, `equip`).
 
+## Dexter greets you and studies with you
+
+- **Greeting:** the first page of each visit (once per browser session), Dexter walks in wearing his current outfit and says hello in a speech bubble: an introduction on the very first visit, then a time-of-day welcome with one tip (days until the exam, XP until he evolves, gold to spend, or XP to the next level). Tap him or *Let's study!* to send him to his spot; he also leaves on his own after 8 seconds.
+- **Study pal:** on any page with questions (drills, Lab Practical / HW 3, Word Roots drill, Bio-pardy, mock exam), the corner icon becomes a bigger Dexter who stays with the student: beside the question card on wide screens (he moves with it as you scroll and change questions), in the bottom corner on phones. He bats a yarn ball while you read. When you pick an answer he scurries over to it; a right answer makes him hop and meow, a wrong one makes him lose his yarn ball (it rolls away and comes back). Tap him for the Closet, Shop and Progress.
+- Both respect *Reduce motion* and switch off with *Show study buddy* in Settings. The code is in `assets/buddy.js` (search for "Study pal" and "Greeting").
+
 ## XP and difficulty
 
 `assets/xp.js` rates every question and turns it into XP (it runs in Node too, for calibration):

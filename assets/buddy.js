@@ -285,11 +285,52 @@ body.bb-on{padding-bottom:96px}
 .cl-reset{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 16px 0}
 .pal-prog{text-align:center;padding:0 22px}
 .bb-shop.still{animation:none}
+/* Study pal: Dexter beside the question, playing with yarn */
+.bb-pal{position:fixed;left:0;top:0;z-index:58;width:var(--ps,72px);height:var(--ps,72px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .55s cubic-bezier(.34,1.3,.5,1),opacity .3s;-webkit-tap-highlight-color:transparent}
+.bb-palon .bb-dock{display:none}
+.bb-palon.bb-on{padding-bottom:110px}
+.bb-pal .bb-palart{position:absolute;inset:0;transform-origin:50% 92%;animation:bbSway 2.6s ease-in-out infinite}
+.bb-pal .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18))}
+.bb-pal .bb-yarnball{position:absolute;z-index:1;width:27%;height:27%;left:2%;bottom:3%;animation:bbBat 2.6s ease-in-out infinite}
+.bb-pal .bb-yarnball svg{display:block;width:100%;height:100%}
+.bb-pal .bb-lv{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);font:700 10.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#1d1d1f;color:#fff;border-radius:980px;padding:2px 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
+[data-theme="dark"] .bb-pal .bb-lv{background:#f5f5f7;color:#1d1d1f}
+.bb-pal .bb-streak{top:-4px;left:-6px}
+.bb-pal:hover .bb-palart{animation-duration:1.2s}
+.bb-pal.run .bb-palart{animation:bbScurry .26s ease-in-out 3}
+.bb-pal.hop .bb-palart{animation:bbHop .6s cubic-bezier(.3,1.6,.5,1)}
+.bb-pal.sad .bb-palart{animation:bbPalSad .7s ease}
+.bb-pal.lost .bb-yarnball{animation:bbLost 2.4s ease forwards}
+.bb-greeting .bb-pal,.bb-greeting .bb-dock{opacity:0;pointer-events:none}
+@keyframes bbSway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg) translateY(-1.5px)}}
+@keyframes bbBat{0%,100%{transform:translateX(0) rotate(0)}35%{transform:translateX(-60%) rotate(-280deg)}50%{transform:translateX(-58%) rotate(-270deg)}80%{transform:translateX(6%) rotate(20deg)}}
+@keyframes bbScurry{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(-7deg)}}
+@keyframes bbPalSad{0%,100%{transform:none}30%{transform:translateY(3px) scaleY(.94)}60%{transform:rotate(-5deg)}}
+@keyframes bbLost{0%{transform:none;opacity:1}35%{transform:translate(-300%,40%) rotate(-560deg);opacity:0}75%{transform:translate(-120%,0) rotate(-300deg);opacity:0}100%{transform:none;opacity:1}}
+/* Greeting */
+.bb-greet{position:fixed;inset:auto 0 0 0;z-index:120;pointer-events:none}
+.bb-greet .gwrap{position:fixed;left:50%;bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 6px);width:min(460px,calc(100vw - 20px));display:flex;align-items:flex-end;gap:4px;pointer-events:auto;transform:translateX(-50%);animation:bbWalkIn 1.1s cubic-bezier(.2,.85,.25,1) both}
+.bb-greet .gbubble{flex:1;position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;color:#1d1d1f;border-radius:20px;padding:13px 15px;margin-bottom:34px;box-shadow:0 12px 36px rgba(0,0,0,.2);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;letter-spacing:-.012em;animation:bbBubble .45s cubic-bezier(.3,1.5,.5,1) .9s both}
+.bb-greet .gbubble b{font:700 17px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}
+.bb-greet .gbubble::after{content:"";position:absolute;right:-9px;bottom:22px;border:9px solid transparent;border-left-color:#fff;border-right:0}
+[data-theme="dark"] .bb-greet .gbubble{background:#2c2c2e;color:#f5f5f7} [data-theme="dark"] .bb-greet .gbubble::after{border-left-color:#2c2c2e}
+.bb-greet .gbtn{border:0;border-radius:980px;background:#0071e3;color:#fff;font:600 14px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:8px 15px;cursor:pointer}
+.bb-greet .gdex{flex:none;width:128px;height:128px;border:0;padding:0;background:none;cursor:pointer;animation:bbWalkBob .28s ease-in-out 4,bbWave 1.4s ease-in-out 1.2s 2}
+.bb-greet .gdex svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.2))}
+.bb-greet.leave .gwrap{animation:bbWalkOut .55s ease-in forwards}
+@keyframes bbWalkIn{from{opacity:0;transform:translateX(calc(-50% + 70vw))}to{opacity:1;transform:translateX(-50%)}}
+@keyframes bbWalkOut{to{opacity:0;transform:translateX(calc(-50% + 45vw)) translateY(30px) scale(.35)}}
+@keyframes bbWalkBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(-5deg)}}
+@keyframes bbWave{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) translateY(-6px)}50%{transform:rotate(5deg)}75%{transform:rotate(-3deg) translateY(-3px)}}
+@keyframes bbBubble{from{opacity:0;transform:scale(.6) translateX(30px)}to{opacity:1;transform:none}}
+@media (max-width:420px){.bb-greet .gdex{width:104px;height:104px}.bb-greet .gbubble{font-size:14px}}
+@media (prefers-reduced-motion:reduce){.bb-pal{transition:none}.bb-pal .bb-palart,.bb-pal .bb-yarnball,.bb-greet .gwrap,.bb-greet .gdex,.bb-greet .gbubble{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.bb-say,.bb-yarn,.bb-yarn svg{animation-duration:.01s}.bb-dock .bb-pic,.bb-card .bb-big,.bb-evo.done .new{animation:none}.bb-evo .old{animation:none;opacity:0}.bb-evo .new{animation:none;opacity:1}.bb-evo .glow{display:none}}`;
 
   // ===== Dock (bottom-right) with a ring that fills toward the next evolution
   function ringPct(pts) { const k = stageOf(pts), a = STAGES[k].at, b = nextAt(k); return b === null ? 1 : (pts - a) / (b - a) }
-  function paintDock() {
+  function paintDock() { paintDock0(); checkPal(); paintPal() }
+  function paintDock0() {
     let d = $("bbDock");
     if (off()) { if (d) d.remove(); document.body.classList.remove("bb-on"); return }
     const s = load(), k = stageOf(s.pts), C = 2 * Math.PI * 30, mult = XP() ? XP().multiplier(s.streak) : 1;
@@ -338,8 +379,8 @@ body.bb-on{padding-bottom:96px}
   // Pops float up from the buddy; ones that overlap in time stack upward instead of piling on top of each other
   const live = [];
   function pop(lines, cls) {
-    const d = $("bbDock"); if (!d) return;
-    const r = d.getBoundingClientRect(), p = document.createElement("span");
+    const d = anchor(); if (!d) return;
+    const r = anchorRect(d), p = document.createElement("span");
     p.className = "bb-plus" + (cls ? " " + cls : ""); p.innerHTML = lines;
     const slot = live.reduce((n, x) => Math.max(n, x.slot + 1), 0);
     p.style.right = (innerWidth - r.right) + "px"; p.style.top = (r.top - 14 - slot * 40) + "px";
@@ -375,16 +416,20 @@ body.bb-on{padding-bottom:96px}
   const MEOWS = ["Meow!", "Meow meow!", "MEOW!!", "Mrrrow!", "Meeeow! ♪", "Meow! Nice!"];
   let sayEl = null;
   function say(text) {
-    const d = $("bbDock"); if (!d) return;
+    const d = anchor(); if (!d) return;
     if (sayEl) sayEl.remove();
-    const r = d.getBoundingClientRect(), b = document.createElement("span");
+    const r = anchorRect(d), b = document.createElement("span");
     b.className = "bb-say"; b.textContent = text; b.setAttribute("aria-hidden", "true");
     b.style.right = (innerWidth - r.left + 10) + "px"; b.style.top = (r.top + r.height * .1) + "px";
     document.body.appendChild(b); sayEl = b;
     setTimeout(() => { b.remove(); if (sayEl === b) sayEl = null }, 1500);
   }
   function dropYarn() {
-    const d = $("bbDock"); if (!d) return;
+    const d = anchor(); if (!d) return;
+    if (d.id === "bbPal") {   // the study pal loses its toy: it rolls away and comes back
+      d.classList.remove("hop", "sad", "lost"); void d.offsetWidth; d.classList.add("sad", "lost");
+      setTimeout(() => d.classList.remove("lost"), 2500); return;
+    }
     const r = d.getBoundingClientRect(), y = document.createElement("span");
     y.className = "bb-yarn"; y.setAttribute("aria-hidden", "true");
     y.innerHTML = `<svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="10.5" fill="#4f8dff" stroke="#3a2a1e" stroke-width="2"/><path d="M5 10 Q13 5 21 12 M5 15 Q13 9 21 17 M9 4.5 Q15 13 11 23" stroke="#2c5fc4" stroke-width="1.6" fill="none"/></svg>`;
@@ -408,8 +453,8 @@ body.bb-on{padding-bottom:96px}
     save(s);
     window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
     if (off()) return;
-    paintDock();
-    const d = $("bbDock"); if (!d) return;
+    paintDock(); visit();
+    const d = anchor(); if (!d) return;
     d.classList.remove("hop", "sad"); void d.offsetWidth; d.classList.add("hop");
     say(MEOWS[Math.floor(Math.random() * MEOWS.length)]); meowSound(before);
     const lv = level(s.pts);
@@ -421,7 +466,7 @@ body.bb-on{padding-bottom:96px}
   function miss() {
     const s = load(), had = s.streak | 0; s.streak = 0; s.last = Date.now(); save(s);
     if (off()) return;
-    paintDock();
+    paintDock(); visit();
     dropYarn();
     if (had >= 3) pop(`<b>Streak ended at ${had}</b><small>No XP lost. Start a new one!</small>`, "cool");
   }
@@ -546,11 +591,88 @@ body.bb-on{padding-bottom:96px}
   function closeShop() { if (shop) { shop.remove(); shop = null } }
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeShop() });
 
+  // ===== Study pal: on pages with questions, Dexter leaves the corner and stays with the student.
+  // He sits beside the question (in the margin on wide screens, bottom corner on phones), bats a yarn ball while she reads,
+  // scurries over to the answer she picks to react, then goes back to playing. Tap him for the Closet / Shop / Progress.
+  const PAL_YARN = `<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10.5" fill="#4f8dff" stroke="#3a2a1e" stroke-width="2"/><path d="M5 10 Q13 5 21 12 M5 15 Q13 9 21 17 M9 4.5 Q15 13 11 23" stroke="#2c5fc4" stroke-width="1.6" fill="none"/></svg>`;
+  let palOn = false, palAt = null, lastOpt = null, lastOptAt = 0, visiting = 0, rafQ = 0;
+  const shown = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
+  const palSize = () => innerWidth >= 900 ? 96 : 72;
+  function anchor() { const p = $("bbPal"); return palOn && p ? p : $("bbDock") }
+  function anchorRect(d) {   // where Dexter is headed (he may still be moving)
+    if (d && d.id === "bbPal" && palAt) { const S = palSize(); return { left: palAt.x, top: palAt.y, right: palAt.x + S, bottom: palAt.y + S, width: S, height: S } }
+    return d.getBoundingClientRect();
+  }
+  function questionCard() {
+    const all = [...document.querySelectorAll(".opt")], opt = all.find(shown) || all[0];   // a question below the fold still counts
+    return opt ? opt.closest("#card, .card, .clue, article, section") || opt.parentElement : null;
+  }
+  function home() {
+    const S = palSize(), card = questionCard();
+    if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
+    return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
+  }
+  function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)` }
+  function settle() { if (palOn && !visiting) place(home()) }
+  function checkPal() {
+    if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); return }
+    if (!palOn && document.querySelector(".opt")) { palOn = true; document.body.classList.add("bb-palon"); paintPal(); place(home()) }
+  }
+  function paintPal() {
+    if (!palOn || off()) return;
+    const s = load(), k = stageOf(s.pts), mult = XP() ? XP().multiplier(s.streak) : 1;
+    let p = $("bbPal");
+    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet"); document.body.appendChild(p); if (palAt) place(palAt) }
+    p.style.setProperty("--ps", palSize() + "px");
+    p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}. Open closet and shop`);
+    p.innerHTML = `<span class="bb-yarnball">${PAL_YARN}</span><span class="bb-palart">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+  }
+  // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
+  function visit() {
+    const p = $("bbPal"); if (!palOn || !p || !lastOpt || Date.now() - lastOptAt > 2000 || !document.contains(lastOpt)) return;
+    const S = palSize(), r = lastOpt.getBoundingClientRect(), card = questionCard(), cr = card ? card.getBoundingClientRect() : null;
+    const pos = cr && cr.right + S + 28 <= innerWidth ? { x: cr.right + 16, y: r.top + r.height / 2 - S * .6 } : { x: Math.min(r.right - S * .8, innerWidth - S - 6), y: r.top + r.height / 2 - S * .85 };
+    pos.y = Math.min(Math.max(pos.y, 8), innerHeight - S - 8);
+    clearTimeout(visiting); p.classList.remove("run"); void p.offsetWidth; p.classList.add("run");
+    place(pos);
+    visiting = setTimeout(() => { visiting = 0; p.classList.remove("run"); settle() }, 2300);
+  }
+  const queue = () => { if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; checkPal(); settle() }) };
+  document.addEventListener("click", e => { const o = e.target.closest && e.target.closest(".opt"); if (o) { lastOpt = o; lastOptAt = Date.now() } }, true);
+  addEventListener("scroll", queue, { passive: true }); addEventListener("resize", () => { paintPal(); queue() });
+  new MutationObserver(queue).observe(document.documentElement, { childList: true, subtree: true });
+
+  // ===== Greeting: once per visit, Dexter walks in and says hello, then heads to his spot
+  const GREET_KEY = KEY + "-greeted";
+  function greet() {
+    if (off()) return;
+    try { if (sessionStorage.getItem(GREET_KEY)) return; sessionStorage.setItem(GREET_KEY, "1") } catch (e) { return }
+    const s = load(), k = stageOf(s.pts), nm = name(s), h = new Date().getHours(), L = level(s.pts), nx = nextAt(k);
+    const hello = h < 5 ? "Up late studying?" : h < 12 ? "Good morning!" : h < 18 ? "Good afternoon!" : "Good evening!";
+    let line;
+    if (!s.correct && !s.pts) line = `Hi, I'm ${nm}! Answer questions and I'll grow up with you. Every right answer earns XP, and gold for my closet.`;
+    else {
+      let days = null; try { const ex = window.BioSettings && window.BioSettings.examDate && window.BioSettings.examDate(); if (ex) days = Math.ceil((ex - Date.now()) / 864e5) } catch (e) { }
+      const tip = days !== null && days >= 0 && days <= 7 ? (days === 0 ? "Your exam is today. You've got this!" : `${days} day${days === 1 ? "" : "s"} until your exam. Let's practice!`)
+        : nx !== null && nx - s.pts <= 80 ? `Only ${fmt(nx - s.pts)} XP until I evolve!`
+        : s.gold >= 60 ? `You have ${fmt(s.gold)} gold. Want to dress me up?`
+        : `${fmt(lvXP(L + 1) - s.pts)} XP to Level ${L + 1}. Let's go!`;
+      line = `${hello} Welcome back. ${tip}`;
+    }
+    const g = document.createElement("div"); g.className = "bb-greet"; g.setAttribute("role", "status");
+    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" aria-label="Close the greeting">${art(k)}</button></div>`;
+    document.body.appendChild(g); document.body.classList.add("bb-greeting");
+    let gone = false;
+    const leave = () => { if (gone) return; gone = true; g.classList.add("leave"); setTimeout(() => { g.remove(); document.body.classList.remove("bb-greeting") }, 600) };
+    g.querySelector(".gbtn").onclick = leave; g.querySelector(".gdex").onclick = leave;
+    setTimeout(leave, 8000);
+  }
+
   function setEnabled(on) { try { on ? localStorage.removeItem(OFF_KEY) : localStorage.setItem(OFF_KEY, "1") } catch (e) { } paintDock() }
   window.addEventListener("bio:correct", gain);
   window.addEventListener("bio:wrong", miss);
 
-  function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock() }
+  function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
   window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, art, STAGES, state: load, level };
 })();
