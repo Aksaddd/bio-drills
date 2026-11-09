@@ -315,6 +315,13 @@ body.bb-on{padding-bottom:96px}
 /* Study pal: Dexter beside the question, playing with yarn */
 .bb-pal{position:fixed;left:0;top:0;z-index:58;width:var(--ps,72px);height:var(--ps,72px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .55s cubic-bezier(.34,1.3,.5,1),opacity .3s;-webkit-tap-highlight-color:transparent}
 .bb-palon .bb-dock{display:none}
+.bb-pal,.bb-dock{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+.bb-pal.drag,.bb-dock.drag{transition:none;cursor:grabbing;z-index:130}
+.bb-pal.drag .bb-palart{transform:translateY(-6px) scale(1.1) rotate(-5deg);filter:drop-shadow(0 12px 14px rgba(0,0,0,.22))}
+.bb-dock.drag{transform:scale(1.1);box-shadow:0 14px 30px rgba(0,0,0,.25)}
+.bb-spot{margin:14px 0;padding:12px 14px;border-radius:14px;background:var(--c-fill);text-align:left;font-size:14px;line-height:1.4}
+.bb-spot b{display:block;font-size:15px}.bb-spot small{display:block;opacity:.7;margin-top:2px}
+.bb-spot button{margin-top:8px;border:0;border-radius:980px;padding:7px 14px;background:var(--c-acc);color:#fff;font:600 14px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
 .bb-palon.bb-on{padding-bottom:110px}
 .bb-pal .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}
 .bb-pal .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18))}
@@ -481,8 +488,8 @@ body.bb-on{padding-bottom:96px}
     let d = $("bbDock");
     if (off()) { if (d) d.remove(); document.body.classList.remove("bb-on"); return }
     const s = load(), k = stageOf(s.pts), C = 2 * Math.PI * 30, mult = XP() ? XP().multiplier(s.streak) : 1;
-    if (!d) { d = document.createElement("button"); d.id = "bbDock"; d.type = "button"; d.className = "bb-dock"; d.onclick = () => openPal("closet"); document.body.appendChild(d) }
-    document.body.classList.add("bb-on");
+    if (!d) { d = document.createElement("button"); d.id = "bbDock"; d.type = "button"; d.className = "bb-dock"; d.onclick = () => openPal("closet"); document.body.appendChild(d); makeMovable(d, () => 64, (x, y) => { d.style.left = x + "px"; d.style.top = y + "px"; d.style.right = d.style.bottom = "auto" }) }
+    document.body.classList.add("bb-on"); dockSpot(d);
     d.setAttribute("aria-label", `Study buddy: ${name(s)}, level ${level(s.pts)}, ${fmt(s.pts)} XP${s.streak >= 3 ? `, ${s.streak} in a row, XP times ${mult}` : ""}. Open`);
     d.innerHTML = `<svg class="bb-ring" viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="30"/><circle class="f" cx="32" cy="32" r="30" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - ringPct(s.pts))}"/></svg>
       <span class="bb-pic">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
@@ -517,6 +524,7 @@ body.bb-on{padding-bottom:96px}
         <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half.</p>
         <p><b>Win streaks multiply XP and gold:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes anything away. Each evolution adds ${EVOLVE_BONUS} gold.</p>
       </details>
+      <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys).</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button></div>
     </div>`;
   }
@@ -567,7 +575,8 @@ body.bb-on{padding-bottom:96px}
     if (sayEl) sayEl.remove();
     const r = anchorRect(d), b = document.createElement("span");
     b.className = "bb-say"; b.textContent = text; b.setAttribute("aria-hidden", "true");
-    b.style.right = (innerWidth - r.left + 10) + "px"; b.style.top = (r.top + r.height * .1) + "px";
+    if (r.left < 170) { b.style.left = (r.right + 10) + "px"; b.style.transformOrigin = "0 100%" } else b.style.right = (innerWidth - r.left + 10) + "px";
+    b.style.top = (r.top + r.height * .1) + "px";
     document.body.appendChild(b); sayEl = b;
     setTimeout(() => { b.remove(); if (sayEl === b) sayEl = null }, 1500);
   }
@@ -710,6 +719,7 @@ body.bb-on{padding-bottom:96px}
       if (st.tab === "progress") {
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
+        if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
         return;
       }
       if (st.tab === "closet") {
@@ -784,7 +794,8 @@ body.bb-on{padding-bottom:96px}
     return opt ? opt.closest("#card, .card, .clue, article, section") || opt.parentElement : null;
   }
   function home() {
-    const S = palSize(), card = questionCard();
+    const S = palSize(), sp = getSpot(), card = questionCard();
+    if (sp) return spotXY(sp, S);
     if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
     return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
   }
@@ -798,9 +809,9 @@ body.bb-on{padding-bottom:96px}
     if (!palOn || off()) return;
     const s = load(), k = stageOf(s.pts), mult = XP() ? XP().multiplier(s.streak) : 1;
     let p = $("bbPal");
-    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet"); document.body.appendChild(p); if (palAt) place(palAt) }
+    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet"); document.body.appendChild(p); makeMovable(p, palSize, (x, y) => place({ x, y })); if (palAt) place(palAt) }
     p.style.setProperty("--ps", palSize() + "px");
-    p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]}`;
+    p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]} · drag to move him`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
     p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: eyesNow(k) })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
@@ -814,9 +825,59 @@ body.bb-on{padding-bottom:96px}
     place(pos);
     visiting = setTimeout(() => { visiting = 0; p.classList.remove("run"); settle() }, 2300);
   }
+  // ===== Moving Dexter: she can drag him (or use arrow keys) anywhere and he stays there. Saved on this device as a
+  // fraction of the screen, so the spot survives resizing and rotating; Progress has a button to let him roam again.
+  const SPOT_KEY = KEY + "-spot", PAD = 8;
+  function getSpot() { try { const v = JSON.parse(localStorage.getItem(SPOT_KEY) || "null"); return v && isFinite(v.fx) && isFinite(v.fy) ? v : null } catch (e) { return null } }
+  function setSpot(v) { try { v ? localStorage.setItem(SPOT_KEY, JSON.stringify(v)) : localStorage.removeItem(SPOT_KEY) } catch (e) { } const d = $("bbDock"); if (d) dockSpot(d); clearTimeout(visiting); visiting = 0; settle() }
+  const c01 = v => Math.min(1, Math.max(0, v));
+  const spotXY = (sp, S) => ({ x: PAD + sp.fx * Math.max(0, innerWidth - S - 2 * PAD), y: PAD + sp.fy * Math.max(0, innerHeight - S - 2 * PAD) });
+  const xySpot = (x, y, S) => ({ fx: c01((x - PAD) / Math.max(1, innerWidth - S - 2 * PAD)), fy: c01((y - PAD) / Math.max(1, innerHeight - S - 2 * PAD)) });
+  const clampXY = (x, y, S) => ({ x: Math.min(Math.max(x, PAD), innerWidth - S - PAD), y: Math.min(Math.max(y, PAD), innerHeight - S - PAD) });
+  function dockSpot(d) {
+    const sp = getSpot();
+    if (!sp) { d.style.left = d.style.top = d.style.right = d.style.bottom = ""; return }
+    const q = spotXY(sp, 64); d.style.left = q.x + "px"; d.style.top = q.y + "px"; d.style.right = d.style.bottom = "auto";
+  }
+  function makeMovable(el, size, moveTo) {
+    let g = null, dragged = 0;
+    el.addEventListener("pointerdown", e => {
+      if (e.button) return;
+      e.preventDefault();   // no text selection or native link drag from what's under him (a tap still clicks)
+      const o = el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop };   // layout box, ignoring any scale
+      g = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: o.x, oy: o.y, moved: false };
+      try { el.setPointerCapture(e.pointerId) } catch (err) { }   // keep getting moves even when a fast flick leaves him behind
+    });
+    el.addEventListener("pointermove", e => {
+      if (!g || e.pointerId !== g.id) return;
+      const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+      if (!g.moved) {
+        if (Math.hypot(dx, dy) < 8) return;   // a tap still opens the Closet; only a real drag moves him
+        g.moved = true;
+        clearTimeout(visiting); visiting = 0; el.classList.add("drag", "run");
+      }
+      const q = clampXY(g.ox + dx, g.oy + dy, size()); g.x = q.x; g.y = q.y; moveTo(q.x, q.y);
+    });
+    const end = e => {
+      if (!g || e.pointerId !== g.id) return;
+      const was = g; g = null;
+      if (!was.moved) return;
+      dragged = Date.now(); el.classList.remove("drag", "run");
+      if (was.x !== undefined) { setSpot(xySpot(was.x, was.y, size())); say("I'll sit here!") }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    el.addEventListener("dragstart", e => e.preventDefault());   // no native drag-and-drop ghost (it would cancel our drag)
+    el.addEventListener("click", e => { if (Date.now() - dragged < 400) { e.stopImmediatePropagation(); e.preventDefault() } }, true);
+    el.addEventListener("keydown", e => {   // arrow keys nudge him (Shift for bigger steps)
+      const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!k) return;
+      e.preventDefault(); e.stopPropagation();
+      const S = size(), o = el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop }, step = e.shiftKey ? 80 : 24;
+      const q = clampXY(o.x + k[0] * step, o.y + k[1] * step, S); moveTo(q.x, q.y); setSpot(xySpot(q.x, q.y, S));
+    });
+  }
   const queue = () => { if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; checkPal(); settle() }) };
   document.addEventListener("click", e => { const o = e.target.closest && e.target.closest(".opt"); if (o) { lastOpt = o; lastOptAt = Date.now() } }, true);
-  addEventListener("scroll", queue, { passive: true }); addEventListener("resize", () => { paintPal(); queue() });
+  addEventListener("scroll", queue, { passive: true }); addEventListener("resize", () => { paintPal(); const d = $("bbDock"); if (d) dockSpot(d); queue() });
   new MutationObserver(queue).observe(document.documentElement, { childList: true, subtree: true });
 
   // ===== Greeting: once per visit, Dexter walks in and says hello, then heads to his spot
