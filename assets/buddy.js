@@ -71,16 +71,42 @@
   const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round" stroke-linecap="round"`;
   let uidN = 0;
   const sparkle = (x, y, r, c = "#ffd84a") => `<path d="M${x} ${y - r} Q${x + r * .18} ${y - r * .18} ${x + r} ${y} Q${x + r * .18} ${y + r * .18} ${x} ${y + r} Q${x - r * .18} ${y + r * .18} ${x - r} ${y} Q${x - r * .18} ${y - r * .18} ${x} ${y - r}Z" fill="${c}" stroke="${OL}" stroke-width="1"/>`;
+  // Eye expressions. "open" is his everyday look; the study pal switches between the others by mood:
+  //   wide (wonder: sparkly, brows up) · dilated (playing/hunting: big round pupils, as real cats' widen) · focus (stalking:
+  //   lids lowered toward the nose, big pupils) · sleepy (content: heavy lids, a slow blink) · sad (outer lids droop, worried
+  //   brows, a tear) · happy (closed ^ ^ smile) · sleep (relaxed closed lids) · closed (the newborn's sleepy look)
+  const EYE = {   // pupil rx/ry, lid drop at outer/inner corner, brow outer/inner y offset, highlight scale
+    open: { p: [1.9, 3.3], dO: 0, dI: 0, bO: -10.6, bI: -8.4, hi: 1 },
+    wide: { p: [2.6, 3.5], dO: -1.2, dI: -1.2, bO: -13, bI: -12.2, hi: 1.3, star: true },
+    dilated: { p: [4.1, 4.7], dO: 0, dI: 0, bO: -11.4, bI: -10, hi: 1.15 },
+    focus: { p: [3.4, 4.3], dO: .4, dI: 2.8, bO: -11.6, bI: -6.8, hi: .9 },
+    sleepy: { p: [2.6, 3.2], dO: 4.6, dI: 4.2, bO: -9.6, bI: -9.2, hi: .8 },
+    sad: { p: [2.8, 3.6], dO: 3.8, dI: 0, bO: -8.2, bI: -12, hi: 1.25, tear: true }
+  };
   function eye(u, x, y, mode) {
     if (mode === "closed") return `<path d="M${x - 6} ${y + 1} Q${x} ${y - 5} ${x + 6} ${y + 1}" stroke="${OL}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
-    const out = x < 60 ? -1 : 1, m = v => out < 0 ? v : -v;   // m(): mirror x offsets for the right eye
+    if (mode === "happy") return `<path d="M${x - 6.4} ${y + 2.4} Q${x} ${y - 6} ${x + 6.4} ${y + 2.4}" stroke="${OL}" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M${x - 7.4} ${y - 10.4} Q${x} ${y - 13.6} ${x + 7.4} ${y - 10.4}" stroke="#6b3f17" stroke-width="3.6" fill="none" stroke-linecap="round"/>`;
+    if (mode === "sleep") return `<path d="M${x - 6.2} ${y + .4} Q${x} ${y + 5.2} ${x + 6.2} ${y + .4}" stroke="${OL}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M${x - 7} ${y - 9.2} Q${x} ${y - 10.6} ${x + 7} ${y - 9.2}" stroke="#6b3f17" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".85"/>`;
+    const e = EYE[mode] || EYE.open, out = x < 60 ? -1 : 1, m = v => out < 0 ? v : -v;   // m(): mirror x offsets for the right eye
+    const h = e.hi, dO = e.dO, dI = e.dI;
     return `<ellipse cx="${x}" cy="${y + 1.6}" rx="5.8" ry="6.2" fill="url(#${u}iris)" stroke="${OL}" stroke-width="1.8"/>
-      <ellipse cx="${x + m(.6)}" cy="${y + 2.2}" rx="1.9" ry="3.3" fill="#1f2a18"/>
-      <ellipse cx="${x + m(-2)}" cy="${y - 1.6}" rx="2" ry="2.4" fill="#fff"/><circle cx="${x + m(2.4)}" cy="${y + 4}" r="1" fill="#fff"/>
-      <path d="M${x + m(-6.6)} ${y - 6} Q${x} ${y - 5} ${x + m(6.6)} ${y - 6} L${x + m(6.6)} ${y - 2} Q${x} ${y - 3.2} ${x + m(-6.6)} ${y - 2}Z" fill="${FUR}"/><path d="M${x + m(-7.2)} ${y - 1.6} Q${x} ${y - 3.6} ${x + m(7.4)} ${y - 1.2}" stroke="${OL}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="${x + m(.6)}" cy="${y + 2.2}" rx="${e.p[0]}" ry="${e.p[1]}" fill="#1f2a18"/>
+      <ellipse cx="${x + m(-2)}" cy="${y - 1.6}" rx="${2 * h}" ry="${2.4 * h}" fill="#fff"/><circle cx="${x + m(2.4)}" cy="${y + 4}" r="${1 * h}" fill="#fff"/>
+      ${e.star ? `<path d="M${x + m(2.6)} ${y - .6} l.7 1.6 1.6 .7 -1.6 .7 -.7 1.6 -.7 -1.6 -1.6 -.7 1.6 -.7Z" fill="#fff"/>` : ""}
+      <path d="M${x + m(-6.6)} ${y - 6.4} Q${x} ${y - 5.4} ${x + m(6.6)} ${y - 6.4} L${x + m(6.6)} ${y - 2 + dI} Q${x} ${y - 3.2 + (dO + dI) / 2} ${x + m(-6.6)} ${y - 2 + dO}Z" fill="${FUR}"/><path d="M${x + m(-7.2)} ${y - 1.6 + dO} Q${x} ${y - 3.6 + (dO + dI) / 2} ${x + m(7.4)} ${y - 1.2 + dI}" stroke="${OL}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
       <path d="M${x + m(-6)} ${y + 6.4} Q${x} ${y + 9.2} ${x + m(5)} ${y + 6.6}" stroke="${OL}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".6"/>
-      <path d="M${x + m(-7.8)} ${y - 10.6} L${x + m(6.8)} ${y - 8.4}" stroke="#6b3f17" stroke-width="4.2" stroke-linecap="round"/>`;
+      <path d="M${x + m(-7.8)} ${y + e.bO} L${x + m(6.8)} ${y + e.bI}" stroke="#6b3f17" stroke-width="4.2" stroke-linecap="round"/>
+      ${e.tear && out < 0 ? `<path d="M${x - 5.2} ${y + 6.6} q-1.6 2.8 0 4 q1.6 -1.2 0 -4Z" fill="#8fd3ff" stroke="${OL}" stroke-width=".9"/>` : ""}`;
   }
+  // Mouth to match: happy = open smile, sad = wobbly frown, wide = a little "o", asleep = soft ω, otherwise his grin with a fang
+  function mouth(mode) {
+    if (mode === "closed" || mode === "sleep") return `<path d="M55.4 71 Q57.7 74.4 60 71.2 Q62.3 74.4 64.6 71" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    if (mode === "happy") return `<path d="M55 71.2 Q57.5 73.4 60 71.4 Q62.5 73.4 65 71.2 Q64 78.4 60 78.6 Q56 78.4 55 71.2Z" fill="#a8463a" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/><path d="M57.2 76.2 Q60 74.6 62.8 76.2 Q61.8 78.2 60 78.3 Q58.2 78.2 57.2 76.2Z" fill="#f08a8a"/>`;
+    if (mode === "sad") return `<path d="M55.6 75 Q57.6 72.2 60 73.2 Q62.4 72.2 64.4 75" stroke="${OL}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`;
+    if (mode === "wide") return `<path d="M56.4 71.2 Q58.2 72.6 60 71.4 Q61.8 72.6 63.6 71.2" stroke="${OL}" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="75" rx="2.2" ry="2.5" fill="#a8463a" stroke="${OL}" stroke-width="1.3"/>`;
+    return `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M61.8 72.9 L63.2 77.4 L64.8 72.2Z" fill="#fff" stroke="${OL}" stroke-width="1.1" stroke-linejoin="round"/>`;
+  }
+
   // The kitten at full size, standing on y=108; o: { sc, eyes, tail, extraBack, extraFront, glasses }
   function kitty(u, o) {
     const tail = o.tail === "down"
@@ -105,7 +131,7 @@
       <g class="dx-eyes"><g class="dx-blink">${eye(u, 48.5, 60, o.eyes)}${eye(u, 71.5, 60, o.eyes)}</g></g>
       
       <path d="M58.2 67.6 L61.8 67.6 L60 69.8Z" fill="${PINK_D}" stroke="${OL}" stroke-width="1" stroke-linejoin="round"/>
-      ${o.eyes === "closed" ? `<path d="M55.4 71 Q57.7 74.4 60 71.2 Q62.3 74.4 64.6 71" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>` : `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M61.8 72.9 L63.2 77.4 L64.8 72.2Z" fill="#fff" stroke="${OL}" stroke-width="1.1" stroke-linejoin="round"/>`}
+      ${mouth(o.eyes)}
       <path d="M33 66 L22 64 M33 69 L22 70.5 M87 66 L98 64 M87 69 L98 70.5" stroke="${OL}" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>`;
     const glasses = o.glasses ? `<circle cx="48.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><circle cx="71.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><path d="M58.5 58.5 Q60 56.5 61.5 58.5" stroke="${OL}" stroke-width="2" fill="none"/><path d="M41 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><path d="M64 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>` : "";
     const sc = o.sc;
@@ -574,7 +600,7 @@ body.bb-on{padding-bottom:96px}
     save(s);
     window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
     if (off()) return;
-    paintDock(); visit();
+    paintDock(); visit(); if (palOn) setMood("happy", 1700);
     const d = anchor(); if (!d) return;
     d.classList.remove("hop", "sad"); void d.offsetWidth; d.classList.add("hop");
     say(MEOWS[Math.floor(Math.random() * MEOWS.length)]); meowSound(before);
@@ -587,7 +613,7 @@ body.bb-on{padding-bottom:96px}
   function miss() {
     const s = load(), had = s.streak | 0; s.streak = 0; s.last = Date.now(); save(s);
     if (off()) return;
-    paintDock(); visit();
+    paintDock(); visit(); if (palOn) setMood("sad", 1900);
     dropYarn();
     if (had >= 3) pop(`<b>Streak ended at ${had}</b><small>No XP lost. Start a new one!</small>`, "cool");
   }
@@ -675,7 +701,7 @@ body.bb-on{padding-bottom:96px}
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
         <div class="sh-tabs pal" role="tablist">${[["closet", "Closet"], ["shop", "Shop"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
-        ${st.tab === "progress" ? "" : `<div class="sh-stage">${art(k, st.tab === "shop" ? st.tryEq : s.equip)}</div>`}
+        ${st.tab === "progress" ? "" : `<div class="sh-stage">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -732,7 +758,13 @@ body.bb-on{padding-bottom:96px}
   const BOX_FRONT = `<svg viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true"><path d="M2 10 L-4 0 L28 0 L32 10Z M98 10 L104 0 L72 0 L68 10Z" fill="#c98b52" stroke="${OLC}" stroke-width="2.2" stroke-linejoin="round"/><path d="M2 10 H98 L94 49 H6Z" fill="#d9a066" stroke="${OLC}" stroke-width="2.6" stroke-linejoin="round"/><path d="M44 10 V49 M56 10 V49" stroke="#e8c48f" stroke-width="3" opacity=".8"/><path d="M14 22 l6 6 M20 22 l-6 6" stroke="#a8713e" stroke-width="1.6" stroke-linecap="round"/></svg>`;
   const ACTS = ["yarn", "butterfly", "mouse", "laser", "feather", "leaf", "box", "tail"];
   const ACT_LABEL = { yarn: "playing with his yarn ball", butterfly: "chasing a butterfly", mouse: "hunting a toy mouse", laser: "chasing a laser dot", feather: "swatting a feather toy", leaf: "pouncing on a falling leaf", box: "sitting in a box", tail: "chasing his tail", nap: "taking a cat nap" };
-  let act = ACTS[Math.random() * ACTS.length | 0], lastMove = Date.now();
+  let act = ACTS[Math.random() * ACTS.length | 0], lastMove = Date.now(), mood = null, moodT = 0;
+  const ACT_EYES = { yarn: "open", butterfly: "wide", mouse: "focus", laser: "dilated", feather: "dilated", leaf: "wide", box: "sleepy", tail: "dilated", nap: "sleep" };
+  function eyesNow(k) {
+    if (k === 0) return mood || (act === "nap" ? "sleep" : "closed");   // the newborn's eyes stay shut unless he's reacting
+    return mood || ACT_EYES[act] || "open";
+  }
+  function setMood(m, ms) { mood = m; clearTimeout(moodT); paintPal(); moodT = setTimeout(() => { mood = null; paintPal() }, ms) }
   function setAct(a) { if (a !== act) { act = a; paintPal() } }
   function nextAct() { const pool = ACTS.filter(x => x !== act); setAct(pool[Math.random() * pool.length | 0]) }
   setInterval(() => {   // a new game every 15 s; a cat nap after 45 s without any interaction
@@ -770,7 +802,7 @@ body.bb-on{padding-bottom:96px}
     p.style.setProperty("--ps", palSize() + "px");
     p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]}`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
-    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, act === "nap" ? { eyes: "closed" } : null)}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: eyesNow(k) })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
   function visit() {
@@ -805,7 +837,7 @@ body.bb-on{padding-bottom:96px}
       line = `${hello} Welcome back. ${tip}`;
     }
     const g = document.createElement("div"); g.className = "bb-greet"; g.setAttribute("role", "status");
-    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" aria-label="Close the greeting">${art(k)}</button></div>`;
+    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" aria-label="Close the greeting">${art(k, null, { eyes: k === 0 ? "closed" : "happy" })}</button></div>`;
     document.body.appendChild(g); document.body.classList.add("bb-greeting");
     let gone = false;
     const leave = () => { if (gone) return; gone = true; g.classList.add("leave"); setTimeout(() => { g.remove(); document.body.classList.remove("bb-greeting") }, 600) };
