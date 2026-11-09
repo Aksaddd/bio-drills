@@ -40,6 +40,9 @@
       s = { v: 2, pts: Math.max(n * 20, STAGES[k].at), correct: n, streak: 0, best: 0, last: 0, nick: s.nick || "" };
     }
     if (s.streak && Date.now() - (s.last || 0) > STREAK_TTL) s.streak = 0;
+    // Gold wallet + wardrobe. First time: a 50-gold welcome gift plus gold for the XP already earned (about 1 gold per 4 XP).
+    if (s.gold === undefined) s.gold = 50 + Math.round((s.pts | 0) * .24);
+    s.owned = Array.isArray(s.owned) ? s.owned : []; s.equip = s.equip && typeof s.equip === "object" ? s.equip : {};
     return s;
   }
   const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch (e) { } };
@@ -121,15 +124,24 @@
   const yarn = `<circle cx="22" cy="100" r="8.5" fill="#4f8dff" ${ln}/><path d="M15 97 Q22 92 29 99 M16 103 Q23 97 29 104 M19 93 Q24 100 21 108" stroke="#2c5fc4" stroke-width="1.3" fill="none"/><path d="M29 104 Q36 110 44 106" stroke="#4f8dff" stroke-width="1.6" fill="none"/>`;
   const flask = `<path d="M17 84 h8 v6 l7 13 Q33 108 28 108 h-14 Q9 108 10 103 l7 -13Z" fill="#fff" fill-opacity=".85" ${ln}/><path d="M13 99 h16 l2.4 4.4 Q32 106.5 28 106.5 h-14 Q10.5 106.5 11.4 103Z" fill="#7be08f"/><circle cx="19" cy="102" r="1.3" fill="#fff"/><circle cx="23" cy="98" r="1" fill="#fff" opacity=".8"/>`;
   const book = `<path d="M90 98 h20 v9 h-20Z" fill="#4f8dff" ${ln}/><path d="M92 91 h18 v7 h-18Z" fill="#e8455f" ${ln}/><path d="M93 101 h14 M95 94 h12" stroke="#fff" stroke-width="1.2" opacity=".85"/>`;
-  function art(k) {
-    const u = "dx" + (++uidN);
-    let svg;
-    if (k === 0) svg = kitty(u, { sc: .74, eyes: "closed", tail: "down", over: `<text x="86" y="40" font-family="sans-serif" font-weight="800" font-size="11" fill="#7a8bd8">z</text><text x="94" y="30" font-family="sans-serif" font-weight="800" font-size="8" fill="#7a8bd8">z</text>` });
-    else if (k === 1) svg = kitty(u, { sc: .8, eyes: "open", mid: collar() });
-    else if (k === 2) svg = kitty(u, { sc: .86, eyes: "open", mid: collar(), over: yarn });
-    else if (k === 3) svg = kitty(u, { sc: .92, eyes: "open", mid: collar(), front: headband + bandage });
-    else if (k === 4) svg = kitty(u, { sc: .96, eyes: "open", mid: collar(), front: goggles + bandage, over: flask });
-    else svg = kitty(u, { sc: 1, eyes: "open", glasses: true, mid: coat, front: cap, over: book });
+  // Each form's own gear, by wardrobe slot. Anything bought in the shop and worn replaces the gear in that slot.
+  const zzz = `<text x="86" y="40" font-family="sans-serif" font-weight="800" font-size="11" fill="#7a8bd8">z</text><text x="94" y="30" font-family="sans-serif" font-weight="800" font-size="8" fill="#7a8bd8">z</text>`;
+  const FORM_GEAR = [
+    { sc: .74, eyes: "closed", tail: "down", over: zzz },
+    { sc: .8, neck: () => collar() },
+    { sc: .86, neck: () => collar(), held: () => yarn },
+    { sc: .92, neck: () => collar(), hat: () => headband, extra: () => bandage },
+    { sc: .96, neck: () => collar(), hat: () => goggles, extra: () => bandage, held: () => flask },
+    { sc: 1, glasses: true, outfit: () => coat, hat: () => cap, held: () => book }
+  ];
+  // eq: { hat, outfit, face, neck, held } item ids; defaults to what's saved as worn
+  function art(k, eq) {
+    const u = "dx" + (++uidN), g = FORM_GEAR[k], W = window.BioWardrobe, E = eq || load().equip || {};
+    const worn = slot => W && E[slot] && W.byId[E[slot]] ? W.byId[E[slot]].svg : null;
+    const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
+    const face = worn("face");
+    const svg = kitty(u, { sc: g.sc, eyes: g.eyes || "open", tail: g.tail, glasses: !face && !!g.glasses,
+      mid: pick("outfit") + pick("neck"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -221,6 +233,47 @@ body.bb-on{padding-bottom:96px}
 @keyframes bbFlickNew{0%,28%{opacity:0;filter:brightness(0) invert(1)}30%{opacity:1}38%{opacity:0}46%{opacity:1}52%{opacity:0}58%{opacity:1}62%{opacity:0}66%{opacity:1}69%{opacity:0}72%,86%{opacity:1;filter:brightness(0) invert(1)}100%{opacity:1;filter:none}}
 @keyframes bbGlow{0%,60%{opacity:0;transform:scale(.6)}80%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.5)}}
 @keyframes bbBurst{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}}
+.coin,.sh-tile .coin{width:1em;height:1em;vertical-align:-.14em;margin-right:2px;flex:none}
+.bb-stats{grid-template-columns:repeat(4,1fr)!important}
+.bb-stats .gold b{color:#b07d0f;display:flex;align-items:center;gap:2px} [data-theme="dark"] .bb-stats .gold b{color:#ffcf33}
+.bb-plus .gc{display:inline-flex;align-items:center;color:#b07d0f;margin-left:4px} [data-theme="dark"] .bb-plus .gc{color:#ffcf33}
+.bb-plus.buy{color:#b07d0f}
+.evo-gold{display:flex!important;align-items:center;justify-content:center;gap:4px;margin:8px 0 0!important;font-weight:700;color:#ffd84a;opacity:1!important}
+.bb-shopbtn{width:100%;display:flex;align-items:center;gap:12px;text-align:left;border:0;cursor:pointer;background:linear-gradient(135deg,#fff4d6,#ffe7b0);border-radius:16px;padding:12px 14px;margin:0 0 14px;color:#1d1d1f;font-family:inherit}
+[data-theme="dark"] .bb-shopbtn{background:linear-gradient(135deg,#3a2f12,#4a3a12);color:#f5f5f7}
+.bb-shopbtn .ic{width:38px;height:38px;border-radius:11px;background:#ffcf33;display:grid;place-items:center;color:#5a3c00;flex:none}
+.bb-shopbtn .ic svg{width:22px;height:22px}
+.bb-shopbtn b{display:block;font-size:16px} .bb-shopbtn small{display:block;font-size:12.5px;opacity:.75}
+.bb-shopbtn .go{margin-left:auto;font-size:24px;opacity:.5}
+.bb-shop{width:min(520px,100%);text-align:left;padding:0 0 16px}
+.sh-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:14px 18px 10px;background:color-mix(in srgb,var(--c-bg) 88%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.sh-head h3{font-size:20px!important;margin:0;flex:1}
+.sh-gold{display:inline-flex;align-items:center;gap:3px;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#fff4d6;color:#8a5a00;border-radius:980px;padding:5px 11px;font-variant-numeric:tabular-nums}
+[data-theme="dark"] .sh-gold{background:#3a2f12;color:#ffcf33}
+.sh-done{border:0;background:none;color:var(--c-acc);font:600 17px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
+.sh-stage{height:190px;display:grid;place-items:center;background:radial-gradient(circle at 50% 60%,#fff6dc 0%,var(--c-fill) 70%);margin:0 16px;border-radius:18px}
+[data-theme="dark"] .sh-stage{background:radial-gradient(circle at 50% 60%,#3a3420 0%,var(--c-fill) 70%)}
+.sh-stage svg{width:180px;height:180px}
+.sh-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:10px 16px 4px}
+.sh-sel{flex:1;min-width:0;display:flex;flex-direction:column} .sh-sel b{font-size:16px} .sh-sel span{font-size:13px;color:var(--c-muted);display:flex;align-items:center;gap:2px}
+.sh-hint{flex:1;margin:0;color:var(--c-muted);font-size:14px;text-align:center}
+.sh-act{border:0;border-radius:980px;background:var(--c-acc);color:#fff;font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:10px 18px;cursor:pointer;white-space:nowrap}
+.sh-act.ghost{background:var(--c-fill);color:var(--c-acc)} .sh-act:disabled{background:var(--c-fill);color:var(--c-muted);cursor:default}
+.sh-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--c-fill);border-radius:9px;padding:2px;margin:6px 16px 4px}
+.sh-tabs button{border:0;background:transparent;color:inherit;border-radius:7px;padding:7px 4px;font:500 14px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
+.sh-tabs button[aria-selected="true"]{background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.12)} [data-theme="dark"] .sh-tabs button[aria-selected="true"]{background:#636366}
+.sh-cap{margin:14px 18px 6px;font-size:13px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.02em}
+.sh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px}
+.sh-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid transparent;background:var(--c-fill);border-radius:16px;padding:8px 6px 9px;cursor:pointer;color:inherit;font-family:inherit;text-align:center}
+.sh-tile>svg{width:100%;height:58px}
+.sh-tile b{font-size:12.5px;line-height:1.2;font-weight:600}
+.sh-tile .tag{font-size:10.5px;color:var(--c-muted)}
+.sh-tile .pr{display:inline-flex;align-items:center;font:700 12px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#8a5a00;margin-top:2px} [data-theme="dark"] .sh-tile .pr{color:#ffcf33}
+.sh-tile.sel{border-color:var(--c-acc);background:color-mix(in srgb,var(--c-acc) 10%,var(--c-fill))}
+.sh-tile.on .pr{color:#248a3d} [data-theme="dark"] .sh-tile.on .pr{color:#30d158}
+.sh-tile.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
+.sh-note{margin:16px 18px 0;font-size:12.5px;color:var(--c-muted)}
+@media (max-width:420px){.sh-grid{grid-template-columns:repeat(3,1fr)}.sh-tile>svg{height:50px}}
 @media (prefers-reduced-motion:reduce){.bb-say,.bb-yarn,.bb-yarn svg{animation-duration:.01s}.bb-dock .bb-pic,.bb-card .bb-big,.bb-evo.done .new{animation:none}.bb-evo .old{animation:none;opacity:0}.bb-evo .new{animation:none;opacity:1}.bb-evo .glow{display:none}}`;
 
   // ===== Dock (bottom-right) with a ring that fills toward the next evolution
@@ -236,6 +289,8 @@ body.bb-on{padding-bottom:96px}
       <span class="bb-pic">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   const name = s => s.nick || "Dexter";
+  const COIN = `<svg class="coin" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#ffcf33" stroke="#b07d0f" stroke-width="1.4"/><circle cx="8" cy="8" r="4.2" fill="none" stroke="#d9a21b" stroke-width="1.2"/><path d="M6.6 5.6 q1.4 -1 2.8 0" stroke="#fff6cf" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>`;
+  const HANGER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7 a2.2 2.2 0 1 1 2.2 -2.2 c0 1.4 -2.2 1.8 -2.2 3.4 L21 15 a1.4 1.4 0 0 1 -.9 2.5 H3.9 A1.4 1.4 0 0 1 3 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
   const FLAME = `<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M6 1 C7 4 10 5 10 9 C10 12 8 13 6 13 C4 13 2 12 2 9 C2 7 3 6 4 5 C4 7 5 8 6 8 C6 6 5 4 6 1Z" fill="currentColor"/></svg>`;
 
   // ===== Card: the buddy up close, progress to the next evolution, its biology, the evolution line
@@ -254,11 +309,12 @@ body.bb-on{padding-bottom:96px}
         <div><b>${fmt(s.pts)}</b><span>total XP</span></div>
         <div><b>${s.streak}${s.streak >= 3 ? `<i class="fl">${FLAME}</i>` : ""}</b><span>in a row · ×${mult}</span></div>
         <div><b>${s.best}</b><span>best streak</span></div>
+        <div class="gold"><b>${COIN}${fmt(s.gold)}</b><span>gold</span></div>
       </div>
       <div class="bb-bar"><i style="width:${pct}%"></i></div>
-      <p class="bb-next">${nx === null ? (L >= MAX_LV ? "Fully grown and Level 100. You've mastered it all!" : `Fully grown! ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1} of ${MAX_LV}.`) : `${fmt(nx - s.pts)} XP until it evolves · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
+      <p class="bb-next">${nx === null ? (L >= MAX_LV ? "Fully grown and Level 100. You've mastered it all!" : `Fully grown! ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1} of ${MAX_LV}.`) : `Evolves at Lv ${level(nx)} · ${fmt(nx - s.pts)} XP to go · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
       ${up ? `<p class="bb-next" style="margin-top:-8px">${s.streak ? `${up.at - s.streak} more right in a row for` : `Get ${up.at} right in a row for`} ×${up.mult} XP</p>` : ""}
-      <div class="bb-fact"><b>Cat biology</b>${esc(st.fact)}</div>
+      <div class="bb-fact"><b>The biology</b>${esc(st.fact)}</div>
       <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}">${art(i)}<span>${i > k ? `Lv ${level(x.at)}` : esc(x.name)}</span></div>`).join("")}</div>
       <details class="bb-how"><summary>How XP works</summary>
         <p>Every question is rated by how hard it is. Harder questions earn more XP:</p>
@@ -266,6 +322,7 @@ body.bb-on{padding-bottom:96px}
         <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half XP.</p>
         <p><b>Win streaks multiply XP:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes XP away.</p>
       </details>
+      <button type="button" class="bb-shopbtn" id="bbShop"><span class="ic">${HANGER}</span><span><b>Dexter's Shop</b><small>Hats, outfits and accessories · you have ${fmt(s.gold)} gold</small></span><span class="go">›</span></button>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button><button type="button" class="pri" id="bbClose">Keep studying</button></div>
     </div>`;
     veil.onclick = e => { if (e.target === veil) closeCard() };
@@ -273,6 +330,7 @@ body.bb-on{padding-bottom:96px}
     $("bbClose").onclick = closeCard; $("bbClose").focus();
     $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); closeCard(); paintDock(); openCard() };
     $("bbHide").onclick = () => { setEnabled(false); closeCard() };
+    $("bbShop").onclick = () => { closeCard(); openShop() };
   }
   function closeCard() { if (veil) { veil.remove(); veil = null } }
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeCard() } });
@@ -345,7 +403,11 @@ body.bb-on{padding-bottom:96px}
     const s = load(), before = stageOf(s.pts), lvBefore = level(s.pts);
     s.streak = (s.streak | 0) + 1; s.best = Math.max(s.best | 0, s.streak); s.last = Date.now(); s.correct = (s.correct | 0) + 1;
     const mult = X ? X.multiplier(s.streak) : 1, earned = Math.round(r.xp * mult);
-    s.pts += earned; save(s);
+    s.pts += earned;
+    const goldBase = (GOLD_PER[r.tier.key] || 3), coins = Math.max(1, Math.round((r.repeat ? Math.ceil(goldBase / 2) : goldBase) * mult));
+    const evolved = stageOf(s.pts) > before;
+    s.gold = (s.gold | 0) + coins + (evolved ? EVOLVE_BONUS : 0);
+    save(s);
     window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
     if (off()) return;
     paintDock();
@@ -353,7 +415,7 @@ body.bb-on{padding-bottom:96px}
     d.classList.remove("hop", "sad"); void d.offsetWidth; d.classList.add("hop");
     say(MEOWS[Math.floor(Math.random() * MEOWS.length)]); meowSound(before);
     const lv = level(s.pts);
-    pop(`<b>+${earned} XP</b><small><span class="xpb t-${r.tier.key}">${esc(r.tier.name)}</span>${mult > 1 ? ` ×${mult} streak` : ""}${lv > lvBefore ? ` · Lv ${lv}!` : ""}</small>`);
+    pop(`<b>+${earned} XP <span class="gc">${COIN}+${coins}</span></b><small><span class="xpb t-${r.tier.key}">${esc(r.tier.name)}</span>${mult > 1 ? ` ×${mult} streak` : ""}${lv > lvBefore ? ` · Lv ${lv}!` : ""}</small>`);
     if (STREAK_CHEERS[s.streak]) setTimeout(() => pop(`<b>${FLAME} ${STREAK_CHEERS[s.streak]}</b><small>XP ×${mult} while it lasts</small>`, "hot"), 650);
     const after = stageOf(s.pts);
     if (after > before) setTimeout(() => evolve(before, after), 900);
@@ -370,7 +432,7 @@ body.bb-on{padding-bottom:96px}
     const ev = document.createElement("div"); ev.className = "bb-evo"; ev.setAttribute("role", "dialog"); ev.setAttribute("aria-modal", "true"); ev.setAttribute("aria-live", "polite");
     ev.innerHTML = `<p class="msg" id="bbMsg">${esc(who)} is starting to glow…</p>
       <div class="stage"><div class="glow"></div><span class="old">${art(from)}</span><span class="new">${art(to)}</span></div>
-      <div class="reveal"><h2>${esc(who)} evolved into ${esc(b.name)}!</h2><p style="margin-top:8px">${esc(b.form)} stage · ${esc(b.fact)}</p></div>
+      <div class="reveal"><h2>${esc(who)} evolved into ${esc(b.name)}!</h2><p class="evo-gold">${COIN} +${EVOLVE_BONUS} gold evolution bonus</p><p style="margin-top:8px">${esc(b.form)} stage · ${esc(b.fact)}</p></div>
       <button type="button" id="bbEvoOk">Keep studying</button>`;
     document.body.appendChild(ev);
     const finish = () => {
@@ -391,11 +453,63 @@ body.bb-on{padding-bottom:96px}
     ev.onclick = e => { if (ev.classList.contains("done") && e.target === ev) ev.remove() };
   }
 
+  // ===== Dexter's Shop: earn gold with right answers, buy hats, outfits and accessories, try them on first
+  const GOLD_PER = { easy: 3, medium: 5, hard: 8, expert: 12 }, EVOLVE_BONUS = 50;
+  let shop = null;
+  function openShop(tab) {
+    const W = window.BioWardrobe; if (!W) return;
+    if (shop) shop.remove();
+    const st = { tab: tab || "hat", sel: null, tryEq: Object.assign({}, load().equip) };
+    shop = document.createElement("div"); shop.className = "bb-veil"; document.body.appendChild(shop);
+    shop.onclick = e => { if (e.target === shop) closeShop() };
+    const TABS = [["hat", "Hats"], ["outfit", "Outfits"], ["acc", "Accessories"]];
+    function tile(it, s) {
+      const own = s.owned.includes(it.id), on = s.equip[it.slot] === it.id;
+      return `<button type="button" class="sh-tile${st.sel === it.id ? " sel" : ""}${on ? " on" : ""}" data-id="${it.id}" aria-pressed="${st.sel === it.id}">
+        <svg viewBox="${W.VIEW[it.slot]}" aria-hidden="true">${it.svg}</svg><b>${esc(it.name)}</b>
+        <span class="tag">${esc(it.set)}</span><span class="pr">${on ? "Wearing" : own ? "Owned" : `${COIN}${it.price}`}</span></button>`;
+    }
+    function paint() {
+      const s = load(), k = stageOf(s.pts), it = st.sel ? W.byId[st.sel] : null;
+      const own = it && s.owned.includes(it.id), on = it && s.equip[it.slot] === it.id;
+      const slots = st.tab === "acc" ? W.SLOTS.filter(x => x.group === "Accessories") : W.SLOTS.filter(x => x.key === st.tab);
+      let action = `<p class="sh-hint">Tap an item to try it on.</p>`;
+      if (it) action = `<div class="sh-sel"><b>${esc(it.name)}</b><span>${esc(it.set)} · ${on ? "Wearing" : own ? "Owned" : `${COIN}${it.price} gold`}</span></div>` + (
+        on ? `<button type="button" class="sh-act ghost" id="shOff">Take off</button>`
+        : own ? `<button type="button" class="sh-act" id="shWear">Wear</button>`
+        : s.gold >= it.price ? `<button type="button" class="sh-act" id="shBuy">Buy for ${it.price}</button>`
+        : `<button type="button" class="sh-act" disabled>Need ${it.price - s.gold} more gold</button>`);
+      shop.innerHTML = `<div class="bb-card bb-shop" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+        <div class="sh-head"><h3 id="shTitle">Dexter's Shop</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
+        <div class="sh-stage">${art(k, st.tryEq)}</div>
+        <div class="sh-bar">${action}</div>
+        <div class="sh-tabs" role="tablist">${TABS.map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
+        ${slots.map(sl => `<p class="sh-cap">${esc(sl.name)}</p><div class="sh-grid">${W.ITEMS.filter(i => i.slot === sl.key).map(i => tile(i, s)).join("")}</div>`).join("")}
+        <p class="sh-note">Earn gold with every right answer: Easy 3 · Medium 5 · Hard 8 · Expert 12, multiplied by your streak, plus ${EVOLVE_BONUS} each time Dexter evolves. Items show up on Dexter in every form.</p>
+      </div>`;
+      $("shDone").onclick = closeShop;
+      shop.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { st.tab = b.dataset.tab; st.sel = null; st.tryEq = Object.assign({}, load().equip); paint() });
+      shop.querySelectorAll(".sh-tile").forEach(b => b.onclick = () => {
+        const i = W.byId[b.dataset.id], cur = load().equip;
+        st.sel = st.sel === i.id ? null : i.id;
+        st.tryEq = Object.assign({}, cur); if (st.sel) st.tryEq[i.slot] = i.id;
+        const y = shop.querySelector(".bb-shop").scrollTop; paint(); shop.querySelector(".bb-shop").scrollTop = y;
+      });
+      const keep = fn => () => { const y = shop.querySelector(".bb-shop").scrollTop; fn(); paint(); shop.querySelector(".bb-shop").scrollTop = y; paintDock() };
+      if ($("shBuy")) $("shBuy").onclick = keep(() => { const t = load(); if (t.gold < it.price || t.owned.includes(it.id)) return; t.gold -= it.price; t.owned.push(it.id); t.equip[it.slot] = it.id; save(t); st.tryEq = Object.assign({}, t.equip); pop(`<b>New: ${esc(it.name)}!</b><small>${COIN}−${it.price} gold</small>`, "buy") });
+      if ($("shWear")) $("shWear").onclick = keep(() => { const t = load(); t.equip[it.slot] = it.id; save(t); st.tryEq = Object.assign({}, t.equip) });
+      if ($("shOff")) $("shOff").onclick = keep(() => { const t = load(); delete t.equip[it.slot]; save(t); st.tryEq = Object.assign({}, t.equip); st.sel = null });
+    }
+    paint(); $("shDone").focus();
+  }
+  function closeShop() { if (shop) { shop.remove(); shop = null } }
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeShop() });
+
   function setEnabled(on) { try { on ? localStorage.removeItem(OFF_KEY) : localStorage.setItem(OFF_KEY, "1") } catch (e) { } paintDock() }
   window.addEventListener("bio:correct", gain);
   window.addEventListener("bio:wrong", miss);
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, art, STAGES, state: load, level };
+  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, art, STAGES, state: load, level };
 })();

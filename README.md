@@ -32,6 +32,14 @@ Every page has **Settings** at the top: in the home page's nav bar, and beside "
 
 Pages announce a correct answer with `window.dispatchEvent(new CustomEvent("bio:correct"))`.
 
+## Gold and Dexter's Shop
+
+Every right answer also earns **gold**: Easy 3, Medium 5, Hard 8, Expert 12, multiplied by the win streak (half for questions already answered right 3+ times), plus 50 gold each time Dexter evolves. New players start with a 50-gold welcome gift (plus gold for any XP already earned).
+
+Gold buys items in **Dexter's Shop** (Dexter's card → Dexter's Shop): 13 hats, 11 outfits and 20 accessories (glasses, neckwear, things to hold), grouped in themed sets: Police, Firefighter, Construction, Chef, Farmer, Doctor, Pilot, School, Festival, Cozy, Formal, Party, Ranch, Botanist and Royal. Tap an item to try it on, then buy, wear or take it off. Worn items replace each form's own gear slot by slot and show on Dexter everywhere: the corner buddy, his card, the evolution scene and the evolution line.
+
+The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size "kitten space" (120 × 120), so they fit all six forms. To add one, append `{ id, slot, name, set, price, svg }` (slots: `hat`, `outfit`, `face`, `neck`, `held`); ids are saved in progress, so never reuse one. Wallet, owned items and worn items are saved with Dexter (`bio-dexter-v1`: `gold`, `owned`, `equip`).
+
 ## XP and difficulty
 
 `assets/xp.js` rates every question and turns it into XP (it runs in Node too, for calibration):
