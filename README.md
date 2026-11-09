@@ -28,9 +28,24 @@ Every page has **Settings** at the top: in the home page's nav bar, and beside "
 
 ## Study buddy
 
-`assets/buddy.js` adds an original character drawn in the file as SVG: a baby long-necked leafy dino that lives in the bottom-right corner of every practice page. Every correct answer in the main drill, the HW 3 drill, Word Roots and Bio-pardy is +1 level. It evolves at 5, 15, 35, 70 and 120 correct answers as plants grow on its back in the order they evolved: **Pip** (seed-egg) → **Sprig** (mossy hatchling) → **Frondo** (ferns) → **Sproutle** (seedlings) → **Blossaur** (flowers) → **Grovewalker** (a whole tree). Each form comes with the biology behind it. Art direction: a distinct silhouette for each stage, clean dark outlines with flat color (grass green, cream and one pink accent), and proportions that go from round, big-headed and big-eyed to long-necked, angular and majestic. Wrong answers never hurt it. Tap it for its card (progress, evolution line, rename, hide). It can be switched off in Settings. Saved per device as `bio-buddy-v1`.
+`assets/buddy.js` adds an original character drawn in the file as SVG: a baby long-necked leafy dino that lives in the bottom-right corner of every practice page. Every correct answer in the main drill, the HW 3 drill, Word Roots and Bio-pardy earns XP based on the question's difficulty, multiplied by the current win streak (see "XP and difficulty" below). It evolves at 100, 350, 900, 1,800 and 3,200 XP as plants grow on its back in the order they evolved: **Pip** (seed-egg) → **Sprig** (mossy hatchling) → **Frondo** (ferns) → **Sproutle** (seedlings) → **Blossaur** (flowers) → **Grovewalker** (a whole tree). Each form comes with the biology behind it. Art direction: a distinct silhouette for each stage, clean dark outlines with flat color (grass green, cream and one pink accent), and proportions that go from round, big-headed and big-eyed to long-necked, angular and majestic. Wrong answers never hurt it. Tap it for its card (progress, evolution line, rename, hide). It can be switched off in Settings. Saved per device as `bio-buddy-v1`.
 
 Pages announce a correct answer with `window.dispatchEvent(new CustomEvent("bio:correct"))`.
+
+## XP and difficulty
+
+`assets/xp.js` rates every question and turns it into XP (it runs in Node too, for calibration):
+
+| Tier | XP | Share of the drill |
+|---|---|---|
+| Easy | 10 | 44% |
+| Medium | 20 | 38% |
+| Hard | 35 | 13% |
+| Expert | 50 | 4% |
+
+The score adds up what makes a question hard: the professor's clicker question or a homework concept (+1), EXCEPT/NOT wording (+2), putting steps in order (+2), several numbered statements or blanks (+1), reading an experiment or a figure (+1 each), comparing two things or explaining why/how (+1 each), five choices, long similar answers or "All of the above" (+1 each), a long question (+1), and the Bio-pardy dollar value. It also adds the student's own history: missed it last time, or usually misses it (+1). Score 0–1 is Easy, 2–3 Medium, 4–5 Hard, 6+ Expert. A question already answered right 3+ times earns half XP. Word roots are Easy (Medium for a root missed before).
+
+**Win streaks** (right answers in a row, across every module) multiply XP: 3 in a row ×1.25, 5 ×1.5, 10 ×2, 15 ×2.5, 25 ×3. A wrong answer resets the streak but never removes XP; a streak also cools off after 3 hours away. Levels follow total XP (level L needs 10·(L−1)² XP). Each drill question shows its tier and XP; hover or long-press the badge for the reasons.
 
 ## Subject tabs
 

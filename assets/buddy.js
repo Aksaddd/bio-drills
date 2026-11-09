@@ -1,8 +1,10 @@
 // Bio Drills · Study buddy
 // An original long-necked leafy dino that grows up through the plant life cycle as the student answers correctly.
-// Every correct answer (main drill, HW 3 drill, Word Roots, Bio-pardy) = +1 level. It evolves at
-// milestones. Wrong answers never hurt it. Saved on this device only ("bio-buddy-v1").
-// Pages announce a correct answer with: window.dispatchEvent(new CustomEvent("bio:correct"))
+// Every correct answer (main drill, HW 3 drill, Word Roots, Bio-pardy) earns XP based on how difficult the
+// question is (assets/xp.js), multiplied by the current win streak. Levels and evolutions follow total XP.
+// Wrong answers reset the streak but never take XP away. Saved on this device only ("bio-buddy-v1").
+// Pages announce answers with: window.dispatchEvent(new CustomEvent("bio:correct", { detail })) and "bio:wrong".
+// detail describes the question for the difficulty rating: { kind: "drill", q, prev, prevHist } | { kind: "board", val } | { kind: "root", missed }
 // All artwork below is drawn here as SVG.
 (() => {
   const KEY = "bio-buddy-v1", OFF_KEY = "bio-buddy-off";
@@ -11,25 +13,40 @@
   const STAGES = [
     { at: 0, name: "Pip", form: "Seed-egg", color: "#c9a46a",
       fact: "Pip is still inside its seed. A seed holds an embryo, a food supply and a protective seed coat, so it can wait (dormancy) until conditions are right." },
-    { at: 5, name: "Sprig", form: "Mossy hatchling", color: "#5fb37a",
+    { at: 100, name: "Sprig", form: "Mossy hatchling", color: "#5fb37a",
       fact: "The fuzz on Sprig's back is moss. In mosses the green gametophyte (n) is the main plant, and fertilization needs water so sperm can swim to the egg." },
-    { at: 15, name: "Frondo", form: "Fern-back", color: "#3f9e6a",
+    { at: 350, name: "Frondo", form: "Fern-back", color: "#3f9e6a",
       fact: "Ferns grow on Frondo's back. Ferns have xylem and phloem and a dominant sporophyte; the brown dots under a frond are sori, clusters of sporangia. The curl on its tail is a fiddlehead." },
-    { at: 35, name: "Sproutle", form: "Seedling-back", color: "#7cc35a",
+    { at: 900, name: "Sproutle", form: "Seedling-back", color: "#7cc35a",
       fact: "Seedlings sprout along Sproutle's back. Each one's first two round leaves are cotyledons (seed leaves): one in monocots, two in eudicots." },
-    { at: 70, name: "Blossaur", form: "Flower-back", color: "#e86aa6",
+    { at: 1800, name: "Blossaur", form: "Flower-back", color: "#e86aa6",
       fact: "Flowers bloom on Blossaur's back. Flowers are modified leaves (sepals, petals, stamens, carpels), and double fertilization makes a 2n zygote plus 3n endosperm." },
-    { at: 120, name: "Grovewalker", form: "Walking forest", color: "#6d8f4e",
+    { at: 3200, name: "Grovewalker", form: "Walking forest", color: "#6d8f4e",
       fact: "A whole tree grows on Grovewalker's back. Lignin-stiffened xylem lets trees grow tall. That's the top of the plant tree of life; every right answer still levels it up." }
   ];
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const load = () => { try { return Object.assign({ xp: 0, nick: "" }, JSON.parse(localStorage.getItem(KEY) || "{}")) } catch (e) { return { xp: 0, nick: "" } } };
+  // State: pts = total XP · correct = right answers · streak / best = answers right in a row · last = time of last answer
+  const OLD_AT = [0, 5, 15, 35, 70, 120];   // v1 evolved by number of right answers
+  const STREAK_TTL = 3 * 60 * 60 * 1000;    // a streak cools off after 3 hours away
+  function load() {
+    let s = {}; try { s = JSON.parse(localStorage.getItem(KEY) || "{}") || {} } catch (e) { }
+    if (s.v !== 2) {   // migrate v1 (xp = count of right answers) without ever moving the buddy back a form
+      const n = s.xp | 0; let k = 0; OLD_AT.forEach((t, i) => { if (n >= t) k = i });
+      s = { v: 2, pts: Math.max(n * 20, STAGES[k].at), correct: n, streak: 0, best: 0, last: 0, nick: s.nick || "" };
+    }
+    if (s.streak && Date.now() - (s.last || 0) > STREAK_TTL) s.streak = 0;
+    return s;
+  }
   const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch (e) { } };
   const off = () => { try { return localStorage.getItem(OFF_KEY) === "1" } catch (e) { return false } };
-  const stageOf = xp => { let k = 0; STAGES.forEach((s, i) => { if (xp >= s.at) k = i }); return k };
+  const stageOf = pts => { let k = 0; STAGES.forEach((s, i) => { if (pts >= s.at) k = i }); return k };
   const nextAt = k => STAGES[k + 1] ? STAGES[k + 1].at : null;
-  const level = xp => xp + 1;
+  // Level curve: reaching level L takes 10·(L−1)² XP (Lv 4 = 90 XP, Lv 10 = 810, Lv 18 = 2,890)
+  const level = pts => Math.floor(Math.sqrt(Math.max(0, pts) / 10)) + 1;
+  const lvXP = L => 10 * (L - 1) * (L - 1);
+  const XP = () => window.BioXP;
+  const fmt = n => Math.round(n).toLocaleString("en-US");
 
   // ===== Artwork (viewBox 0 0 120 120), side view facing right. An original character.
   // Design rules: readable silhouette per stage, clean dark outlines, a limited palette (grass greens,
@@ -189,7 +206,26 @@
 .bb-dock .bb-lv{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);font:700 10.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#1d1d1f;color:#fff;border-radius:980px;padding:2px 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
 [data-theme="dark"] .bb-dock .bb-lv{background:#f5f5f7;color:#1d1d1f}
 .bb-dock.hop .bb-pic{animation:bbHop .6s cubic-bezier(.3,1.6,.5,1)}
-.bb-plus{position:fixed;z-index:46;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#248a3d;pointer-events:none;animation:bbPlus 1.1s ease forwards;white-space:nowrap}
+.bb-plus{position:fixed;z-index:46;display:flex;flex-direction:column;align-items:flex-end;gap:2px;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#248a3d;pointer-events:none;animation:bbPlus 1.5s ease forwards;white-space:nowrap;text-align:right;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+.bb-plus small{font:600 11.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#6e6e73;display:flex;align-items:center;gap:4px}
+.bb-plus.hot{color:#ff6b00} .bb-plus.cool{color:#6e6e73}
+.bb-plus svg,.bb-streak svg,.bb-stats .fl svg{width:.9em;height:1em;vertical-align:-1px}
+[data-theme="dark"] .bb-plus{text-shadow:none} [data-theme="dark"] .bb-plus small{color:#98989f}
+.bb-streak{position:absolute;top:-8px;left:-10px;display:inline-flex;align-items:center;gap:1px;font:800 11px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#fff;background:linear-gradient(180deg,#ff9f0a,#ff6b00);border-radius:980px;padding:2px 6px 2px 5px;box-shadow:0 2px 6px rgba(255,107,0,.4);font-variant-numeric:tabular-nums}
+.bb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
+.bb-stats div{background:var(--c-fill);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center}
+.bb-stats b{font:700 20px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:2px}
+.bb-stats .fl{color:#ff6b00;font-style:normal}
+.bb-stats span{font-size:11.5px;color:var(--c-muted)}
+.bb-how{text-align:left;background:var(--c-fill);border-radius:14px;padding:10px 14px;margin:0 0 14px;font-size:13.5px}
+.bb-how summary{cursor:pointer;font-weight:600;color:var(--c-acc)}
+.bb-how p{margin:8px 0 0}
+.bb-tiers{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bb-tiers li{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.xpb{display:inline-flex;align-items:center;font:700 10.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;letter-spacing:.01em;border-radius:980px;padding:2px 8px;text-transform:none;white-space:nowrap}
+.xpb.t-easy{background:rgba(52,199,89,.16);color:#1f7a37} .xpb.t-medium{background:rgba(10,132,255,.14);color:#0060c7}
+.xpb.t-hard{background:rgba(255,159,10,.18);color:#b25000} .xpb.t-expert{background:rgba(255,55,95,.15);color:#c4153f}
+[data-theme="dark"] .xpb.t-easy{color:#30d158} [data-theme="dark"] .xpb.t-medium{color:#409cff} [data-theme="dark"] .xpb.t-hard{color:#ffb340} [data-theme="dark"] .xpb.t-expert{color:#ff6482}
 [data-theme="dark"] .bb-plus{color:#30d158}
 body.bb-on{padding-bottom:96px}
 .bb-veil{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;animation:bbFade .2s ease}
@@ -230,7 +266,7 @@ body.bb-on{padding-bottom:96px}
 @media (max-width:560px){.bb-dock{width:50px;height:50px;right:max(10px,env(safe-area-inset-right,0px));bottom:max(10px,env(safe-area-inset-bottom,0px))}.bb-dock .bb-pic{width:38px;height:38px}.bb-dock .bb-lv{font-size:9.5px;padding:1px 6px;bottom:-5px}}
 @keyframes bbIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 @keyframes bbHop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.08,.95)}70%{transform:translateY(0) scale(.96,1.04)}100%{transform:none}}
-@keyframes bbPlus{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-44px)}}
+@keyframes bbPlus{0%{opacity:0;transform:translateY(0)}12%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translateY(-40px)}}
 @keyframes bbFade{from{opacity:0}} @keyframes bbUp{from{opacity:0;transform:translateY(20px) scale(.97)}}
 @keyframes bbFlickOld{0%,12%{opacity:1;filter:none}20%{opacity:1;filter:brightness(0) invert(1)}30%{opacity:0}38%{opacity:1}46%{opacity:0}52%{opacity:1}58%{opacity:0}62%{opacity:1}66%{opacity:0}69%{opacity:1}72%,100%{opacity:0;filter:brightness(0) invert(1)}}
 @keyframes bbFlickNew{0%,28%{opacity:0;filter:brightness(0) invert(1)}30%{opacity:1}38%{opacity:0}46%{opacity:1}52%{opacity:0}58%{opacity:1}62%{opacity:0}66%{opacity:1}69%{opacity:0}72%,86%{opacity:1;filter:brightness(0) invert(1)}100%{opacity:1;filter:none}}
@@ -239,36 +275,49 @@ body.bb-on{padding-bottom:96px}
 @media (prefers-reduced-motion:reduce){.bb-dock .bb-pic,.bb-card .bb-big,.bb-evo.done .new{animation:none}.bb-evo .old{animation:none;opacity:0}.bb-evo .new{animation:none;opacity:1}.bb-evo .glow{display:none}}`;
 
   // ===== Dock (bottom-right) with a ring that fills toward the next evolution
-  function ringPct(xp) { const k = stageOf(xp), a = STAGES[k].at, b = nextAt(k); return b === null ? 1 : (xp - a) / (b - a) }
+  function ringPct(pts) { const k = stageOf(pts), a = STAGES[k].at, b = nextAt(k); return b === null ? 1 : (pts - a) / (b - a) }
   function paintDock() {
     let d = $("bbDock");
     if (off()) { if (d) d.remove(); document.body.classList.remove("bb-on"); return }
-    const s = load(), k = stageOf(s.xp), C = 2 * Math.PI * 30;
+    const s = load(), k = stageOf(s.pts), C = 2 * Math.PI * 30, mult = XP() ? XP().multiplier(s.streak) : 1;
     if (!d) { d = document.createElement("button"); d.id = "bbDock"; d.type = "button"; d.className = "bb-dock"; d.onclick = openCard; document.body.appendChild(d) }
     document.body.classList.add("bb-on");
-    d.setAttribute("aria-label", `Study buddy: ${name(s)}, level ${level(s.xp)}. Open`);
-    d.innerHTML = `<svg class="bb-ring" viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="30"/><circle class="f" cx="32" cy="32" r="30" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - ringPct(s.xp))}"/></svg>
-      <span class="bb-pic">${art(k)}</span><span class="bb-lv">Lv ${level(s.xp)}</span>`;
+    d.setAttribute("aria-label", `Study buddy: ${name(s)}, level ${level(s.pts)}, ${fmt(s.pts)} XP${s.streak >= 3 ? `, ${s.streak} in a row, XP times ${mult}` : ""}. Open`);
+    d.innerHTML = `<svg class="bb-ring" viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="30"/><circle class="f" cx="32" cy="32" r="30" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - ringPct(s.pts))}"/></svg>
+      <span class="bb-pic">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
-  const name = s => s.nick || STAGES[stageOf(s.xp)].name;
+  const name = s => s.nick || STAGES[stageOf(s.pts)].name;
+  const FLAME = `<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M6 1 C7 4 10 5 10 9 C10 12 8 13 6 13 C4 13 2 12 2 9 C2 7 3 6 4 5 C4 7 5 8 6 8 C6 6 5 4 6 1Z" fill="currentColor"/></svg>`;
 
   // ===== Card: the buddy up close, progress to the next evolution, its biology, the evolution line
   let veil = null;
   function openCard() {
     if (veil) return;
-    const s = load(), k = stageOf(s.xp), st = STAGES[k], nx = nextAt(k);
+    const s = load(), k = stageOf(s.pts), st = STAGES[k], nx = nextAt(k), L = level(s.pts), X = XP();
+    const mult = X ? X.multiplier(s.streak) : 1, up = X ? X.nextStreak(s.streak) : null;
     veil = document.createElement("div"); veil.className = "bb-veil";
-    const pct = Math.round(ringPct(s.xp) * 100);
+    const pct = Math.round(ringPct(s.pts) * 100);
     veil.innerHTML = `<div class="bb-card" role="dialog" aria-modal="true" aria-labelledby="bbName">
       <div class="bb-big">${art(k)}</div>
       <h3 id="bbName">${esc(name(s))}</h3>
-      <p class="bb-sub">Level ${level(s.xp)} · ${esc(st.form)}${s.nick ? ` · ${esc(st.name)}` : ""} · ${s.xp} right answer${s.xp === 1 ? "" : "s"}</p>
+      <p class="bb-sub">Level ${L} · ${esc(st.form)}${s.nick ? ` · ${esc(st.name)}` : ""}</p>
+      <div class="bb-stats">
+        <div><b>${fmt(s.pts)}</b><span>total XP</span></div>
+        <div><b>${s.streak}${s.streak >= 3 ? `<i class="fl">${FLAME}</i>` : ""}</b><span>in a row · ×${mult}</span></div>
+        <div><b>${s.best}</b><span>best streak</span></div>
+      </div>
       <div class="bb-bar"><i style="width:${pct}%"></i></div>
-      <p class="bb-next">${nx === null ? "Fully grown! Every right answer still raises its level." : `${nx - s.xp} more right answer${nx - s.xp === 1 ? "" : "s"} until it evolves`}</p>
+      <p class="bb-next">${nx === null ? "Fully grown! XP still raises its level." : `${fmt(nx - s.pts)} XP until it evolves · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
+      ${up ? `<p class="bb-next" style="margin-top:-8px">${s.streak ? `${up.at - s.streak} more right in a row for` : `Get ${up.at} right in a row for`} ×${up.mult} XP</p>` : ""}
       <div class="bb-fact"><b>The biology</b>${esc(st.fact)}</div>
-      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}">${art(i)}<span>${i > k ? `at ${x.at}` : esc(x.name)}</span></div>`).join("")}</div>
+      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}">${art(i)}<span>${i > k ? `${fmt(x.at)} XP` : esc(x.name)}</span></div>`).join("")}</div>
+      <details class="bb-how"><summary>How XP works</summary>
+        <p>Every question is rated by how hard it is. Harder questions earn more XP:</p>
+        <ul class="bb-tiers">${X ? X.TIERS.map(t => `<li><span class="xpb t-${t.key}">${t.name}</span>${t.xp} XP</li>`).join("") : ""}</ul>
+        <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half XP.</p>
+        <p><b>Win streaks multiply XP:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes XP away.</p>
+      </details>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button><button type="button" class="pri" id="bbClose">Keep studying</button></div>
-      <p class="bb-next" style="margin:12px 0 0">Every right answer in the drills, Word Roots and Bio-pardy levels it up. Wrong answers never hurt it.</p>
     </div>`;
     veil.onclick = e => { if (e.target === veil) closeCard() };
     document.body.appendChild(veil);
@@ -279,18 +328,43 @@ body.bb-on{padding-bottom:96px}
   function closeCard() { if (veil) { veil.remove(); veil = null } }
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeCard() } });
 
-  // ===== A correct answer: +1 level, hop, and evolve at a milestone
-  function gain() {
-    const s = load(), before = stageOf(s.xp); s.xp += 1; save(s);
+  // ===== A correct answer: XP from the question's difficulty × the streak multiplier, then hop / level up / evolve
+  const STREAK_CHEERS = { 3: "3 in a row!", 5: "5 in a row!", 10: "10 in a row!", 15: "15 in a row!", 25: "25 in a row!" };
+  // Pops float up from the buddy; ones that overlap in time stack upward instead of piling on top of each other
+  const live = [];
+  function pop(lines, cls) {
+    const d = $("bbDock"); if (!d) return;
+    const r = d.getBoundingClientRect(), p = document.createElement("span");
+    p.className = "bb-plus" + (cls ? " " + cls : ""); p.innerHTML = lines;
+    const slot = live.reduce((n, x) => Math.max(n, x.slot + 1), 0);
+    p.style.right = (innerWidth - r.right) + "px"; p.style.top = (r.top - 14 - slot * 40) + "px";
+    const rec = { slot, p }; live.push(rec);
+    document.body.appendChild(p);
+    setTimeout(() => { p.remove(); live.splice(live.indexOf(rec), 1) }, 1500);
+  }
+  function gain(e) {
+    const X = XP(), detail = (e && e.detail) || {};
+    const r = X ? X.rate(detail) : { xp: 10, tier: { key: "easy", name: "Easy" } };
+    const s = load(), before = stageOf(s.pts), lvBefore = level(s.pts);
+    s.streak = (s.streak | 0) + 1; s.best = Math.max(s.best | 0, s.streak); s.last = Date.now(); s.correct = (s.correct | 0) + 1;
+    const mult = X ? X.multiplier(s.streak) : 1, earned = Math.round(r.xp * mult);
+    s.pts += earned; save(s);
+    window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
     if (off()) return;
     paintDock();
     const d = $("bbDock"); if (!d) return;
     d.classList.remove("hop"); void d.offsetWidth; d.classList.add("hop");
-    const r = d.getBoundingClientRect(), p = document.createElement("span");
-    p.className = "bb-plus"; p.textContent = `Lv ${level(s.xp)}!`; p.style.left = (r.left + 6) + "px"; p.style.top = (r.top - 8) + "px";
-    document.body.appendChild(p); setTimeout(() => p.remove(), 1200);
-    const after = stageOf(s.xp);
-    if (after > before) setTimeout(() => evolve(before, after), 700);
+    const lv = level(s.pts);
+    pop(`<b>+${earned} XP</b><small><span class="xpb t-${r.tier.key}">${esc(r.tier.name)}</span>${mult > 1 ? ` ×${mult} streak` : ""}${lv > lvBefore ? ` · Lv ${lv}!` : ""}</small>`);
+    if (STREAK_CHEERS[s.streak]) setTimeout(() => pop(`<b>${FLAME} ${STREAK_CHEERS[s.streak]}</b><small>XP ×${mult} while it lasts</small>`, "hot"), 650);
+    const after = stageOf(s.pts);
+    if (after > before) setTimeout(() => evolve(before, after), 900);
+  }
+  function miss() {
+    const s = load(), had = s.streak | 0; s.streak = 0; s.last = Date.now(); save(s);
+    if (off()) return;
+    paintDock();
+    if (had >= 3) pop(`<b>Streak ended at ${had}</b><small>No XP lost. Start a new one!</small>`, "cool");
   }
   function evolve(from, to) {
     const s = load(), a = STAGES[from], b = STAGES[to], who = s.nick || a.name;
@@ -320,8 +394,9 @@ body.bb-on{padding-bottom:96px}
 
   function setEnabled(on) { try { on ? localStorage.removeItem(OFF_KEY) : localStorage.setItem(OFF_KEY, "1") } catch (e) { } paintDock() }
   window.addEventListener("bio:correct", gain);
+  window.addEventListener("bio:wrong", miss);
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { enabled: () => !off(), setEnabled, open: openCard, art, STAGES };
+  window.BioBuddy = { enabled: () => !off(), setEnabled, open: openCard, art, STAGES, state: load, level };
 })();

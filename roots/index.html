@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#f5f5f7">
 <link rel="stylesheet" href="../assets/drill.css">
 <script src="../assets/settings.js"></script>
+<script src="../assets/xp.js"></script>
 <script src="../assets/buddy.js"></script>
 <style>
 /* Layout: header → exam switch (Exam 1 / Exam 2) → search + Quiz me → roots grouped by theme.
@@ -273,8 +274,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
     $("mkM").onclick = () => { const S = st(); if (S.m[r.root]) delete S.m[r.root]; else { S.m[r.root] = 1; delete S.r[r.root] } saveST(); paint() };
     $("mkR").onclick = () => { const S = st(); if (S.r[r.root]) delete S.r[r.root]; else { S.r[r.root] = 1; delete S.m[r.root] } saveST(); paint() };
     document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
-      const ok = it.opts[+b.dataset.k] === r, S = st();
-      if (ok) { quiz.right++; delete S.x[r.root]; window.dispatchEvent(new CustomEvent("bio:correct", { detail: { from: "roots" } })) } else { quiz.missed.push(it); S.x[r.root] = 1; $("missNote").hidden = false }
+      const ok = it.opts[+b.dataset.k] === r, S = st(), wasMissed = !!S.x[r.root];
+      window.dispatchEvent(new CustomEvent(ok ? "bio:correct" : "bio:wrong", { detail: { kind: "root", from: "roots", missed: wasMissed } }));
+      if (ok) { quiz.right++; delete S.x[r.root] } else { quiz.missed.push(it); S.x[r.root] = 1; $("missNote").hidden = false }
       quiz.done++; saveST();
       document.querySelectorAll(".opt").forEach(x => { x.disabled = true; const o = it.opts[+x.dataset.k]; if (o === r) x.classList.add("right"); else if (x === b) x.classList.add("wrong") });
       $("fb").hidden = false; $("next").hidden = false; $("next").focus();

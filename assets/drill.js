@@ -375,8 +375,14 @@
     return `<figure class="fig"><button type="button" class="zoom" data-src="${im[0]}" data-alt="${esc(im[1])}" aria-label="Enlarge image: ${esc(im[1])}"><img src="${im[0]}" alt="${esc(im[1])}"></button><figcaption>Tap to zoom</figcaption></figure>`;
   }
   function wireZoom() { $("card").querySelectorAll(".zoom").forEach(b => b.onclick = () => openLightbox(b.dataset.src, b.dataset.alt)) }
+  // Difficulty and XP for the study buddy (assets/xp.js); hidden when the buddy is switched off
+  function xpBadge(id) {
+    if (!window.BioXP || (window.BioBuddy && !window.BioBuddy.enabled())) return "";
+    const r = window.BioXP.rate({ kind: "drill", q: Q[id], prev: S.stats[id], prevHist: S.hist[id] });
+    return `<span class="xpb t-${r.tier.key}" title="${esc(r.tier.name)}: ${esc(r.why.join(" · ") || "Straightforward recall")}">${esc(r.tier.name)} · ${r.xp} XP</span>`;
+  }
   function metaRow(id, right) {
-    return `<div class="meta"><span class="meta-l">${basedBadge(srcOf(id))}${isProf(srcOf(id)) ? `<span class="prof" title="This question comes straight from the professor's course materials">★ From the professor</span>` : ""}<span class="origin">Source: ${esc(srcOf(id))}</span><span>${esc(Q[id].tag)}</span></span>${right}</div>`;
+    return `<div class="meta"><span class="meta-l">${xpBadge(id)}${basedBadge(srcOf(id))}${isProf(srcOf(id)) ? `<span class="prof" title="This question comes straight from the professor's course materials">★ From the professor</span>` : ""}<span class="origin">Source: ${esc(srcOf(id))}</span><span>${esc(Q[id].tag)}</span></span>${right}</div>`;
   }
   // Bottom navigation: Previous on the left, the forward action on the right.
   function navBar(fwdLabel, fwdId, ghostFwd) {
@@ -452,9 +458,11 @@
     $("card").querySelectorAll(".opt").forEach(o => { o.disabled = true; if (o.dataset.c === "true") o.classList.add("right") });
     b.classList.add("picked", good ? "pop" : "shake"); if (!good) b.classList.add("wrong");
     if (good) { r.streak++; r.best = Math.max(r.best | 0, r.streak); missed.delete(id) } else { r.streak = 0; missed.add(id) }
+    const prevStat = (S.stats[id] || [0, 0]).slice(), prevHist = S.hist[id];   // the question's history before this answer (difficulty rating)
     S.hist[id] = good ? 1 : 0;
     const s = S.stats[id] || [0, 0]; S.stats[id] = [s[0] + 1, s[1] + (good ? 1 : 0)];
-    if (good) window.dispatchEvent(new CustomEvent("bio:correct", { detail: { from: B.storageKey } }));   // study buddy levels up
+    // study buddy: XP by difficulty × win streak (assets/xp.js, assets/buddy.js)
+    window.dispatchEvent(new CustomEvent(good ? "bio:correct" : "bio:wrong", { detail: { kind: "drill", from: B.storageKey, id, q: x, prev: prevStat, prevHist } }));
     const dk = dayKey(); S.days[dk] = (S.days[dk] | 0) + 1;
     save(); paintChrome();
     const sq = $("map").querySelector(`[data-k="${r.pos}"]`); if (sq) sq.classList.add("just");
