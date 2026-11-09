@@ -43,9 +43,16 @@
   const off = () => { try { return localStorage.getItem(OFF_KEY) === "1" } catch (e) { return false } };
   const stageOf = pts => { let k = 0; STAGES.forEach((s, i) => { if (pts >= s.at) k = i }); return k };
   const nextAt = k => STAGES[k + 1] ? STAGES[k + 1].at : null;
-  // Level curve: reaching level L takes 10·(L−1)² XP (Lv 4 = 90 XP, Lv 10 = 810, Lv 18 = 2,890)
-  const level = pts => Math.floor(Math.sqrt(Math.max(0, pts) / 10)) + 1;
-  const lvXP = L => 10 * (L - 1) * (L - 1);
+  // Levels 1–100. Reaching level L takes A·(L−1)^1.5 XP, with Level 100 at 20,000 XP: quick early levels,
+  // a long climb at the top. Forms land at Lv 3 (Mossback), 7, 13, 20 and 30 (Forestback); 30–100 is mastery.
+  const MAX_LV = 100, MAX_XP = 20000, LV_A = MAX_XP / Math.pow(MAX_LV - 1, 1.5);
+  const lvXP = L => L <= 1 ? 0 : Math.ceil(LV_A * Math.pow(L - 1, 1.5));
+  function level(pts) {
+    let L = Math.min(MAX_LV, Math.floor(1 + Math.pow(Math.max(0, pts) / LV_A, 2 / 3) + 1e-9));
+    while (L < MAX_LV && pts >= lvXP(L + 1)) L++;
+    while (L > 1 && pts < lvXP(L)) L--;
+    return L;
+  }
   const XP = () => window.BioXP;
   const fmt = n => Math.round(n).toLocaleString("en-US");
 
@@ -278,14 +285,14 @@ body.bb-on{padding-bottom:96px}
     veil.innerHTML = `<div class="bb-card" role="dialog" aria-modal="true" aria-labelledby="bbName">
       <div class="bb-big">${art(k)}</div>
       <h3 id="bbName">${esc(name(s))}</h3>
-      <p class="bb-sub">Level ${L} · ${esc(st.form)}${s.nick ? ` · ${esc(st.name)}` : ""}</p>
+      <p class="bb-sub">Level ${L} of ${MAX_LV} · ${esc(st.form)}${s.nick ? ` · ${esc(st.name)}` : ""}</p>
       <div class="bb-stats">
         <div><b>${fmt(s.pts)}</b><span>total XP</span></div>
         <div><b>${s.streak}${s.streak >= 3 ? `<i class="fl">${FLAME}</i>` : ""}</b><span>in a row · ×${mult}</span></div>
         <div><b>${s.best}</b><span>best streak</span></div>
       </div>
       <div class="bb-bar"><i style="width:${pct}%"></i></div>
-      <p class="bb-next">${nx === null ? "Fully grown! XP still raises its level." : `${fmt(nx - s.pts)} XP until it evolves · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
+      <p class="bb-next">${nx === null ? (L >= MAX_LV ? "Fully grown and Level 100. You've mastered it all!" : `Fully grown! ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1} of ${MAX_LV}.`) : `${fmt(nx - s.pts)} XP until it evolves · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
       ${up ? `<p class="bb-next" style="margin-top:-8px">${s.streak ? `${up.at - s.streak} more right in a row for` : `Get ${up.at} right in a row for`} ×${up.mult} XP</p>` : ""}
       <div class="bb-fact"><b>The biology</b>${esc(st.fact)}</div>
       <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}">${art(i)}<span>${i > k ? `${fmt(x.at)} XP` : esc(x.name)}</span></div>`).join("")}</div>

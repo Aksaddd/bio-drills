@@ -45,7 +45,7 @@ Pages announce a correct answer with `window.dispatchEvent(new CustomEvent("bio:
 
 The score adds up what makes a question hard: the professor's clicker question or a homework concept (+1), EXCEPT/NOT wording (+2), putting steps in order (+2), several numbered statements or blanks (+1), reading an experiment or a figure (+1 each), comparing two things or explaining why/how (+1 each), five choices, long similar answers or "All of the above" (+1 each), a long question (+1), and the Bio-pardy dollar value. It also adds the student's own history: missed it last time, or usually misses it (+1). Score 0–1 is Easy, 2–3 Medium, 4–5 Hard, 6+ Expert. A question already answered right 3+ times earns half XP. Word roots are Easy (Medium for a root missed before).
 
-**Win streaks** (right answers in a row, across every module) multiply XP: 3 in a row ×1.25, 5 ×1.5, 10 ×2, 15 ×2.5, 25 ×3. A wrong answer resets the streak but never removes XP; a streak also cools off after 3 hours away. Levels follow total XP (level L needs 10·(L−1)² XP). Each drill question shows its tier and XP; hover or long-press the badge for the reasons.
+**Win streaks** (right answers in a row, across every module) multiply XP: 3 in a row ×1.25, 5 ×1.5, 10 ×2, 15 ×2.5, 25 ×3. A wrong answer resets the streak but never removes XP; a streak also cools off after 3 hours away. Levels run from 1 to 100 and follow total XP: level L needs about 20,000 × ((L−1)/99)^1.5 XP, so the forms arrive at Lv 3, 7, 13, 20 and 30 and Level 100 (20,000 XP) is a long-term mastery goal. Each drill question shows its tier and XP; hover or long-press the badge for the reasons.
 
 ## Subject tabs
 
