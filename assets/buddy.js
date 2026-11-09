@@ -1,5 +1,5 @@
 // Bio Drills · Study buddy
-// An original long-necked leafy dino that grows up through the plant life cycle as the student answers correctly.
+// An original sea turtle (inspired by the World Turtle myth) whose shell grows a forest as the student answers correctly.
 // Every correct answer (main drill, HW 3 drill, Word Roots, Bio-pardy) earns XP based on how difficult the
 // question is (assets/xp.js), multiplied by the current win streak. Levels and evolutions follow total XP.
 // Wrong answers reset the streak but never take XP away. Saved on this device only ("bio-buddy-v1").
@@ -8,21 +8,22 @@
 // All artwork below is drawn here as SVG.
 (() => {
   const KEY = "bio-buddy-v1", OFF_KEY = "bio-buddy-off";
-  // An original long-necked leafy dino. It hatches from a seed-egg, then plants grow on its back
-  // in the order they evolved: moss → ferns → seedlings → flowers → a whole tree.
+  // An original sea turtle inspired by the World Turtle myth (the land grows on a great turtle's back).
+  // Its shell is colonized the way real land is, by ecological succession:
+  // bare rock + lichens → mosses → ferns → shrubs and flowers → young trees → a layered climax forest.
   const STAGES = [
-    { at: 0, name: "Pip", form: "Seed-egg", color: "#c9a46a",
-      fact: "Pip is still inside its seed. A seed holds an embryo, a food supply and a protective seed coat, so it can wait (dormancy) until conditions are right." },
-    { at: 100, name: "Sprig", form: "Mossy hatchling", color: "#5fb37a",
-      fact: "The fuzz on Sprig's back is moss. In mosses the green gametophyte (n) is the main plant, and fertilization needs water so sperm can swim to the egg." },
-    { at: 350, name: "Frondo", form: "Fern-back", color: "#3f9e6a",
-      fact: "Ferns grow on Frondo's back. Ferns have xylem and phloem and a dominant sporophyte; the brown dots under a frond are sori, clusters of sporangia. The curl on its tail is a fiddlehead." },
-    { at: 900, name: "Sproutle", form: "Seedling-back", color: "#7cc35a",
-      fact: "Seedlings sprout along Sproutle's back. Each one's first two round leaves are cotyledons (seed leaves): one in monocots, two in eudicots." },
-    { at: 1800, name: "Blossaur", form: "Flower-back", color: "#e86aa6",
-      fact: "Flowers bloom on Blossaur's back. Flowers are modified leaves (sepals, petals, stamens, carpels), and double fertilization makes a 2n zygote plus 3n endosperm." },
-    { at: 3200, name: "Grovewalker", form: "Walking forest", color: "#6d8f4e",
-      fact: "A whole tree grows on Grovewalker's back. Lignin-stiffened xylem lets trees grow tall. That's the top of the plant tree of life; every right answer still levels it up." }
+    { at: 0, name: "Pebble", form: "Bare-rock hatchling", color: "#6f7f8a",
+      fact: "Succession starts on bare rock. Lichens (a fungus plus a photosynthetic partner) are pioneer species: their acids break rock down into the first soil." },
+    { at: 100, name: "Mossback", form: "Moss stage", color: "#5fae4f",
+      fact: "Mosses move in next. The green carpet is the gametophyte (n); the tiny stalks are sporophytes. No true roots or vascular tissue, and sperm need water to swim." },
+    { at: 350, name: "Fernshell", form: "Fern stage", color: "#3f8a3a",
+      fact: "With more soil, ferns arrive. They have xylem and phloem and a dominant sporophyte; the brown dots under the fronds are sori, clusters of sporangia." },
+    { at: 900, name: "Thicket", form: "Shrub stage", color: "#e9785f",
+      fact: "Seed plants take over. Pollen frees them from needing water for fertilization, and flowers and fruits (angiosperms) attract pollinators and spread seeds." },
+    { at: 1800, name: "Grovekin", form: "Young-tree stage", color: "#52616c",
+      fact: "Saplings race upward toward light. Lignin-stiffened xylem lets them grow tall, and auxin from each tip keeps a main shoot dominant (apical dominance)." },
+    { at: 3200, name: "Forestback", form: "Climax forest", color: "#3f8a3a",
+      fact: "A climax community: canopy, understory and forest floor. Xylem and lignin let trees stand tall, and fungi and lichens recycle nutrients for the whole ecosystem." }
   ];
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -49,148 +50,125 @@
   const fmt = n => Math.round(n).toLocaleString("en-US");
 
   // ===== Artwork (viewBox 0 0 120 120), side view facing right. An original character.
-  // Design rules: readable silhouette per stage, clean dark outlines, a limited palette (grass greens,
-  // cream, one pink accent), cel shading (one shadow tone + highlights), and proportions that go from
-  // round and big-eyed to long-necked, angular and majestic.
-  const OL = "#24331f", GREEN = "#6cc36e", GREEN_D = "#4a9a57", GREEN_DD = "#3a7f47", LIGHT = "#a8e6a3", CREAM = "#f3e8c6", CREAM_D = "#d9c79a", PINK = "#ff8fb8", OW = 2.2;
+  // Design rules: a sea turtle (flippers, smooth domed shell, round beakless face), distinct silhouette per
+  // stage, clean dark outlines, palette of Slate Gray / Leaf Green / Terracotta Coral (+ sea-green skin, sand),
+  // cel shading, and proportions going from round and big-eyed to broad, low and ancient.
+  const OL = "#22302b", OW = 2.2;
+  const SLATE = "#6f7f8a", SLATE_D = "#52616c", SLATE_L = "#98a7b1";
+  const SKIN = "#8fcfb4", SKIN_D = "#66a98e", SKIN_L = "#bfe8d6";
+  const LEAF = "#5fae4f", LEAF_D = "#3f8a3a", LEAF_L = "#9ad27f";
+  const CORAL = "#e9785f", CORAL_L = "#f6a58f", SAND = "#ecdfc0", SAND_D = "#d8c597", WATER = "#7cc4e8";
   const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round"`;
   let uidN = 0;
-  // Leaf with a midrib and side veins
-  const leaf = (x, y, len, rot, fill, shade) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0 C${len * .35} ${-len * .32} ${len * .8} ${-len * .3} ${len} 0 C${len * .8} ${len * .3} ${len * .35} ${len * .32} 0 0Z" fill="${fill}" ${ln}/><path d="M${len * .15} ${len * .02} C${len * .45} ${len * .2} ${len * .75} ${len * .16} ${len * .95} ${len * .02}Z" fill="${shade || "rgba(0,0,0,.14)"}"/><path d="M2 0 L${len * .85} 0" stroke="${OL}" stroke-width="1" opacity=".6"/>${[.3, .5, .7].map(t => `<path d="M${len * t} 0 l${len * .09} ${-len * .1} M${len * t} 0 l${len * .09} ${len * .1}" stroke="${OL}" stroke-width=".7" opacity=".45"/>`).join("")}</g>`;
-  // Fern frond: a curved midrib with paired leaflets (pinnae), spore dots (sori) under some
-  function frond(x, y, len, rot, fill, sori) {
+  const leaf = (x, y, len, rot, fill) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 0 C${len * .35} ${-len * .32} ${len * .8} ${-len * .3} ${len} 0 C${len * .8} ${len * .3} ${len * .35} ${len * .32} 0 0Z" fill="${fill}" ${ln}/><path d="M2 0 L${len * .85} 0" stroke="${OL}" stroke-width=".9" opacity=".55"/></g>`;
+  function frond(x, y, len, rot, fill, sori) {   // fern frond: midrib + paired leaflets, sori on some
     let p = "";
     for (let i = 1; i <= 7; i++) {
       const t = i / 8, px = len * t, w = len * .2 * (1 - t * .65);
-      p += `<ellipse cx="${px}" cy="${-w * .55}" rx="${w * .55}" ry="${w * .3}" transform="rotate(-35 ${px} ${-w * .55})" fill="${fill}" stroke="${OL}" stroke-width="1"/>` +
-        `<ellipse cx="${px}" cy="${w * .55}" rx="${w * .55}" ry="${w * .3}" transform="rotate(35 ${px} ${w * .55})" fill="${fill}" stroke="${OL}" stroke-width="1"/>` +
-        (sori && i % 2 ? `<circle cx="${px + 1}" cy="${w * .5}" r=".9" fill="#8a5a2b"/>` : "");
+      p += `<ellipse cx="${px}" cy="${-w * .55}" rx="${w * .55}" ry="${w * .3}" transform="rotate(-35 ${px} ${-w * .55})" fill="${fill}" stroke="${OL}" stroke-width="1"/><ellipse cx="${px}" cy="${w * .55}" rx="${w * .55}" ry="${w * .3}" transform="rotate(35 ${px} ${w * .55})" fill="${fill}" stroke="${OL}" stroke-width="1"/>` +
+        (sori && i % 2 ? `<circle cx="${px + 1}" cy="${w * .5}" r=".9" fill="#7a4f2b"/>` : "");
     }
-    return `<g transform="translate(${x} ${y}) rotate(${rot})">${p}<path d="M0 0 Q${len * .5} ${-len * .04} ${len} 0" stroke="${OL}" stroke-width="1.6" fill="none"/></g>`;
+    return `<g transform="translate(${x} ${y}) rotate(${rot})">${p}<path d="M0 0 Q${len * .5} ${-len * .04} ${len} 0" stroke="${OL}" stroke-width="1.5" fill="none"/></g>`;
   }
-  // Clusters with one outline around the whole group (outline layer, then fills on top)
+  // Circles merged under one outline (outline layer, shade layer, fill layer, highlights)
   const cluster = (cs, fill, shade, hi) => cs.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${OL}" stroke="${OL}" stroke-width="${OW * 2}"/>`).join("") +
     cs.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${shade}"/>`).join("") +
-    cs.map(([x, y, r]) => `<circle cx="${x - r * .12}" cy="${y - r * .18}" r="${r * .82}" fill="${fill}"/>`).join("") +
-    (hi ? cs.map(([x, y, r]) => `<circle cx="${x - r * .35}" cy="${y - r * .42}" r="${r * .22}" fill="${hi}" opacity=".85"/>`).join("") : "");
-  const plate = (x, y, h, w, rot) => `<g transform="rotate(${rot} ${x} ${y})"><path d="M${x - w / 2} ${y} L${x} ${y - h} L${x + w / 2} ${y}Z" fill="${GREEN_DD}" ${ln}/><path d="M${x} ${y - h + 2} L${x + w / 2 - 1.5} ${y - .5} L${x} ${y - .5}Z" fill="${OL}" opacity=".18"/><path d="M${x} ${y - h + 3} L${x} ${y - 1}" stroke="${LIGHT}" stroke-width="1" opacity=".55"/></g>`;
-  const flower = (x, y, r) => `${[0, 72, 144, 216, 288].map(a => `<g transform="rotate(${a} ${x} ${y})"><ellipse cx="${x}" cy="${y - r * .9}" rx="${r * .55}" ry="${r * .9}" fill="${PINK}" stroke="${OL}" stroke-width="1.3"/><ellipse cx="${x + r * .15}" cy="${y - r * .75}" rx="${r * .2}" ry="${r * .5}" fill="#ffc2d8"/></g>`).join("")}<circle cx="${x}" cy="${y}" r="${r * .48}" fill="#ffd54f" stroke="${OL}" stroke-width="1.2"/>${[[-.15, -.1], [.15, .05], [0, .18]].map(([dx, dy]) => `<circle cx="${x + dx * r}" cy="${y + dy * r}" r="${r * .08 + .3}" fill="#e09a1a"/>`).join("")}`;
+    cs.map(([x, y, r]) => `<circle cx="${x - r * .12}" cy="${y - r * .18}" r="${r * .8}" fill="${fill}"/>`).join("") +
+    (hi ? cs.map(([x, y, r]) => `<circle cx="${x - r * .35}" cy="${y - r * .42}" r="${r * .2}" fill="${hi}" opacity=".85"/>`).join("") : "");
+  const blossom = (x, y, r) => `${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${x}" cy="${y - r * .85}" rx="${r * .5}" ry="${r * .85}" fill="${CORAL}" stroke="${OL}" stroke-width="1" transform="rotate(${a} ${x} ${y})"/>`).join("")}<circle cx="${x}" cy="${y}" r="${r * .42}" fill="#ffd27a" stroke="${OL}" stroke-width=".9"/>`;
+  const berry = (x, y, r = 1.8) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${CORAL}" stroke="${OL}" stroke-width="1"/><circle cx="${x - r * .35}" cy="${y - r * .35}" r="${r * .3}" fill="${CORAL_L}"/>`;
   function eyeAt(x, y, r, mode) {
-    if (mode === "wise") return `<path d="M${x - r} ${y + r * .2} q${r} ${-r * 1.3} ${r * 2} 0" stroke="${OL}" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M${x - r * .7} ${y + r * .9} q${r * .7} ${r * .4} ${r * 1.4} 0" stroke="${OL}" stroke-width="1" fill="none" opacity=".5"/><path d="M${x - r * 1.1} ${y - r * 2.3} L${x + r * 1.3} ${y - r * 1.8}" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>`;
-    return `<ellipse cx="${x}" cy="${y}" rx="${r * .82}" ry="${r}" fill="${OL}"/><ellipse cx="${x + r * .1}" cy="${y + r * .45}" rx="${r * .45}" ry="${r * .3}" fill="#3d5a8a" opacity=".8"/><circle cx="${x + r * .3}" cy="${y - r * .4}" r="${r * .38}" fill="#fff"/><circle cx="${x - r * .35}" cy="${y + r * .35}" r="${r * .14}" fill="#fff"/>` +
-      (mode === "brow" ? `<path d="M${x - r * 1.1} ${y - r * 1.55} L${x + r * 1.2} ${y - r * 1.15}" stroke="${OL}" stroke-width="2" stroke-linecap="round"/><path d="M${x - r * .9} ${y - r * 1.05} q${r * .9} ${-r * .5} ${r * 1.8} 0" stroke="${OL}" stroke-width="1" fill="none" opacity=".55"/>` : "");
+    if (mode === "wise") return `<path d="M${x - r} ${y + r * .2} q${r} ${-r * 1.3} ${r * 2} 0" stroke="${OL}" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M${x - r * .7} ${y + r * .95} q${r * .7} ${r * .4} ${r * 1.4} 0" stroke="${OL}" stroke-width="1" fill="none" opacity=".5"/><path d="M${x - r * 1.2} ${y - r * 2.1} Q${x} ${y - r * 2.6} ${x + r * 1.3} ${y - r * 1.9}" stroke="${OL}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+    return `<ellipse cx="${x}" cy="${y}" rx="${r * .82}" ry="${r}" fill="${OL}"/><ellipse cx="${x + r * .1}" cy="${y + r * .45}" rx="${r * .45}" ry="${r * .3}" fill="#2f6f8f" opacity=".85"/><circle cx="${x + r * .3}" cy="${y - r * .4}" r="${r * .38}" fill="#fff"/><circle cx="${x - r * .35}" cy="${y + r * .35}" r="${r * .14}" fill="#fff"/>`;
   }
-  // The dino, built from proportions. a = 0 (round baby) … 1 (long, angular adult). spots = back markings.
-  function dino(u, o) {
-    const { bx, by, rx, ry, hx, hy, hr, eye, leg, legW, neck, a, eyeMode, tail, spots = 0 } = o;
-    const headRx = hr * (1 + .38 * a), headRy = hr * (1 - .14 * a), hcx = hx + hr * .32 * a;
-    const tailD = `M${bx - rx * .7} ${by - ry * .35} C${bx - rx - tail * .45} ${by - ry * .4} ${bx - rx - tail * .85} ${by - ry * .9} ${bx - rx - tail} ${by - ry * 1.6} C${bx - rx - tail * .6} ${by - ry * .3} ${bx - rx - tail * .2} ${by + ry * .5} ${bx - rx * .55} ${by + ry * .55}Z`;
-    const legTop = by + ry * .35;
-    const L = (x, far) => {
-      const top = legTop, h = leg, w = legW;
-      const toes = [-.3, 0, .3].map(t => `<ellipse cx="${x + t * w + w * .08}" cy="${top + h - 1.2}" rx="${w * .16}" ry="${w * .13}" fill="${CREAM}" stroke="${OL}" stroke-width="1"/>`).join("");
-      return `<rect x="${x - w / 2}" y="${top}" width="${w}" height="${h}" rx="${w / 2}" fill="${far ? GREEN_D : GREEN}"/>
-        <rect x="${x - w / 2}" y="${top}" width="${w * .38}" height="${h}" rx="${w * .19}" fill="${far ? GREEN_DD : GREEN_D}"/>
-        <rect x="${x - w / 2}" y="${top}" width="${w}" height="${h}" rx="${w / 2}" fill="none" ${ln}/>${toes}`;
-    };
-    const nx0 = bx + rx * .5, ny0 = by - ry * .55, c1x = bx + rx * .95, c1y = by - ry * 1.3, c2x = hx - hr * .9, c2y = hy + hr * 1.4, nx1 = hx - hr * .3, ny1 = hy + hr * .35;
-    const neckD = `M${nx0} ${ny0} C${c1x} ${c1y} ${c2x} ${c2y} ${nx1} ${ny1}`;
-    // markings: darker leaf-shaped spots along the top of the back
-    const marks = Array.from({ length: spots }, (_, i) => { const t = -.62 + i * (1.1 / Math.max(1, spots - 1)), x = bx + rx * t, y = by - ry * Math.sqrt(1 - t * t) * .62; return `<ellipse cx="${x}" cy="${y}" rx="${2.8 + (i % 2)}" ry="1.8" transform="rotate(${t * 40} ${x} ${y})" fill="${GREEN_D}"/>` }).join("");
-    const scutes = [-.35, -.1, .15, .4].map(t => `<path d="M${bx + rx * t} ${by + ry * .42} q1.5 ${ry * .32} 0 ${ry * .58}" stroke="${CREAM_D}" stroke-width="1.2" fill="none"/>`).join("");
-    const defs = `<clipPath id="${u}cb"><ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}"/></clipPath><clipPath id="${u}ch"><ellipse cx="${hcx}" cy="${hy}" rx="${headRx}" ry="${headRy}"/></clipPath><clipPath id="${u}ct"><path d="${tailD}"/></clipPath>`;
+  // Flipper: a long, rounded paddle (sea turtle), drawn pointing along +x then rotated
+  const paddle = (x, y, len, w, rot, fill, shade) => `<g transform="translate(${x} ${y}) rotate(${rot})"><path d="M0 ${-w * .5} C${len * .35} ${-w * 1.05} ${len * .85} ${-w * .7} ${len} ${-w * .05} C${len * .8} ${w * .45} ${len * .35} ${w * .75} 0 ${w * .5}Z" fill="${fill}" ${ln}/><path d="M${len * .15} ${w * .35} C${len * .45} ${w * .55} ${len * .75} ${w * .35} ${len * .93} ${w * .02}" stroke="${shade}" stroke-width="${w * .35}" fill="none" stroke-linecap="round" opacity=".9"/>${[.35, .6].map(t => `<circle cx="${len * t}" cy="${-w * .15}" r="${w * .13}" fill="${SKIN_L}" opacity=".8"/>`).join("")}</g>`;
+  // The turtle. cx/by: shell center and base; rx/ry: shell size; head at hx,hy with radius hr; a: age 0..1
+  function turtle(u, o) {
+    const { cx, by, rx, ry, hx, hy, hr, eye, eyeMode, fl, stone } = o;
+    const dome = `M${cx - rx} ${by} A${rx} ${ry} 0 0 1 ${cx + rx} ${by} Z`;
+    const topY = x => by - ry * Math.sqrt(Math.max(0, 1 - ((x - cx) / rx) ** 2));
+    const neckD = `M${cx + rx * .72} ${by - ry * .18} C${cx + rx * .95} ${by - ry * .32} ${hx - hr * 1.1} ${hy + hr * .3} ${hx - hr * .2} ${hy + hr * .15}`;
+    const scutes = stone
+      ? [[-.45, .45], [-.1, .7], [.3, .5], [-.3, .25], [.15, .2], [.5, .25]].map(([dx, dy], i) => `<circle cx="${cx + dx * rx}" cy="${by - dy * ry}" r="${1.1 + (i % 3) * .5}" fill="${SLATE_D}" opacity=".7"/>`).join("")
+      : `<path d="M${cx - rx * .55} ${by - 1} Q${cx - rx * .5} ${by - ry * .55} ${cx - rx * .2} ${by - ry * .8} M${cx + rx * .1} ${by - 1} Q${cx + rx * .05} ${by - ry * .5} ${cx + rx * .25} ${by - ry * .85} M${cx - rx * .8} ${by - ry * .35} Q${cx} ${by - ry * .5} ${cx + rx * .85} ${by - ry * .3}" stroke="${SLATE_D}" stroke-width="1.2" fill="none" opacity=".75"/>`;
     return {
-      defs,
-      back: `<path d="${tailD}" fill="${GREEN}"/><g clip-path="url(#${u}ct)"><path d="M${bx - rx - tail} ${by - ry * 1.2} C${bx - rx - tail * .5} ${by + ry * .1} ${bx - rx * .8} ${by + ry * .4} ${bx - rx * .4} ${by + ry * .7} L${bx - rx * .4} ${by + ry * 2} L${bx - rx - tail * 1.2} ${by + ry * 2}Z" fill="${GREEN_D}"/></g><path d="${tailD}" fill="none" ${ln}/>
-        ${L(bx - rx * .55, true)}${L(bx + rx * .35, true)}`,
-      body: `<ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="${GREEN}"/>
-        <g clip-path="url(#${u}cb)">
-          <ellipse cx="${bx + rx * .05}" cy="${by + ry * .95}" rx="${rx * 1.2}" ry="${ry * .9}" fill="${GREEN_D}"/>
-          <path d="M${bx - rx * .62} ${by + ry * .4} Q${bx + rx * .05} ${by + ry * 1.12} ${bx + rx * .75} ${by + ry * .3} L${bx + rx} ${by + ry * 2} L${bx - rx} ${by + ry * 2}Z" fill="${CREAM}"/>
-          ${scutes}${marks}
-          <ellipse cx="${bx - rx * .32}" cy="${by - ry * .55}" rx="${rx * .32}" ry="${ry * .16}" fill="${LIGHT}" opacity=".75"/>
-        </g>
-        <ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="none" ${ln}/>
-        ${L(bx - rx * .25, false)}${L(bx + rx * .65, false)}
-        <path d="${neckD}" stroke="${OL}" stroke-width="${neck + OW * 2}" fill="none" stroke-linecap="round"/>
-        <path d="${neckD}" stroke="${GREEN_D}" stroke-width="${neck}" fill="none" stroke-linecap="round"/>
-        <path d="${neckD}" stroke="${GREEN}" stroke-width="${neck * .62}" fill="none" stroke-linecap="round" transform="translate(-${neck * .14} -${neck * .16})"/>
-        <path d="${neckD}" stroke="${LIGHT}" stroke-width="${neck * .14}" fill="none" stroke-linecap="round" opacity=".7" transform="translate(-${neck * .3} -${neck * .3})" stroke-dasharray="${neck * 1.2} ${neck * 2.6}"/>
-        <ellipse cx="${hcx}" cy="${hy}" rx="${headRx}" ry="${headRy}" fill="${GREEN}"/>
-        <g clip-path="url(#${u}ch)">
-          <ellipse cx="${hcx}" cy="${hy + headRy * .95}" rx="${headRx * 1.1}" ry="${headRy * .6}" fill="${GREEN_D}"/>
-          <ellipse cx="${hcx + headRx * .15}" cy="${hy + headRy * .62}" rx="${headRx * .55}" ry="${headRy * .25}" fill="${CREAM}"/>
-          <ellipse cx="${hcx - headRx * .3}" cy="${hy - headRy * .55}" rx="${headRx * .32}" ry="${headRy * .16}" fill="${LIGHT}" opacity=".8"/>
-        </g>
-        <ellipse cx="${hcx}" cy="${hy}" rx="${headRx}" ry="${headRy}" fill="none" ${ln}/>
-        ${eyeAt(hx + hr * .12, hy - hr * .22, eye, eyeMode)}
-        <circle cx="${hcx + headRx * .78}" cy="${hy - headRy * .18}" r="${.9 + a * .4}" fill="${OL}"/>
-        <ellipse cx="${hx - hr * .05}" cy="${hy + hr * .4}" rx="${hr * .28}" ry="${hr * .15}" fill="#ff7a9a" opacity=".55"/>
-        <path d="M${hcx + headRx * .55} ${hy + headRy * .3} q${hr * .22} ${hr * .2} ${hr * .45} 0" stroke="${OL}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
-      head: { x: hcx, y: hy, rx: headRx, ry: headRy }
+      defs: `<clipPath id="${u}cs"><path d="${dome}"/></clipPath><clipPath id="${u}ch"><ellipse cx="${hx}" cy="${hy}" rx="${hr * 1.08}" ry="${hr * .9}"/></clipPath>`,
+      topY,
+      far: `${paddle(cx - rx * .55, by + 2, rx * .55, rx * .26, 160, SKIN_D, OL)}${paddle(cx + rx * .45, by + 1, fl * .9, rx * .3, 35, SKIN_D, OL)}
+        <path d="M${cx - rx * .95} ${by + 1} q-6 1 -8 4 q5 1 9 -1Z" fill="${SKIN}" ${ln}/>`,
+      shell: `<path d="M${cx - rx} ${by} L${cx + rx} ${by} Q${cx + rx - 1} ${by + 6} ${cx + rx - 7} ${by + 7} L${cx - rx + 7} ${by + 7} Q${cx - rx + 1} ${by + 6} ${cx - rx} ${by}Z" fill="${SAND}" ${ln}/>
+        <path d="M${cx - rx + 9} ${by + 3.5} L${cx + rx - 9} ${by + 3.5}" stroke="${SAND_D}" stroke-width="1.2"/>
+        <path d="${neckD}" stroke="${OL}" stroke-width="${hr * .95 + OW * 2}" fill="none" stroke-linecap="round"/><path d="${neckD}" stroke="${SKIN}" stroke-width="${hr * .95}" fill="none" stroke-linecap="round"/>
+        <path d="${dome}" fill="${SLATE}"/>
+        <g clip-path="url(#${u}cs)"><ellipse cx="${cx + rx * .1}" cy="${by + ry * .25}" rx="${rx * 1.1}" ry="${ry * .5}" fill="${SLATE_D}"/>${scutes}<ellipse cx="${cx - rx * .35}" cy="${by - ry * .72}" rx="${rx * .3}" ry="${ry * .14}" fill="${SLATE_L}" opacity=".8"/></g>
+        <path d="${dome}" fill="none" ${ln}/>`,
+      head: `<ellipse cx="${hx}" cy="${hy}" rx="${hr * 1.08}" ry="${hr * .9}" fill="${SKIN}"/>
+        <g clip-path="url(#${u}ch)"><ellipse cx="${hx}" cy="${hy + hr * .8}" rx="${hr * 1.2}" ry="${hr * .5}" fill="${SKIN_D}"/>${[[-.45, -.45], [-.1, -.65], [-.6, .05]].map(([dx, dy]) => `<circle cx="${hx + dx * hr}" cy="${hy + dy * hr}" r="${hr * .13}" fill="${SKIN_L}"/>`).join("")}</g>
+        <ellipse cx="${hx}" cy="${hy}" rx="${hr * 1.08}" ry="${hr * .9}" fill="none" ${ln}/>
+        ${eyeAt(hx + hr * .2, hy - hr * .18, eye, eyeMode)}
+        <ellipse cx="${hx - hr * .05}" cy="${hy + hr * .42}" rx="${hr * .24}" ry="${hr * .13}" fill="${CORAL}" opacity=".45"/>
+        <path d="M${hx + hr * .55} ${hy + hr * .35} q${hr * .25} ${hr * .2} ${hr * .45} -.1" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <circle cx="${hx + hr * .98}" cy="${hy - hr * .05}" r=".8" fill="${OL}"/>`,
+      near: `${paddle(cx - rx * .62, by + 4, rx * .5, rx * .24, 172, SKIN, SKIN_D)}${paddle(cx + rx * .55, by + 4, fl, rx * .3, 22, SKIN, SKIN_D)}`
     };
   }
+  const sand = (cx, w) => `<ellipse cx="${cx}" cy="106" rx="${w}" ry="7" fill="${SAND}" ${ln}/><ellipse cx="${cx + 4}" cy="108" rx="${w * .8}" ry="3.6" fill="${SAND_D}"/>${[[-.6, -1], [.5, 0], [.1, 2]].map(([d, y]) => `<circle cx="${cx + d * w}" cy="${105 + y}" r=".9" fill="${SAND_D}"/>`).join("")}`;
+  // moss carpet hugging the top of the shell, from fraction f0 to f1 of the shell width
+  const moss = (t, cx, rx, f0, f1, r, n) => cluster(Array.from({ length: n }, (_, i) => { const x = cx + rx * (f0 + (f1 - f0) * i / (n - 1)); return [x, t(x) + r * .35, r * (.8 + (i % 3) * .14)] }), LEAF, LEAF_D, LEAF_L);
   function art(k) {
     const u = "bb" + (++uidN);
-    const shadow = (cx, w) => `<ellipse cx="${cx}" cy="111" rx="${w}" ry="4" fill="#000" opacity=".14"/>`;
     let g = "", defs = "";
-    if (k === 0) {   // Pip: a round seed-egg, a big-eyed baby peeking out, one sprout
-      const egg = "M58 108 C38 108 31 93 32 79 C33 62 44 50 58 50 C72 50 83 62 84 79 C85 93 78 108 58 108Z";
-      defs = `<clipPath id="${u}ce"><path d="${egg}"/></clipPath><clipPath id="${u}cp"><ellipse cx="60" cy="52" rx="15" ry="13"/></clipPath>`;
-      g = `${shadow(58, 24)}
-        <path d="${egg}" fill="${CREAM}"/><g clip-path="url(#${u}ce)"><ellipse cx="66" cy="104" rx="30" ry="22" fill="${CREAM_D}"/><ellipse cx="44" cy="72" rx="6" ry="10" fill="#fffaf0" opacity=".8"/>
-        ${[[45, 90, 4], [70, 96, 3.4], [64, 84, 2.6], [74, 78, 2.8], [52, 100, 2.2]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${GREEN}" stroke="${OL}" stroke-width="1.2"/><circle cx="${x - r * .3}" cy="${y - r * .3}" r="${r * .3}" fill="${LIGHT}"/>`).join("")}</g>
-        <path d="${egg}" fill="none" ${ln}/>
-        <ellipse cx="60" cy="52" rx="15" ry="13" fill="${GREEN}"/><g clip-path="url(#${u}cp)"><ellipse cx="60" cy="63" rx="16" ry="7" fill="${GREEN_D}"/><ellipse cx="55" cy="45" rx="5" ry="2.5" fill="${LIGHT}" opacity=".8"/></g><ellipse cx="60" cy="52" rx="15" ry="13" fill="none" ${ln}/>
-        <path d="M37 67 L43 61 L49 68 L55 60 L61 68 L67 60 L73 67 L79 62 L83 69 L83 74 L37 74Z" fill="${CREAM}"/><path d="M37 67 L43 61 L49 68 L55 60 L61 68 L67 60 L73 67 L79 62 L83 69" fill="none" ${ln}/>
-        ${eyeAt(64, 49, 4.6)}<ellipse cx="57" cy="56" rx="3.6" ry="2" fill="#ff7a9a" opacity=".55"/><path d="M66 56 q1.6 1.6 3.2 0" stroke="${OL}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M60 39 L60 32" stroke="${OL}" stroke-width="2.2" stroke-linecap="round"/>${leaf(60, 32, 11, -35, "#8bd06a")}${leaf(60, 32, 9, -150, "#8bd06a")}`;
-    } else if (k === 1) {   // Sprig: very round, big head, short neck, stubby legs, moss clumps, one sprout
-      const d = dino(u, { bx: 54, by: 84, rx: 21, ry: 16, hx: 80, hy: 60, hr: 13, eye: 4.6, leg: 11, legW: 9, neck: 11, a: 0, tail: 14, spots: 0 });
-      defs = d.defs;
-      g = `${shadow(56, 30)}${d.back}${d.body}
-        ${cluster([[39, 71, 4.3], [46, 67.5, 5], [54, 66.5, 5.2], [62, 68, 4.6], [68, 71.5, 3.6]], "#5aa843", "#3f8530", "#9ad87a")}
-        ${[[44, 64], [57, 63], [66, 66]].map(([x, y]) => `<path d="M${x} ${y} l0 -3" stroke="#8a5a2b" stroke-width="1.1" stroke-linecap="round"/><ellipse cx="${x}" cy="${y - 4}" rx="1.2" ry="1.7" fill="#b07a3c" stroke="${OL}" stroke-width=".7"/>`).join("")}
-        <path d="M80 47 L80 41" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>${leaf(80, 41, 10, -40, "#8bd06a")}`;
-    } else if (k === 2) {   // Frondo: a fan of fern fronds, fiddlehead tail, back markings
-      const d = dino(u, { bx: 52, by: 84, rx: 23, ry: 16, hx: 85, hy: 52, hr: 12, eye: 4.2, leg: 13, legW: 9.5, neck: 10.5, a: .15, tail: 18, spots: 3 });
-      defs = d.defs;
-      g = `${shadow(55, 32)}${d.back}
-        ${frond(42, 72, 26, -128, "#2f8a5c", true)}${frond(52, 70, 30, -94, "#3fa36f", false)}${frond(62, 71, 26, -62, "#2f8a5c", true)}${frond(36, 76, 18, -150, "#3fa36f", false)}
-        ${d.body}
-        <path d="M13 65 C8 62 9 55 14 55 C18 55 18 60 15 61" stroke="${OL}" stroke-width="5.4" fill="none" stroke-linecap="round"/><path d="M13 65 C8 62 9 55 14 55 C18 55 18 60 15 61" stroke="${GREEN}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-        ${[[11, 60], [16, 66]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="1.2" fill="#3fa36f" stroke="${OL}" stroke-width=".8"/>`).join("")}`;
-    } else if (k === 3) {   // Sproutle: longer neck, a hint of snout, seedlings with cotyledons, more markings
-      const d = dino(u, { bx: 52, by: 84, rx: 25, ry: 16.5, hx: 88, hy: 44, hr: 11.5, eye: 3.8, leg: 15, legW: 10, neck: 10, a: .4, tail: 22, spots: 4 });
-      defs = d.defs;
-      const sprout = (x, y, h) => `<path d="M${x} ${y} Q${x - 1} ${y - h / 2} ${x} ${y - h}" stroke="${OL}" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M${x} ${y} Q${x - 1} ${y - h / 2} ${x} ${y - h}" stroke="#7cb342" stroke-width="1" fill="none"/>
-        <g transform="rotate(-22 ${x - 4.5} ${y - h - 1})"><ellipse cx="${x - 4.5}" cy="${y - h - 1}" rx="5.4" ry="3.3" fill="#8bc34a" stroke="${OL}" stroke-width="1.4"/><ellipse cx="${x - 3.8}" cy="${y - h - .1}" rx="3.6" ry="1.5" fill="#6aa034"/><path d="M${x - 9} ${y - h - 1} L${x - 1} ${y - h - 1}" stroke="${OL}" stroke-width=".7" opacity=".5"/></g>
-        <g transform="rotate(22 ${x + 4.5} ${y - h - 1})"><ellipse cx="${x + 4.5}" cy="${y - h - 1}" rx="5.4" ry="3.3" fill="#8bc34a" stroke="${OL}" stroke-width="1.4"/><ellipse cx="${x + 5.2}" cy="${y - h - .1}" rx="3.6" ry="1.5" fill="#6aa034"/><path d="M${x + 1} ${y - h - 1} L${x + 9} ${y - h - 1}" stroke="${OL}" stroke-width=".7" opacity=".5"/></g>
-        <path d="M${x - 3} ${y + .5} q3 -2.4 6 0" fill="#8a5a2b" stroke="${OL}" stroke-width="1"/>`;
-      g = `${shadow(55, 34)}${d.back}${d.body}${sprout(38, 72, 9)}${sprout(49, 68, 12)}${sprout(60, 68, 10)}${sprout(70, 71, 7)}`;
-    } else if (k === 4) {   // Blossaur: taller and angular, shaded leaf-plates, flowers, a flower crown
-      const d = dino(u, { bx: 50, by: 82, rx: 27, ry: 17, hx: 91, hy: 36, hr: 11, eye: 3.4, leg: 17, legW: 10.5, neck: 10.5, a: .7, tail: 26, eyeMode: "brow", spots: 5 });
-      defs = d.defs;
-      g = `${shadow(54, 36)}${d.back}
-        ${plate(30, 72, 10, 9, -38)}${plate(40, 67, 13, 10, -20)}${plate(52, 65.5, 15, 11, 0)}${plate(64, 67, 13, 10, 18)}
-        ${d.body}
-        ${leaf(36, 69, 10, -150, "#5fae45")}${leaf(68, 68, 10, -30, "#5fae45")}
-        ${flower(42, 66, 4.6)}${flower(57, 64, 5.4)}${flower(14, 54, 4)}
-        ${flower(d.head.x - 2, d.head.y - d.head.ry - 2, 4.4)}
-        ${[[26, 50], [76, 50], [33, 58]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#ffd54f" stroke="${OL}" stroke-width=".6"/>`).join("")}`;
-    } else {   // Grovewalker: large, long neck held high, plates, a leafy flowering tree rooted on its back
-      const d = dino(u, { bx: 50, by: 82, rx: 30, ry: 18.5, hx: 95, hy: 26, hr: 10.5, eye: 3, leg: 19, legW: 12, neck: 12, a: 1, tail: 30, eyeMode: "wise", spots: 6 });
-      defs = d.defs;
-      const trunk = "M47 66 C49 58 49 52 46 44 C44 38 41 34 38 31 M48 52 C53 47 58 44 64 39 M47 58 C43 56 39 56 35 58";
-      g = `${shadow(54, 40)}${d.back}
-        ${plate(26, 72, 12, 10, -40)}${plate(68, 66, 13, 10, 22)}${plate(76, 60, 11, 9, 35)}
-        ${d.body}
-        <path d="M38 67 C42 64 45 64 47 66 C50 63 54 63 58 66 C61 64 64 65 66 68" stroke="${OL}" stroke-width="5.2" fill="none" stroke-linecap="round"/><path d="M38 67 C42 64 45 64 47 66 C50 63 54 63 58 66 C61 64 64 65 66 68" stroke="#7a5536" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <path d="${trunk}" stroke="${OL}" stroke-width="8" fill="none" stroke-linecap="round"/><path d="${trunk}" stroke="#7a5536" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M46 62 C47 56 47 51 44 45" stroke="#a07650" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-        <path d="M48 60 l-2 1 M46 52 l2 -1 M45 47 l-2 .5" stroke="${OL}" stroke-width=".9" opacity=".6"/>
-        ${cluster([[40, 30, 10.5], [52, 22, 12], [64, 28, 10.5], [32, 38, 8.5], [49, 35, 9.5], [70, 37, 7.5], [58, 34, 8]], "#58b05a", "#3d8a45", "#9ed98e")}
-        ${[[37, 26], [52, 16], [64, 24], [30, 36], [47, 32], [70, 35], [58, 30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.3" fill="${PINK}" stroke="${OL}" stroke-width="1"/><circle cx="${x - .6}" cy="${y - .6}" r=".7" fill="#ffe0ec"/>`).join("")}
-        ${cluster([[36, 68, 2.6], [61, 67, 2.4]], "#5aa843", "#3f8530")}`;
+    if (k === 0) {   // Pebble: a round bare-stone hatchling with lichen spots
+      const T = turtle(u, { cx: 54, by: 92, rx: 21, ry: 19, hx: 81, hy: 84, hr: 11, eye: 4.6, fl: 15, stone: true });
+      defs = T.defs;
+      const lichen = [[44, 80, 3.2, CORAL], [58, 76, 2.4, LEAF_L], [64, 86, 2.8, CORAL], [49, 89, 2, LEAF_L], [55, 82, 1.6, CORAL_L]];
+      g = `${sand(56, 36)}${T.far}${T.shell}${lichen.map(([x, y, r, c]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="${OL}" stroke-width="1"/><circle cx="${x + r * .5}" cy="${y + r * .3}" r="${r * .45}" fill="${c}" stroke="${OL}" stroke-width=".8"/>`).join("")}${T.near}${T.head}`;
+    } else if (k === 1) {   // Mossback: a carpet of moss with sporophyte stalks, the first fern at the back
+      const T = turtle(u, { cx: 52, by: 92, rx: 26, ry: 18, hx: 86, hy: 82, hr: 10, eye: 4.2, fl: 18 });
+      defs = T.defs;
+      const stalks = [[44, 2], [55, 3], [63, 2]].map(([x, h]) => { const y = T.topY(x) - 2; return `<path d="M${x} ${y} L${x + .5} ${y - 7 - h}" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="${x + .6}" cy="${y - 9 - h}" rx="1.5" ry="2.3" fill="#b07a3c" stroke="${OL}" stroke-width=".9"/>` }).join("");
+      g = `${sand(54, 40)}${T.far}${T.shell}${cluster([[29, 86, 3.4], [33, 83, 3]], LEAF, LEAF_D, LEAF_L)}${moss(T.topY, 52, 26, -.82, .82, 4.6, 9)}${stalks}${T.near}${T.head}`;
+    } else if (k === 2) {   // Fernshell: moss rim plus a fan of fern fronds and grass
+      const T = turtle(u, { cx: 50, by: 92, rx: 28, ry: 18.5, hx: 87, hy: 81, hr: 9.6, eye: 3.9, fl: 20 });
+      defs = T.defs;
+      const fr = [[36, -150, 20], [43, -120, 24], [51, -95, 27], [59, -70, 24], [66, -42, 19]].map(([x, rot, len], i) => frond(x, T.topY(x) + 3, len, rot, i % 2 ? LEAF : LEAF_D, i % 2 === 0)).join("");
+      g = `${sand(52, 42)}${T.far}${T.shell}${fr}${moss(T.topY, 50, 28, -.9, .9, 3.6, 11)}${T.near}${T.head}`;
+    } else if (k === 3) {   // Thicket: shrubs with coral flowers and berries, ferns at the edges
+      const T = turtle(u, { cx: 50, by: 92, rx: 30, ry: 19, hx: 88, hy: 81, hr: 9.2, eye: 3.6, fl: 21 });
+      defs = T.defs;
+      const shrub = (x, r) => { const y = T.topY(x) - r * .6; return cluster([[x - r * .7, y + r * .3, r * .7], [x, y - r * .2, r], [x + r * .75, y + r * .25, r * .72]], LEAF, LEAF_D, LEAF_L) };
+      g = `${sand(52, 44)}${T.far}${T.shell}${cluster([[23, 88, 3.6], [27, 84, 3.4], [76, 84, 3.4], [79, 87, 3]], LEAF_D, "#2f6e2c", LEAF_L)}
+        ${shrub(37, 7)}${shrub(62, 7.5)}${shrub(50, 8.5)}
+        ${blossom(34, T.topY(34) - 9, 2.6)}${blossom(53, T.topY(53) - 14, 2.8)}${blossom(65, T.topY(65) - 10, 2.5)}
+        ${berry(44, T.topY(44) - 6)}${berry(58, T.topY(58) - 8)}${berry(70, T.topY(70) - 4, 1.5)}
+        ${moss(T.topY, 50, 30, -.92, .92, 3, 12)}${T.near}${T.head}`;
+    } else if (k === 4) {   // Grovekin: three young trees of different heights (tallest at the back), shrubs below
+      const T = turtle(u, { cx: 50, by: 92, rx: 31, ry: 19.5, hx: 89, hy: 81, hr: 9, eye: 3.4, fl: 22 });
+      defs = T.defs;
+      const tree = (x, h, r) => { const y = T.topY(x) + 1, top = y - h; return `<path d="M${x} ${y} L${x} ${top + r * .5}" stroke="${OL}" stroke-width="5" stroke-linecap="round"/><path d="M${x} ${y} L${x} ${top + r * .5}" stroke="${SLATE}" stroke-width="2.6" stroke-linecap="round"/>${cluster([[x - r * .55, top + r * .35, r * .7], [x, top, r * .9], [x + r * .55, top + r * .35, r * .7]], LEAF, LEAF_D, LEAF_L)}` };
+      g = `${sand(52, 46)}${T.far}${T.shell}${tree(36, 32, 9)}${tree(64, 22, 8)}${tree(50, 18, 7)}
+        ${cluster([[30, T.topY(30) - 2, 5], [72, T.topY(72) - 1, 4.5], [43, T.topY(43) - 2, 4.5], [57, T.topY(57) - 2, 4.8]], LEAF, LEAF_D, LEAF_L)}
+        ${blossom(43, T.topY(43) - 6, 2.3)}${berry(72, T.topY(72) - 4, 1.5)}${berry(30, T.topY(30) - 5, 1.5)}
+        ${moss(T.topY, 50, 31, -.94, .94, 2.8, 13)}${T.near}${T.head}`;
+    } else {   // Forestback: a whole layered forest (floor, understory, rolling canopy of many trees) and a little spring
+      const T = turtle(u, { cx: 50, by: 93, rx: 35, ry: 21, hx: 93, hy: 82, hr: 8.8, eye: 3.1, fl: 23, eyeMode: "wise" });
+      defs = T.defs;
+      // nine trees of uneven heights spread over the whole shell: the canopy line rises and dips like a hillside
+      const trunks = [[20, 12, 5.5], [27, 22, 6.5], [34, 15, 6], [41, 27, 7], [48, 19, 6.5], [55, 25, 7], [62, 16, 6], [69, 21, 6.5], [76, 12, 5.5]];
+      const trunkSvg = trunks.map(([x, h]) => { const y = T.topY(x) + 1; return `<path d="M${x} ${y} L${x} ${y - h}" stroke="${OL}" stroke-width="4.6" stroke-linecap="round"/><path d="M${x} ${y} L${x} ${y - h}" stroke="${SLATE}" stroke-width="2.3" stroke-linecap="round"/>` }).join("");
+      const crown = ([x, h, r], i) => { const y = T.topY(x) - h; return [[x - r * .55, y + r * .3, r * .62], [x, y - r * .1, r * .8], [x + r * .55, y + r * .3, r * .62]] };
+      const back = trunks.filter((_, i) => i % 2 === 1).flatMap(crown), front = trunks.filter((_, i) => i % 2 === 0).flatMap(crown);
+      g = `${sand(52, 50)}${T.far}${T.shell}${trunkSvg}
+        ${cluster(back, LEAF_D, "#2f6e2c", null)}${cluster(front, LEAF, LEAF_D, LEAF_L)}
+        ${trunks.filter((_, i) => i % 3 === 1).map(([x, h]) => berry(x + 2, T.topY(x) - h + 1, 1.6)).join("")}${berry(48, T.topY(48) - 21, 1.6)}${berry(69, T.topY(69) - 18, 1.5)}
+        ${frond(18, 90, 10, -170, LEAF_D, true)}${frond(80, 86, 10, -12, LEAF_D, true)}
+        ${cluster([[29, T.topY(29) - 3, 4.2], [41, T.topY(41) - 3, 4.6], [58, T.topY(58) - 3, 4.6], [70, T.topY(70) - 3, 4.2]], LEAF, LEAF_D, LEAF_L)}
+        ${blossom(36, T.topY(36) - 6, 2.2)}${blossom(64, T.topY(64) - 7, 2.3)}
+        ${moss(T.topY, 50, 35, -.95, .95, 2.7, 15)}
+        ${[[33, T.topY(33) + 1.5], [55, T.topY(55) + 1.5], [72, T.topY(72) + 1.5]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="1" fill="${CORAL}" stroke="${OL}" stroke-width=".7" transform="rotate(-20 ${x} ${y})"/>`).join("")}
+        <path d="M20 ${T.topY(20) + 2} q-3 4 -2 9 q1 4 -1 7" stroke="${OL}" stroke-width="4.4" fill="none" stroke-linecap="round"/><path d="M20 ${T.topY(20) + 2} q-3 4 -2 9 q1 4 -1 7" stroke="${WATER}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        ${T.near}${T.head}`;
     }
     return `<svg viewBox="0 0 120 120" aria-hidden="true"><defs>${defs}</defs>${g}</svg>`;
   }
