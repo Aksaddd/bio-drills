@@ -86,22 +86,23 @@
     const tail = o.tail === "down"
       ? `M76 100 C90 104 96 98 94 90`
       : `M77 98 C94 96 98 78 92 66 C89 60 84 62 86 67`;
-    const body = `<path d="${tail}" stroke="${OL}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="${tail}" stroke="${FUR}" stroke-width="5.6" fill="none" stroke-linecap="round"/>
+    // Body parts are grouped (dx-tail, dx-torso, dx-pawl, dx-pawr, dx-head, dx-earl, dx-earr, dx-eyes) so the study pal can move them like a real cat
+    const body = `<g class="dx-tail"><path d="${tail}" stroke="${OL}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="${tail}" stroke="${FUR}" stroke-width="5.6" fill="none" stroke-linecap="round"/>
       ${o.tail === "down" ? "" : `<path d="M90 70 C89 66 86 64 86 67" stroke="${FUR_L}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`}
-      <path d="M37 92 Q37 76 60 75 Q83 76 83 92 Q83 109 60 109 Q37 109 37 92Z" fill="${FUR}" ${ln}/>
+      </g><g class="dx-torso"><path d="M37 92 Q37 76 60 75 Q83 76 83 92 Q83 109 60 109 Q37 109 37 92Z" fill="${FUR}" ${ln}/>
       <path d="M44 98 Q60 112 76 98 Q74 108 60 108.5 Q46 108 44 98Z" fill="${FUR_D}" opacity=".55"/>
       <path d="M48 84 L52 89 L54 84.5 L57 90 L60 84 L63 90 L66 84.5 L68 89 L72 84 Q74 100 60 106 Q46 100 48 84Z" fill="${FUR_L}"/>
       <path d="M55 96 q5 3 10 0" stroke="${FUR_D}" stroke-width="1.2" fill="none" opacity=".7"/>`;
-    const paws = `      <ellipse cx="49.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/><ellipse cx="70.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/>
-      <path d="M47 104 v3 M52 104 v3 M68 104 v3 M73 104 v3" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/>`;
+    const paws = `<g class="dx-pawl"><ellipse cx="49.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/><path d="M47 104 v3 M52 104 v3" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/></g>
+      <g class="dx-pawr"><ellipse cx="70.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/><path d="M68 104 v3 M73 104 v3" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/></g>`;
     const head = `
-      <path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/>
-      <path d="M85 47 L83.5 15 L64 33Z" fill="${FUR}" ${ln}/><path d="M81 40 L80 22.5 L69 33Z" fill="${PINK}"/>
+      <g class="dx-earl"><path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/></g>
+      <g class="dx-earr"><path d="M85 47 L83.5 15 L64 33Z" fill="${FUR}" ${ln}/><path d="M81 40 L80 22.5 L69 33Z" fill="${PINK}"/></g>
       <path d="M32.5 58 L25 61 L31.5 65 L24.5 69.5 L32 71.5 L28.5 76 L37 75.5 Q43 85 60 85.5 Q77 85 83 75.5 L91.5 76 L88 71.5 L95.5 69.5 L88.5 65 L95 61 L87.5 58 Q88 33 60 32 Q32 33 32.5 58Z" fill="${FUR}" ${ln}/>
       <path d="M37 74 Q47 82.5 60 83 Q73 82.5 83 74 Q77 86 60 86 Q43 86 37 74Z" fill="${FUR_D}" opacity=".55"/>
       <path d="M41 45 L42 27 L50 39 L53 21 L60 37 L66 20.5 L69.5 37 L78 25 L79 45 Q60 39 41 45Z" fill="${FUR_L}" ${ln}/>
       <path d="M50 39 L52 31 M60 37 L64 28 M69.5 37 L74 31" stroke="${FUR_D}" stroke-width="1.4" stroke-linecap="round"/>
-      ${eye(u, 48.5, 60, o.eyes)}${eye(u, 71.5, 60, o.eyes)}
+      <g class="dx-eyes"><g class="dx-blink">${eye(u, 48.5, 60, o.eyes)}${eye(u, 71.5, 60, o.eyes)}</g></g>
       
       <path d="M58.2 67.6 L61.8 67.6 L60 69.8Z" fill="${PINK_D}" stroke="${OL}" stroke-width="1" stroke-linejoin="round"/>
       ${o.eyes === "closed" ? `<path d="M55.4 71 Q57.7 74.4 60 71.2 Q62.3 74.4 64.6 71" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>` : `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M61.8 72.9 L63.2 77.4 L64.8 72.2Z" fill="#fff" stroke="${OL}" stroke-width="1.1" stroke-linejoin="round"/>`}
@@ -110,7 +111,7 @@
     const sc = o.sc;
     return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
       <ellipse cx="60" cy="109" rx="${30 * sc}" ry="3.6" fill="#000" opacity=".12"/>
-      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${body}${o.mid || ""}${paws}${head}${glasses}${o.front || ""}</g>${o.over || ""}`;
+      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${body}${o.mid || ""}</g>${paws}<g class="dx-head">${head}${glasses}${o.front || ""}</g></g>${o.over || ""}`;
   }
   const collar = () => `<path d="M43 80.5 Q60 89 77 80.5" stroke="${OL}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M43 80.5 Q60 89 77 80.5" stroke="#26365e" stroke-width="3.6" fill="none" stroke-linecap="round"/>
     <path d="M60 85 v1.6" stroke="${OL}" stroke-width="1.2"/><rect x="56.4" y="86.4" width="7.2" height="9" rx="2.6" fill="#c9d1db" stroke="${OL}" stroke-width="1.3"/><path d="M58.4 89.6 h3.2 M58.4 92.2 h3.2" stroke="#7d8794" stroke-width=".9"/><path d="M57.6 88 l1.4 -.6" stroke="#fff" stroke-width=".9" stroke-linecap="round"/>`;
@@ -359,6 +360,92 @@ body.bb-on{padding-bottom:96px}
 @keyframes bbBubble{from{opacity:0;transform:scale(.6) translateX(30px)}to{opacity:1;transform:none}}
 @media (max-width:420px){.bb-greet .gdex{width:104px;height:104px}.bb-greet .gbubble{font-size:14px}}
 @media (prefers-reduced-motion:reduce){.bb-pal{transition:none}.bb-pal .bb-palart,.bb-pal .bb-toy,.bb-pal .bb-toy *,.bb-greet .gwrap,.bb-greet .gdex,.bb-greet .gbubble{animation:none!important}}
+/* Dexter's body parts: pivot points */
+.dx-head{transform-origin:60px 84px}.dx-tail{transform-origin:78px 98px}.dx-earl{transform-origin:45px 36px}.dx-earr{transform-origin:75px 36px}
+.dx-pawl{transform-origin:49.5px 108px}.dx-pawr{transform-origin:70.5px 108px}.dx-torso{transform-origin:60px 109px}.dx-eyes{transform-origin:60px 60px}.dx-blink{transform-origin:60px 61px}
+/* every awake game: blinks, and a lazy ear flick now and then */
+.bb-pal:not(.act-nap) .dx-blink,.bb-greet .dx-blink{animation:bbBlink 4.6s ease-in-out infinite}
+.bb-pal .dx-earr{animation:bbEarFlick 6.2s ease-in-out infinite}
+/* yarn: looks down at the ball, swats it with the left paw, tail swishes */
+.act-yarn .dx-head{animation:bbYarnHead 2.6s ease-in-out infinite}.act-yarn .dx-pawl{animation:bbYarnSwat 2.6s ease-in-out infinite}
+.act-yarn .dx-tail{animation:bbTailSway 2.6s ease-in-out infinite}.act-yarn .dx-eyes{animation:bbYarnEyes 2.6s ease-in-out infinite}
+/* butterfly: head and eyes follow it, ears swivel, tail tip twitches, then he rears up with both paws */
+.act-butterfly .dx-head,.act-leaf .dx-head{animation:bbFlyHead 4.2s ease-in-out infinite}.act-butterfly .dx-eyes{animation:bbFlyEyes 4.2s ease-in-out infinite}
+.act-butterfly .dx-pawl{animation:bbRearL 4.2s ease-in-out infinite}.act-butterfly .dx-pawr{animation:bbRearR 4.2s ease-in-out infinite}
+.act-butterfly .dx-tail,.act-laser .dx-tail{animation:bbTailTwitch .7s ease-in-out infinite}
+.act-butterfly .dx-earl,.act-leaf .dx-earl{animation:bbEarSwivelL 2.1s ease-in-out infinite}.act-butterfly .dx-earr,.act-leaf .dx-earr{animation:bbEarSwivelR 2.1s ease-in-out infinite}
+/* toy mouse: hunting crouch, butt wiggle, low tail lash, then both paws reach for the pounce */
+.act-mouse .dx-head{animation:bbHuntHead 3.4s ease-in-out infinite}.act-mouse .dx-torso{animation:bbButtWiggle 3.4s ease-in-out infinite}
+.act-mouse .dx-tail{animation:bbTailLash 3.4s ease-in-out infinite}.act-mouse .dx-pawl{animation:bbPounceL 3.4s ease-in-out infinite}.act-mouse .dx-pawr{animation:bbPounceR 3.4s ease-in-out infinite}
+.act-mouse .dx-earl{transform:rotate(-12deg)}.act-mouse .dx-earr{animation:none;transform:rotate(12deg)}
+/* laser dot: eyes and head jerk with every jump, ears pinned forward, a quick paw tap */
+.act-laser .dx-head{animation:bbLaserHead 2.4s steps(1) infinite}.act-laser .dx-eyes{animation:bbLaserEyes 2.4s steps(1) infinite}
+.act-laser .dx-pawr{animation:bbTap 2.4s ease-in-out infinite}.act-laser .dx-earr{animation:none}
+/* feather wand: looks up, swats with one paw then the other, stretching up */
+.act-feather .dx-head{animation:bbLookUp 1.8s ease-in-out infinite}.act-feather .dx-pawl{animation:bbSwatUpL 1.8s ease-in-out infinite}
+.act-feather .dx-pawr{animation:bbSwatUpR 1.8s ease-in-out infinite}.act-feather .dx-torso{animation:bbStretchUp 1.8s ease-in-out infinite}.act-feather .dx-tail{animation:bbTailSway 1.8s ease-in-out infinite}
+/* falling leaf: curious head tilts while it drifts, then pins it with both paws */
+.act-leaf .dx-head{animation:bbTiltHead 4.2s ease-in-out infinite}.act-leaf .dx-pawl{animation:bbPinL 4.2s ease-in-out infinite}.act-leaf .dx-pawr{animation:bbPinR 4.2s ease-in-out infinite}
+.act-leaf .dx-tail{animation:bbTailSway 4.2s ease-in-out infinite}
+/* box: loafing, peeking left and right, ears twitching */
+.act-box .dx-eyes{animation:bbGlance 3s ease-in-out infinite}.act-box .dx-earl{animation:bbEarFlickL 3s ease-in-out infinite}.act-box .dx-head{animation:bbBoxHead 3s ease-in-out infinite}
+/* chasing his tail: looks back over his shoulder, tail whips, paw swipes at it */
+.act-tail .dx-head{animation:bbLookBack 3.2s ease-in-out infinite}.act-tail .dx-tail{animation:bbTailWhip .32s ease-in-out infinite}.act-tail .dx-pawr{animation:bbSwipeTail 3.2s ease-in-out infinite}
+/* nap: head droops, slow breathing, the odd ear twitch, tail slowly curling */
+.act-nap .dx-head{animation:bbNapHead 3.2s ease-in-out infinite}.act-nap .dx-torso{animation:bbBreathe 3.2s ease-in-out infinite}
+.act-nap .dx-earr{animation:bbEarFlick 7s ease-in-out infinite}.act-nap .dx-tail{animation:bbTailCurl 6.4s ease-in-out infinite}
+/* answers: tail straight up and ears perked when right; ears flat, tail and head down when wrong; trotting legs when he runs over */
+.bb-pal.hop .dx-tail{animation:bbTailUp .9s ease both}.bb-pal.hop .dx-earl,.bb-pal.hop .dx-earr{animation:bbEarPerk .6s ease}
+.bb-pal.sad .dx-earl{animation:bbEarFlatL 1.1s ease}.bb-pal.sad .dx-earr{animation:bbEarFlatR 1.1s ease}.bb-pal.sad .dx-tail{animation:bbTailDroop 1.1s ease}.bb-pal.sad .dx-head{animation:bbHeadDroop 1.1s ease}
+.bb-pal.run .dx-pawl{animation:bbTrot .26s ease-in-out infinite}.bb-pal.run .dx-pawr{animation:bbTrot .26s ease-in-out .13s infinite}.bb-pal.run .dx-tail{animation:bbTailStream .52s ease-in-out infinite}
+/* greeting: a paw wave and a happy tail */
+.bb-greet .gdex .dx-pawr{animation:bbPawWave .42s ease-in-out 1.15s 6 alternate}.bb-greet .gdex .dx-tail{animation:bbTailSway 1.4s ease-in-out infinite}.bb-greet .gdex .dx-earl{animation:bbEarPerk .6s ease 1s 2}
+@keyframes bbBlink{0%,44%,50%,100%{transform:none}47%{transform:scaleY(.08)}}
+@keyframes bbEarFlick{0%,86%,100%{transform:none}89%{transform:rotate(14deg)}92%{transform:rotate(-4deg)}95%{transform:rotate(8deg)}}
+@keyframes bbEarFlickL{0%,40%,100%{transform:none}45%{transform:rotate(-14deg)}50%{transform:rotate(4deg)}55%{transform:rotate(-8deg)}}
+@keyframes bbYarnHead{0%,100%{transform:rotate(-3deg)}25%{transform:rotate(-9deg) translateY(2px)}45%{transform:rotate(-12deg) translate(-2px,3px)}75%{transform:rotate(-5deg) translateY(1px)}}
+@keyframes bbYarnEyes{0%,100%{transform:translate(-1px,1px)}40%{transform:translate(-2.4px,2px)}80%{transform:translate(-.5px,1px)}}
+@keyframes bbYarnSwat{0%,18%,48%,100%{transform:none}26%{transform:translate(-6px,-12px) rotate(-28deg)}34%{transform:translate(-10px,-2px) rotate(-12deg)}40%{transform:translate(-4px,0)}}
+@keyframes bbTailSway{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+@keyframes bbTailTwitch{0%,100%{transform:rotate(0)}30%{transform:rotate(9deg)}60%{transform:rotate(-4deg)}}
+@keyframes bbFlyHead{0%,100%{transform:rotate(-10deg) translateY(-1px)}22%{transform:rotate(-8deg) translateY(-3px)}48%{transform:rotate(11deg) translateY(-3px)}68%{transform:rotate(7deg)}84%{transform:rotate(-6deg)}}
+@keyframes bbFlyEyes{0%,100%{transform:translate(-2px,0)}22%{transform:translate(-2px,-2px)}48%{transform:translate(2.4px,-2px)}68%{transform:translate(2px,1px)}84%{transform:translate(-1.6px,0)}}
+@keyframes bbRearL{0%,52%,72%,100%{transform:none}60%{transform:translate(-4px,-26px) rotate(-24deg)}66%{transform:translate(-2px,-20px) rotate(-14deg)}}
+@keyframes bbRearR{0%,53%,73%,100%{transform:none}61%{transform:translate(4px,-27px) rotate(24deg)}67%{transform:translate(2px,-20px) rotate(14deg)}}
+@keyframes bbEarSwivelL{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+@keyframes bbEarSwivelR{0%,100%{transform:rotate(10deg)}50%{transform:rotate(0)}}
+@keyframes bbHuntHead{0%,100%{transform:translateY(5px) rotate(-5deg)}40%{transform:translateY(6px) rotate(-8deg)}48%{transform:translate(-3px,-2px) rotate(-10deg)}60%{transform:translateY(4px) rotate(-4deg)}}
+@keyframes bbButtWiggle{0%,18%,38%,100%{transform:none}22%{transform:rotate(-3deg) translateX(-1px)}26%{transform:rotate(3deg) translateX(1px)}30%{transform:rotate(-3deg) translateX(-1px)}34%{transform:rotate(3deg) translateX(1px)}}
+@keyframes bbTailLash{0%,100%{transform:rotate(30deg)}20%{transform:rotate(40deg)}30%{transform:rotate(22deg)}40%{transform:rotate(44deg)}}
+@keyframes bbPounceL{0%,38%,58%,100%{transform:none}46%{transform:translate(-12px,-8px) rotate(-22deg)}52%{transform:translate(-10px,0) rotate(-8deg)}}
+@keyframes bbPounceR{0%,39%,59%,100%{transform:none}47%{transform:translate(-6px,-10px) rotate(-18deg)}53%{transform:translate(-6px,0) rotate(-6deg)}}
+@keyframes bbLaserHead{0%{transform:rotate(-6deg) translateY(2px)}20%{transform:rotate(-12deg) translateY(-2px)}40%{transform:rotate(9deg) translateY(1px)}60%{transform:rotate(-4deg) translateY(3px)}80%{transform:rotate(12deg) translateY(2px)}}
+@keyframes bbLaserEyes{0%{transform:translate(-1px,2px)}20%{transform:translate(-2.6px,-1.6px)}40%{transform:translate(2.4px,0)}60%{transform:translate(-1px,2.4px)}80%{transform:translate(2.8px,1.6px)}}
+@keyframes bbTap{0%,55%,75%,100%{transform:none}60%{transform:translate(-4px,-8px) rotate(-16deg)}65%{transform:translate(-5px,0)}70%{transform:translate(-4px,-6px) rotate(-12deg)}}
+@keyframes bbLookUp{0%,100%{transform:rotate(-10deg) translateY(-2px)}50%{transform:rotate(-3deg) translateY(-3px)}}
+@keyframes bbSwatUpL{0%,22%,48%,100%{transform:none}32%{transform:translate(-6px,-30px) rotate(-32deg)}40%{transform:translate(-3px,-18px) rotate(-16deg)}}
+@keyframes bbSwatUpR{0%,62%,90%,100%{transform:none}72%{transform:translate(2px,-30px) rotate(28deg)}80%{transform:translate(1px,-16px) rotate(12deg)}}
+@keyframes bbStretchUp{0%,20%,50%,60%,92%,100%{transform:none}32%,72%{transform:scaleY(1.05)}}
+@keyframes bbTiltHead{0%,100%{transform:rotate(-13deg)}20%{transform:rotate(13deg)}40%{transform:rotate(-11deg)}58%{transform:rotate(-4deg) translateY(3px)}76%{transform:rotate(0) translateY(5px)}}
+@keyframes bbPinL{0%,58%,92%,100%{transform:none}66%{transform:translate(0,-16px) rotate(-14deg)}74%,86%{transform:translate(3px,1px)}}
+@keyframes bbPinR{0%,59%,93%,100%{transform:none}67%{transform:translate(0,-16px) rotate(14deg)}75%,87%{transform:translate(-3px,1px)}}
+@keyframes bbGlance{0%,20%,100%{transform:none}30%,45%{transform:translateX(-2.6px)}60%,80%{transform:translateX(2.6px)}}
+@keyframes bbBoxHead{0%,100%{transform:none}30%{transform:rotate(-6deg)}65%{transform:rotate(6deg)}}
+@keyframes bbLookBack{0%,25%,85%,100%{transform:none}38%,72%{transform:rotate(16deg) translateX(4px)}}
+@keyframes bbTailWhip{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(26deg)}}
+@keyframes bbSwipeTail{0%,34%,46%,56%,68%,100%{transform:none}40%{transform:translate(10px,-10px) rotate(28deg)}62%{transform:translate(12px,-8px) rotate(30deg)}}
+@keyframes bbNapHead{0%,100%{transform:rotate(-7deg) translateY(4px)}50%{transform:rotate(-8deg) translateY(5px)}}
+@keyframes bbTailCurl{0%,100%{transform:rotate(14deg)}50%{transform:rotate(22deg)}}
+@keyframes bbTailUp{0%{transform:none}35%,70%{transform:rotate(-22deg)}100%{transform:none}}
+@keyframes bbEarPerk{0%,100%{transform:none}50%{transform:translateY(-3px) scaleY(1.08)}}
+@keyframes bbEarFlatL{0%,100%{transform:none}25%,75%{transform:rotate(-38deg) translateY(5px)}}
+@keyframes bbEarFlatR{0%,100%{transform:none}25%,75%{transform:rotate(38deg) translateY(5px)}}
+@keyframes bbTailDroop{0%,100%{transform:none}25%,75%{transform:rotate(42deg)}}
+@keyframes bbHeadDroop{0%,100%{transform:none}25%,75%{transform:rotate(-6deg) translateY(4px)}}
+@keyframes bbTrot{0%,100%{transform:none}50%{transform:translateY(-5px) rotate(-8deg)}}
+@keyframes bbTailStream{0%,100%{transform:rotate(18deg)}50%{transform:rotate(30deg)}}
+@keyframes bbPawWave{from{transform:translate(4px,-26px) rotate(-38deg)}to{transform:translate(7px,-28px) rotate(8deg)}}
+@media (prefers-reduced-motion:reduce){.dx-head,.dx-tail,.dx-earl,.dx-earr,.dx-pawl,.dx-pawr,.dx-torso,.dx-eyes,.dx-blink{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.bb-say,.bb-yarn,.bb-yarn svg{animation-duration:.01s}.bb-dock .bb-pic,.bb-card .bb-big,.bb-evo.done .new{animation:none}.bb-evo .old{animation:none;opacity:0}.bb-evo .new{animation:none;opacity:1}.bb-evo .glow{display:none}}`;
 
   // ===== Dock (bottom-right) with a ring that fills toward the next evolution
