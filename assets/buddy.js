@@ -135,13 +135,13 @@
     { sc: 1, glasses: true, outfit: () => coat, hat: () => cap, held: () => book }
   ];
   // eq: { hat, outfit, face, neck, held } item ids; defaults to what's saved as worn
-  function art(k, eq) {
+  function art(k, eq, look) {
     const u = "dx" + (++uidN), g = FORM_GEAR[k], W = window.BioWardrobe, E = eq || load().equip || {};
     // per slot: an item id = wear it · "none" = nothing (even the form's own gear) · unset = the form's own gear
     const worn = slot => E[slot] === "none" ? "" : W && E[slot] && W.byId[E[slot]] ? W.byId[E[slot]].svg : null;
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
-    const svg = kitty(u, { sc: g.sc, eyes: g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses,
+    const svg = kitty(u, { sc: g.sc, eyes: (look && look.eyes) || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses,
       mid: pick("outfit") + pick("neck"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
@@ -289,10 +289,44 @@ body.bb-on{padding-bottom:96px}
 .bb-pal{position:fixed;left:0;top:0;z-index:58;width:var(--ps,72px);height:var(--ps,72px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .55s cubic-bezier(.34,1.3,.5,1),opacity .3s;-webkit-tap-highlight-color:transparent}
 .bb-palon .bb-dock{display:none}
 .bb-palon.bb-on{padding-bottom:110px}
-.bb-pal .bb-palart{position:absolute;inset:0;transform-origin:50% 92%;animation:bbSway 2.6s ease-in-out infinite}
+.bb-pal .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}
 .bb-pal .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18))}
-.bb-pal .bb-yarnball{position:absolute;z-index:1;width:27%;height:27%;left:2%;bottom:3%;animation:bbBat 2.6s ease-in-out infinite}
-.bb-pal .bb-yarnball svg{display:block;width:100%;height:100%}
+.bb-pal .bb-toy{position:absolute;z-index:1;pointer-events:none}
+.bb-pal .bb-toy svg{display:block;width:100%;height:100%}
+.bb-pal .bb-boxfront{position:absolute;z-index:2;left:2%;right:2%;bottom:-3%;height:40%}
+.bb-pal .bb-boxfront svg{display:block;width:100%;height:100%}
+.act-yarn .bb-toy{width:27%;height:27%;left:2%;bottom:3%;animation:bbBat 2.6s ease-in-out infinite}
+.act-yarn .bb-palart{animation:bbSway 2.6s ease-in-out infinite}
+.act-butterfly .bb-toy{width:30%;height:24%;left:34%;top:-6%;animation:bbFly 4.2s ease-in-out infinite}
+.act-butterfly .bb-toy .wl{transform-box:fill-box;transform-origin:right center;animation:bbFlap .16s ease-in-out infinite alternate}
+.act-butterfly .bb-toy .wr{transform-box:fill-box;transform-origin:left center;animation:bbFlap .16s ease-in-out infinite alternate}
+.act-butterfly .bb-palart,.act-leaf .bb-palart{animation:bbWatch 4.2s ease-in-out infinite}
+.act-mouse .bb-toy{width:32%;height:19%;left:-14%;bottom:0;animation:bbScamper 3.4s ease-in-out infinite}
+.act-mouse .bb-palart{animation:bbCrouch 3.4s ease-in-out infinite}
+.act-laser .bb-toy{width:12%;height:12%;left:14%;bottom:5%;animation:bbLaser 2.4s steps(1) infinite}
+.act-laser .bb-palart{animation:bbWiggle 1.2s ease-in-out infinite}
+.act-feather .bb-toy{width:22%;height:56%;left:-2%;top:-44%;transform-origin:50% 0;animation:bbSwing 1.8s ease-in-out infinite}
+.act-feather .bb-palart{animation:bbSwat 1.8s ease-in-out infinite}
+.act-leaf .bb-toy{width:26%;height:18%;left:36%;top:-24%;animation:bbLeafFall 4.2s ease-in infinite}
+.act-box .bb-palart{animation:bbPeek 3s ease-in-out infinite}
+.act-tail .bb-palart{animation:bbTail 3.2s ease-in-out infinite}
+.act-nap .bb-palart{animation:bbBreathe 3.2s ease-in-out infinite}
+.act-nap .bb-toy{right:-4%;top:-14%;display:flex;gap:1px;font:800 13px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;color:#7a8bd8}
+.act-nap .bb-toy .zz{display:inline-block;animation:bbZ 2.4s ease-in-out infinite} .act-nap .bb-toy .zz:nth-child(2){animation-delay:.4s;font-size:1.15em} .act-nap .bb-toy .zz:nth-child(3){animation-delay:.8s;font-size:1.35em}
+@keyframes bbFly{0%,100%{transform:translate(-140%,40%) rotate(-10deg)}22%{transform:translate(-50%,-70%) rotate(8deg)}48%{transform:translate(95%,-30%) rotate(-6deg)}68%{transform:translate(45%,70%) rotate(10deg)}84%{transform:translate(-70%,15%) rotate(-4deg)}}
+@keyframes bbFlap{from{transform:scaleX(1)}to{transform:scaleX(.25)}}
+@keyframes bbWatch{0%,100%{transform:rotate(-5deg)}22%{transform:rotate(-2deg) translateY(-2%)}48%{transform:rotate(6deg)}60%{transform:translateY(-12%) rotate(4deg)}68%{transform:rotate(3deg)}}
+@keyframes bbScamper{0%{transform:translateX(0) scaleX(-1)}40%{transform:translateX(-80%) scaleX(-1)}46%{transform:translateX(-80%) scaleX(1)}86%{transform:translateX(30%) scaleX(1)}92%{transform:translateX(30%) scaleX(-1)}100%{transform:translateX(0) scaleX(-1)}}
+@keyframes bbCrouch{0%,30%,100%{transform:none}38%{transform:scaleY(.9) translateY(5%)}46%{transform:translate(-9%,-11%) rotate(-9deg)}56%{transform:none}}
+@keyframes bbLaser{0%{transform:translate(0,0)}20%{transform:translate(-180%,-140%)}40%{transform:translate(160%,-50%)}60%{transform:translate(-90%,30%)}80%{transform:translate(300%,10%)}}
+@keyframes bbWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-3deg) scaleY(.96)}40%{transform:rotate(3deg) scaleY(.96)}60%{transform:translate(4%,-8%) rotate(5deg)}80%{transform:none}}
+@keyframes bbSwing{0%,100%{transform:rotate(-26deg)}50%{transform:rotate(22deg)}}
+@keyframes bbSwat{0%,100%{transform:none}40%{transform:translateY(-6%) rotate(-10deg)}55%{transform:translateY(-2%) rotate(-4deg)}}
+@keyframes bbLeafFall{0%{transform:translate(40%,-60%) rotate(0);opacity:0}10%{opacity:1}40%{transform:translate(-60%,120%) rotate(120deg)}70%{transform:translate(30%,300%) rotate(260deg);opacity:1}82%{transform:translate(0,330%) rotate(300deg);opacity:1}100%{transform:translate(0,330%) rotate(300deg);opacity:0}}
+@keyframes bbPeek{0%,100%{transform:translateY(17%)}50%{transform:translateY(9%) rotate(3deg)}}
+@keyframes bbTail{0%,35%,100%{transform:none}45%{transform:scaleX(-1) translateX(5%)}55%{transform:translateX(5%) rotate(6deg)}65%{transform:scaleX(-1) translateX(-5%) rotate(-6deg)}75%{transform:translateX(-3%)}}
+@keyframes bbBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.95)}}
+@keyframes bbZ{0%{transform:translateY(4px);opacity:0}30%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
 .bb-pal .bb-lv{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);font:700 10.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#1d1d1f;color:#fff;border-radius:980px;padding:2px 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
 [data-theme="dark"] .bb-pal .bb-lv{background:#f5f5f7;color:#1d1d1f}
 .bb-pal .bb-streak{top:-4px;left:-6px}
@@ -300,7 +334,7 @@ body.bb-on{padding-bottom:96px}
 .bb-pal.run .bb-palart{animation:bbScurry .26s ease-in-out 3}
 .bb-pal.hop .bb-palart{animation:bbHop .6s cubic-bezier(.3,1.6,.5,1)}
 .bb-pal.sad .bb-palart{animation:bbPalSad .7s ease}
-.bb-pal.lost .bb-yarnball{animation:bbLost 2.4s ease forwards}
+.bb-pal.lost .bb-toy{animation:bbLost 2.4s ease forwards!important}
 .bb-greeting .bb-pal,.bb-greeting .bb-dock{opacity:0;pointer-events:none}
 @keyframes bbSway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg) translateY(-1.5px)}}
 @keyframes bbBat{0%,100%{transform:translateX(0) rotate(0)}35%{transform:translateX(-60%) rotate(-280deg)}50%{transform:translateX(-58%) rotate(-270deg)}80%{transform:translateX(6%) rotate(20deg)}}
@@ -324,7 +358,7 @@ body.bb-on{padding-bottom:96px}
 @keyframes bbWave{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) translateY(-6px)}50%{transform:rotate(5deg)}75%{transform:rotate(-3deg) translateY(-3px)}}
 @keyframes bbBubble{from{opacity:0;transform:scale(.6) translateX(30px)}to{opacity:1;transform:none}}
 @media (max-width:420px){.bb-greet .gdex{width:104px;height:104px}.bb-greet .gbubble{font-size:14px}}
-@media (prefers-reduced-motion:reduce){.bb-pal{transition:none}.bb-pal .bb-palart,.bb-pal .bb-yarnball,.bb-greet .gwrap,.bb-greet .gdex,.bb-greet .gbubble{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.bb-pal{transition:none}.bb-pal .bb-palart,.bb-pal .bb-toy,.bb-pal .bb-toy *,.bb-greet .gwrap,.bb-greet .gdex,.bb-greet .gbubble{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.bb-say,.bb-yarn,.bb-yarn svg{animation-duration:.01s}.bb-dock .bb-pic,.bb-card .bb-big,.bb-evo.done .new{animation:none}.bb-evo .old{animation:none;opacity:0}.bb-evo .new{animation:none;opacity:1}.bb-evo .glow{display:none}}`;
 
   // ===== Dock (bottom-right) with a ring that fills toward the next evolution
@@ -596,6 +630,29 @@ body.bb-on{padding-bottom:96px}
   // scurries over to the answer she picks to react, then goes back to playing. Tap him for the Closet / Shop / Progress.
   const PAL_YARN = `<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10.5" fill="#4f8dff" stroke="#3a2a1e" stroke-width="2"/><path d="M5 10 Q13 5 21 12 M5 15 Q13 9 21 17 M9 4.5 Q15 13 11 23" stroke="#2c5fc4" stroke-width="1.6" fill="none"/></svg>`;
   let palOn = false, palAt = null, lastOpt = null, lastOptAt = 0, visiting = 0, rafQ = 0;
+  // Playtime: Dexter switches between things cats love to do while the student reads (all toys are original SVG)
+  const OLC = "#3a2a1e";
+  const TOYS = {
+    yarn: PAL_YARN,
+    butterfly: `<svg viewBox="0 0 30 24" aria-hidden="true"><g class="wl"><path d="M15 12 C9 2 2 3 3 9 C4 14 10 14 15 12Z" fill="#ff9f43" stroke="${OLC}" stroke-width="1.4"/><path d="M15 12 C10 16 5 20 8 22 C11 23 14 18 15 12Z" fill="#ffc46b" stroke="${OLC}" stroke-width="1.4"/><circle cx="8" cy="8" r="1.4" fill="#fff"/></g><g class="wr"><path d="M15 12 C21 2 28 3 27 9 C26 14 20 14 15 12Z" fill="#ff9f43" stroke="${OLC}" stroke-width="1.4"/><path d="M15 12 C20 16 25 20 22 22 C19 23 16 18 15 12Z" fill="#ffc46b" stroke="${OLC}" stroke-width="1.4"/><circle cx="22" cy="8" r="1.4" fill="#fff"/></g><path d="M15 7 v11" stroke="${OLC}" stroke-width="2" stroke-linecap="round"/><path d="M15 7 l-2.4 -4.4 M15 7 l2.4 -4.4" stroke="${OLC}" stroke-width="1" stroke-linecap="round"/></svg>`,
+    mouse: `<svg viewBox="0 0 34 20" aria-hidden="true"><path d="M6 14 Q-1 13 2 6" stroke="#8a8f99" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="17" cy="13" rx="11" ry="6.4" fill="#b8bec8" stroke="${OLC}" stroke-width="1.5"/><circle cx="22" cy="7" r="3.6" fill="#ffc2cf" stroke="${OLC}" stroke-width="1.3"/><circle cx="25.6" cy="11.4" r="1.2" fill="${OLC}"/><circle cx="28.2" cy="14" r="1.2" fill="#ff7a9a"/><path d="M27.6 14 l4 -1.2 M27.6 15 l4 1" stroke="${OLC}" stroke-width=".7"/><path d="M12 19 v-2 M20 19 v-2" stroke="${OLC}" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+    laser: `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#ff3b30" opacity=".22"/><circle cx="10" cy="10" r="4.6" fill="#ff3b30"/><circle cx="8.6" cy="8.6" r="1.5" fill="#fff" opacity=".85"/></svg>`,
+    feather: `<svg viewBox="0 0 24 60" aria-hidden="true"><path d="M12 0 V30" stroke="#8b5a2b" stroke-width="2"/><path d="M12 30 C4 37 4 50 12 58 C20 50 20 37 12 30Z" fill="#c084fc" stroke="${OLC}" stroke-width="1.4"/><path d="M12 33 V56 M12 41 l-5 -3 M12 47 l-5 -3 M12 41 l5 -3 M12 47 l5 -3" stroke="#7c3aed" stroke-width="1"/><path d="M12 31 C7 27 5 23 8 20 M12 31 C17 27 19 23 16 20" stroke="#f472b6" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+    leaf: `<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M2 8 C8 0 18 0 22 8 C18 16 8 16 2 8Z" fill="#7cc35a" stroke="${OLC}" stroke-width="1.4"/><path d="M3 8 H21 M9 8 l3 -3 M9 8 l3 3 M15 8 l3 -3 M15 8 l3 3" stroke="#3f8a3a" stroke-width="1"/></svg>`,
+    nap: `<span class="zz">z</span><span class="zz">z</span><span class="zz">Z</span>`,
+    box: "", tail: ""
+  };
+  const BOX_FRONT = `<svg viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true"><path d="M2 10 L-4 0 L28 0 L32 10Z M98 10 L104 0 L72 0 L68 10Z" fill="#c98b52" stroke="${OLC}" stroke-width="2.2" stroke-linejoin="round"/><path d="M2 10 H98 L94 49 H6Z" fill="#d9a066" stroke="${OLC}" stroke-width="2.6" stroke-linejoin="round"/><path d="M44 10 V49 M56 10 V49" stroke="#e8c48f" stroke-width="3" opacity=".8"/><path d="M14 22 l6 6 M20 22 l-6 6" stroke="#a8713e" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+  const ACTS = ["yarn", "butterfly", "mouse", "laser", "feather", "leaf", "box", "tail"];
+  const ACT_LABEL = { yarn: "playing with his yarn ball", butterfly: "chasing a butterfly", mouse: "hunting a toy mouse", laser: "chasing a laser dot", feather: "swatting a feather toy", leaf: "pouncing on a falling leaf", box: "sitting in a box", tail: "chasing his tail", nap: "taking a cat nap" };
+  let act = ACTS[Math.random() * ACTS.length | 0], lastMove = Date.now();
+  function setAct(a) { if (a !== act) { act = a; paintPal() } }
+  function nextAct() { const pool = ACTS.filter(x => x !== act); setAct(pool[Math.random() * pool.length | 0]) }
+  setInterval(() => {   // a new game every 15 s; a cat nap after 45 s without any interaction
+    if (!palOn || off() || visiting || document.hidden) return;
+    if (act !== "nap" && Date.now() - lastMove > 45000) setAct("nap"); else if (act !== "nap") nextAct();
+  }, 15000);
+  ["pointerdown", "keydown", "scroll", "touchstart"].forEach(t => addEventListener(t, () => { lastMove = Date.now(); if (act === "nap") nextAct() }, { passive: true, capture: true }));
   const shown = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
   const palSize = () => innerWidth >= 900 ? 96 : 72;
   function anchor() { const p = $("bbPal"); return palOn && p ? p : $("bbDock") }
@@ -624,8 +681,9 @@ body.bb-on{padding-bottom:96px}
     let p = $("bbPal");
     if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet"); document.body.appendChild(p); if (palAt) place(palAt) }
     p.style.setProperty("--ps", palSize() + "px");
-    p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}. Open closet and shop`);
-    p.innerHTML = `<span class="bb-yarnball">${PAL_YARN}</span><span class="bb-palart">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+    p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]}`;
+    ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
+    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, act === "nap" ? { eyes: "closed" } : null)}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
   function visit() {
@@ -674,5 +732,5 @@ body.bb-on{padding-bottom:96px}
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, art, STAGES, state: load, level };
+  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
 })();
