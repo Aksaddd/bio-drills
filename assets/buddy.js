@@ -98,13 +98,13 @@
       <path d="M${x + m(-7.8)} ${y + e.bO} L${x + m(6.8)} ${y + e.bI}" stroke="#6b3f17" stroke-width="4.2" stroke-linecap="round"/>
       ${e.tear && out < 0 ? `<path d="M${x - 5.2} ${y + 6.6} q-1.6 2.8 0 4 q1.6 -1.2 0 -4Z" fill="#8fd3ff" stroke="${OL}" stroke-width=".9"/>` : ""}`;
   }
-  // Mouth to match: happy = open smile, sad = wobbly frown, wide = a little "o", asleep = soft ω, otherwise his grin with a fang
+  // Mouth to match: happy = open smile, sad = wobbly frown, wide = a little "o", asleep = soft ω, otherwise his grin
   function mouth(mode) {
     if (mode === "closed" || mode === "sleep") return `<path d="M55.4 71 Q57.7 74.4 60 71.2 Q62.3 74.4 64.6 71" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
     if (mode === "happy") return `<path d="M55 71.2 Q57.5 73.4 60 71.4 Q62.5 73.4 65 71.2 Q64 78.4 60 78.6 Q56 78.4 55 71.2Z" fill="#a8463a" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/><path d="M57.2 76.2 Q60 74.6 62.8 76.2 Q61.8 78.2 60 78.3 Q58.2 78.2 57.2 76.2Z" fill="#f08a8a"/>`;
     if (mode === "sad") return `<path d="M55.6 75 Q57.6 72.2 60 73.2 Q62.4 72.2 64.4 75" stroke="${OL}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`;
     if (mode === "wide") return `<path d="M56.4 71.2 Q58.2 72.6 60 71.4 Q61.8 72.6 63.6 71.2" stroke="${OL}" stroke-width="1.5" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="75" rx="2.2" ry="2.5" fill="#a8463a" stroke="${OL}" stroke-width="1.3"/>`;
-    return `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M61.8 72.9 L63.2 77.4 L64.8 72.2Z" fill="#fff" stroke="${OL}" stroke-width="1.1" stroke-linejoin="round"/>`;
+    return `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
   }
 
   // The kitten at full size, standing on y=108; o: { sc, eyes, tail, extraBack, extraFront, glasses }
