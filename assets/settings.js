@@ -131,7 +131,8 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
       </div><p class="st-foot">Font and size apply to questions and explanations in every drill.</p></div>
       ${window.BioBuddy ? `<p class="st-cap">Study buddy</p>
       <div class="st-sec" style="margin-top:0"><div class="st-group">
-        <label class="st-row"><span class="st-l"><span>Show study buddy</span><small>A baby sea turtle whose shell grows a forest as you learn</small></span><input type="checkbox" class="st-sw" id="stBuddy"${window.BioBuddy.enabled() ? " checked" : ""}></label>
+        <label class="st-row"><span class="st-l"><span>Show study buddy</span><small>Dexter, a blonde kitten who grows up as you learn</small></span><input type="checkbox" class="st-sw" id="stBuddy"${window.BioBuddy.enabled() ? " checked" : ""}></label>
+        ${window.BioBuddy.enabled() && window.BioBuddy.soundOn ? `<label class="st-row"><span class="st-l"><span>Dexter's meow</span><small>He meows when you get one right</small></span><input type="checkbox" class="st-sw" id="stMeow"${window.BioBuddy.soundOn() ? " checked" : ""}></label>` : ""}
         ${window.BioBuddy.enabled() ? `<button type="button" class="st-row" id="stBuddyOpen"><span class="st-l" style="color:var(--s-acc)">See your buddy</span></button>` : ""}
       </div></div>` : ""}`;
   }
@@ -144,6 +145,7 @@ button.st-row{cursor:pointer} button.st-row:active{background:var(--s-fill)}
     sh.querySelectorAll("[data-size-pick]").forEach(b => b.onclick = () => { const r = reading(); r.size = +b.dataset.sizePick; set(READ_KEY, JSON.stringify(r)); applyReading(r); emit("bio:reading", r); paint() });
     const di = sh.querySelector("#stDate");
     di.onchange = () => { if (!di.value) return; set(DATE_KEY, di.value); set(SKIP_KEY, null); emit("bio:exam", examDate()); paint() };
+    const bm = sh.querySelector("#stMeow"); if (bm) bm.onchange = () => window.BioBuddy.setSound(bm.checked);
     const bs = sh.querySelector("#stBuddy"); if (bs) bs.onchange = () => { window.BioBuddy.setEnabled(bs.checked); paint() };
     const bo = sh.querySelector("#stBuddyOpen"); if (bo) bo.onclick = () => { close(); window.BioBuddy.open() };
     const rs = sh.querySelector("#stReset"); if (rs) rs.onclick = () => { set(DATE_KEY, null); emit("bio:exam", examDate()); paint() };
