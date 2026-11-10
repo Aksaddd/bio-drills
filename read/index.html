@@ -10,6 +10,7 @@
 <script src="../assets/xp.js"></script>
 <script src="../assets/wardrobe.js"></script>
 <script src="../assets/buddy.js"></script>
+<script src="../assets/lookup.js"></script>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <style>
@@ -194,7 +195,7 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
     const next = R.find(c => !chState(c).finished) || R[0];
     $("view").innerHTML = `<p class="rd-lead">Read the course one short passage at a time. After each passage, answer a few questions about what you just read, then keep reading. Start here, before the drills.</p>
       <div class="rd-stickers" aria-label="Chapter stickers">${R.map(c => `<span class="${chState(c).finished ? "got" : ""}" title="${esc(c.title)}">${EMO[c.id]}</span>`).join("")}</div>
-      <div class="rd-how"><b>How it works:</b> the figures come straight from the lecture slides, and every passage has something to do: label a diagram, put steps in order, match, sort, or run one of the lecture's experiments yourself. A perfect first try earns Dexter XP. Then answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
+      <div class="rd-how"><b>How it works:</b> the figures come straight from the lecture slides, and every passage has something to do: label a diagram, put steps in order, match, sort, or run one of the lecture's experiments yourself. A perfect first try earns Dexter XP. <b>Press and hold any science word</b> to see what it means and its Greek and Latin roots. Then answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
       <div class="rd-list">${R.map((c, i) => {
         const p = chProgress(c), S = chState(c), mins = Math.max(2, Math.round(words(c) / 200));
         const go = S.finished ? "Read again" : p.answered || S.at ? "Continue" : c === next ? "Start" : "Read";

@@ -30,6 +30,13 @@ The first module on the home page: the whole unit as reading comprehension. Eigh
 - **Content:** `read/chapters.js` (`window.READ`). Each section is `{ h, html, qs }`, where `qs` lists question ids from the drill bank (`drill/questions.js`), so there's one source of truth for questions, answers and explanations. 159 of the bank's questions appear in the reading (all but a few figure-only and duplicate ones; Bio-pardy clues stay on the board).
 - **Progress:** saved per device as `bio-read-v1` (`{ chapterId: { at, finished, a: { questionId: { ok, p, o } } } }`); a finished chapter shows every passage and answer. Each answer is also written into the drill's progress (`bio-u3-progress-v1`: history, stats, Missed list, today's count), so the drill knows what you've learned and a miss shows up in its Missed tab. Answers fire `bio:correct` / `bio:wrong` like the drill, so Dexter follows along and earns XP and gold.
 
+## Press and hold a word
+
+On every page, press and hold any word for about half a second (finger, mouse or pen) to get a card with its definition, its word parts (each root's meaning and Greek or Latin origin, linked to the Word Roots page) and its literal meaning. The word is highlighted while the card is open; tap anywhere to close it. A hold never counts as a tap, so holding an answer option doesn't pick it. Plurals and Latin plurals work (sporangia, hyphae, sori, stomata), as do multi-word terms (abscisic acid, alternation of generations, systemic acquired resistance).
+
+- `assets/lexicon.js`: the course dictionary, about 160 terms with definitions and word parts.
+- `assets/lookup.js`: the engine. When a word isn't in the dictionary, it uses the Word Roots list (`roots/roots.js` example terms), then the glossary, then finds known roots inside the word. The data loads on the first hold. A one-time tip (`bio-lookup-tip`) points the feature out.
+
 ## Settings
 
 Every page has **Settings** at the top: in the home page's nav bar, and beside "← All drills" on the other pages. It opens an iOS-style sheet (`assets/settings.js`, loaded in each page's `<head>` so the theme applies before the page paints):
