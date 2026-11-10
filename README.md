@@ -120,10 +120,13 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   Older saved coats map to breed + color (`LEGACY`).
 - **The Cat Café** (Cats tab → *Visit the Cat Café*): a cozy illustrated café where cats lounge.
   - **The room:** an arched sunset window with drifting clouds, twinkling string lights, swaying lamps, a chalkboard menu, shelves with books and plants, a coffee counter with a steaming espresso machine, a sofa, a rug, a basket and a little cat tree.
-  - **Who's there:** one cat of every breed (coat colors rotate daily), plus your own cats who aren't studying.
-  - **Life in the café:** cats blink, swish their tails, chirp ("mrrp?") and wander between spots.
+  - **Who's there:** two cats of every breed in different coats (colors rotate daily), plus your own cats who aren't studying, so the café is packed (about 19 cats), with a few spots left free for wandering.
+  - **Wall climbing:** a rope bridge from the window sill to the shelves and two wooden wall steps, each with cats lounging on them (`CAFE_WALL`).
+  - **Toys everywhere** (`CAFE_TOYS`): rolling yarn balls, a robot mouse that zooms back and forth across the rug with a blinking antenna, a red laser dot, a swinging feather wand, a ball-track toy with a ball circling, a fish plush and crinkle balls.
+  - **Cats at play:** spots with an `act` (yarn, mouse, feather, laser) have the cat play that game with the same body animations as the study pal (swatting, butt-wiggle stalking, tail twitching) and big hunting eyes.
+  - **Life in the café:** cats blink, swish their tails, chirp ("mrrp?") and wander between spots every couple of seconds.
   - **Meeting a cat:** tap a guest to pick a coat color and a name, then *Bring to study* (adopt and train) or *Adopt · come along*. Tap one of your cats to study with it, bring it along, or let it keep chilling.
-- **The cat tree (in the Café):** a big multi-floor cat tree stands in the café's corner: a carpeted top perch for two, a pink hammock, a cubby house with a roof perch and a base, plus a swinging pom-pom, a toy mouse and a ball (`TREE_SVG`).
+- **The cat tree (in the Café):** a big multi-floor cat tree stands in the café's corner: a carpeted top perch for two, a pink hammock, a cubby house with a roof perch (the cat sits right on the roof, above the doorway) and a base, plus a swinging pom-pom, a toy mouse and a ball (`TREE_SVG`).
   - Cats can go inside the cubby house: one at a time, a cat walks in and only its face peeks out of the round doorway (clipped to the hole, `inside` spot), sometimes dozing, until it comes back out and another takes a turn. Tap the face to meet that cat.
   - Its floors are lounging spots: cats nap in the hammock, sit on the perches and wander on and off. Cats on the tree play together now and then, hopping with hearts and chirps.
   - On study pages there's no tree (`treeOn()` is false): the companions float beside the cat in training so the questions stay uncluttered.
