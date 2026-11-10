@@ -486,3 +486,7 @@ a.chip{color:var(--accent)}
 [data-theme="dark"] input[type="checkbox"]{color-scheme:dark}
 
 .retryrow{display:flex;justify-content:flex-start}
+
+/* narrow phones: the title and the "answered today" counter stack instead of pushing the page wider */
+.titlerow{flex-wrap:wrap;min-width:0}.titlerow h1{min-width:0;overflow-wrap:anywhere}
+@media (max-width:420px){.titlerow .habit{flex:1 1 100%;justify-content:flex-start}.titlerow .habit-text{align-items:flex-start;text-align:left}}

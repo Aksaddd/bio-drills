@@ -128,7 +128,10 @@ main.inner{padding-top:48px;padding-bottom:64px;display:flex;flex-direction:colu
 .stack i{display:block;height:100%}
 .c-right{background:var(--st-right)} .c-wrong{background:var(--st-wrong)} .c-review{background:var(--st-review)} .c-new{background:var(--st-new)}
 .ptext{flex:1;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
-.stack:not(:empty)+.ptext{flex:none}
+.stack:not(:empty)+.ptext{flex:1 1 auto}
+.prow{flex-wrap:wrap;min-width:0}.ptext{min-width:0}.card{min-width:0}
+/* phones: the progress bar gets its own full-width line, with the status and the button underneath, all inside the card */
+@media (max-width:640px){.prow .stack{flex:1 1 100%}.prow .ptext{flex:1 1 100%}.prow .plink{flex:1 1 100%;text-align:center;padding:12px 17px;font-weight:600;font-size:16px}}
 .plink{flex:none;font:400 15px var(--body);color:#fff;background:var(--accent);text-decoration:none;border-radius:980px;padding:8px 17px;transition:background .15s}
 .plink:hover{background:var(--accent-hover)}
 .plink.ghost{background:var(--fill);color:var(--accent)}
