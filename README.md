@@ -106,7 +106,29 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Lying:** a curled loaf for naps, paws tucked and tail wrapped around.
   - Hats, glasses, neckwear and badges move with his head. Outfits are mapped onto the side of his standing or lying body.
 - **Weight:** a slider in the Closet goes from Slim through Just right, Well fed and Chubby to Absolute chonk (0.75–1.5, saved as `weight` in his state). It widens his body, belly, haunches and legs in every pose.
-- **Breeds and a household of cats:** the **Cats** tab in the companion's panel lists every cat in the household. A free adoption picks from 9 breeds, each the same chibi cat with its own coat, eyes and markings: Golden (Dexter), Orange Tabby, Silver Tabby, Black Cat, Tuxedo, Siamese, Calico, Russian Blue, Snow White (`BREEDS` / `setCoat()` in `assets/buddy.js`). Up to 6 cats.
+- **Breeds and colors:** 9 breeds, each with its own build (`shape` in `BREEDS`, `assets/buddy.js`: ear size, head shape, tail thickness, body build, ruff, ear tufts, fluff, gloss) and 2–4 coat colors, 28 in all:
+  - **Domestic Shorthair** (Dexter): golden, cream, gray, chocolate
+  - **Tabby**: orange, silver, brown, cream
+  - **Tuxedo**: black, gray or orange, each with white
+  - **Bombay**: sleek black or smoke
+  - **Siamese**: slender, with big ears, a wedge face and points: seal, chocolate, blue, lilac
+  - **Calico**: classic or dilute
+  - **Russian Blue**: blue or silver blue
+  - **Persian**: tiny ears, a round face, a fluffy ruff and tail: white, cream, chinchilla silver, black
+  - **Maine Coon**: lynx tufts, a lion's ruff and a huge tail: brown tabby, red, silver
+
+  Older saved coats map to breed + color (`LEGACY`).
+- **The Cat Café** (Cats tab → *Visit the Cat Café*): a cozy illustrated café where cats lounge.
+  - **The room:** an arched sunset window with drifting clouds, twinkling string lights, swaying lamps, a chalkboard menu, shelves with books and plants, a coffee counter with a steaming espresso machine, a sofa, a rug, a basket and a little cat tree.
+  - **Who's there:** one cat of every breed (coat colors rotate daily), plus your own cats who aren't studying.
+  - **Life in the café:** cats blink, swish their tails, chirp ("mrrp?") and wander between spots.
+  - **Meeting a cat:** tap a guest to pick a coat color and a name, then *Bring to study* (adopt and train) or *Adopt · come along*. Tap one of your cats to study with it, bring it along, or let it keep chilling.
+- **The cat tree:** on question pages the cats live on a cat tree standing on the bottom of the screen, in the margin beside the questions when there's room, otherwise the bottom corner (`TREE_SVG` / `layoutTree()`).
+  - **Floors:** a carpeted top perch for two, a hammock (cats lie in it), a cubby house with a roof perch, and the base.
+  - **Toys:** a swinging pom-pom, a toy mouse and a ball.
+  - **Movement:** the cat in training runs to answers and comes back. The others stay on the tree, hop between floors and swap places with each other. Before an interaction, a companion hops next to him.
+  - **Settings:** dragging him moves the tree along the floor. Progress → *Cat tree* turns it off. On phones the page gets bottom padding so content can scroll above the tree.
+- **A household of cats:** the **Cats** tab in the companion's panel lists every cat in the household. A free adoption picks from 9 breeds, each the same chibi cat with its own coat, eyes and markings: Golden (Dexter), Orange Tabby, Silver Tabby, Black Cat, Tuxedo, Siamese, Calico, Russian Blue, Snow White (`BREEDS` / `setCoat()` in `assets/buddy.js`). Up to 6 cats.
   - **Training:** one cat is *in training* and earns the XP. *Train* switches with one tap.
   - **What's per cat:** XP, level, evolution, name, breed, outfit, collar color, pinned badges and weight.
   - **What's shared:** gold, owned items and earned badges belong to the household.

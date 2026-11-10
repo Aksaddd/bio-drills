@@ -53,11 +53,11 @@
   // unchanged); the others wait in CATS_KEY. Gold and owned items (wardrobe, badges) belong to the household and stay put
   // when you switch; each cat keeps its own XP, level, name, breed, outfit, collar and weight.
   const CATS_KEY = KEY.replace(/-v1$/, "") + "-cats-v1", MAX_CATS = 6, MAX_ALONG = 2;
-  const CAT_FIELDS = ["pts", "correct", "streak", "best", "last", "nick", "equip", "collar", "weight", "breed", "born"];
+  const CAT_FIELDS = ["pts", "correct", "streak", "best", "last", "nick", "equip", "collar", "weight", "breed", "color", "born"];
   const pickCat = s => Object.fromEntries(CAT_FIELDS.filter(f => s[f] !== undefined).map(f => [f, s[f]]));
   function household() {
     let H = null; try { H = JSON.parse(localStorage.getItem(CATS_KEY) || "null") } catch (e) { }
-    if (!H || !H.cats || !H.active) { const s = load(); H = { active: "c1", cats: { c1: Object.assign(pickCat(s), { breed: s.breed || "golden", nick: s.nick || "" }) }, along: [] } }
+    if (!H || !H.cats || !H.active) { const s = load(); H = { active: "c1", cats: { c1: Object.assign(pickCat(s), { breed: s.breed || "domestic", color: s.color || "golden", nick: s.nick || "" }) }, along: [] } }
     H.along = (H.along || []).filter(id => H.cats[id] && id !== H.active).slice(0, MAX_ALONG);
     return H;
   }
@@ -70,15 +70,15 @@
   function trainCat(id) {
     const H = household(); if (!H.cats[id] || id === H.active) return;
     const s = load(); H.cats[H.active] = pickCat(s);
-    const c = Object.assign({ pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick: "", equip: { badges: [] }, collar: "navy", weight: 1, breed: "golden" }, H.cats[id]);
+    const c = Object.assign({ pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick: "", equip: { badges: [] }, collar: "navy", weight: 1, breed: "domestic", color: "golden" }, H.cats[id]);
     CAT_FIELDS.forEach(f => { s[f] = c[f] }); delete s.badge;
     H.along = H.along.filter(x => x !== id); if (!H.along.includes(H.active) && H.along.length < MAX_ALONG) H.along.push(H.active);   // the old trainee comes along
     H.active = id; save(s); saveHouse(H);
   }
-  function adoptCat(breed, nick) {
+  function adoptCat(breed, nick, color) {
     const H = household(); if (Object.keys(H.cats).length >= MAX_CATS) return null;
     const id = "c" + Date.now().toString(36);
-    H.cats[id] = { pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick, equip: { badges: [] }, collar: "navy", weight: 1, breed, born: Date.now() };
+    H.cats[id] = { pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick, equip: { badges: [] }, collar: "navy", weight: 1, breed, color, born: Date.now() };
     if (H.along.length < MAX_ALONG) H.along.push(id);
     saveHouse(H); return id;
   }
@@ -111,22 +111,71 @@
   const EYES_GOLD = IRIS.slice(), EYES_BLUE = ["#bfe6ff", "#8fd0ff", "#4fa8f0", "#2f7fd0", "#1d5aa8"], EYES_AMBER = ["#fff1a8", "#ffd34d", "#f2a900", "#c97c00", "#8a5200"], EYES_GREEN = ["#d9f99d", "#a3e635", "#65a30d", "#3f7a12", "#2a5a0c"];
   const tabbyHead = c => `<path d="M31.5 63 l6 1 M31.8 67.4 l5.6 0 M88.5 63 l-6 1 M88.2 67.4 l-5.6 0" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/><path d="M47.5 47.6 l2.2 -3.4 M60 46.4 v-3.8 M72.5 47.6 l-2.2 -3.4" stroke="${c}" stroke-width="1.9" stroke-linecap="round"/>`;
   const tabbyBody = c => (w, hx) => `<path d="M${(60 - hx - 7 * w).toFixed(1)} 95 q4 -2.6 8 0 M${(60 - hx - 6 * w).toFixed(1)} 100 q4 -2.6 8 0 M${(60 + hx - 1 * w).toFixed(1)} 95 q4 -2.6 8 0 M${(60 + hx - 2 * w).toFixed(1)} 100 q4 -2.6 8 0" stroke="${c}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  // Markings, parameterized by color
+  const tuxHead = c => `<path d="M51 68 Q50 61.6 60 61.6 Q70 61.6 69 68 Q69 77.6 60 77.6 Q51 77.6 51 68Z" fill="${c}"/><path d="M60 40 L56.6 52 Q60 55 63.4 52Z" fill="${c}"/>`;
+  const pointsHead = c => `<path d="M36.5 15 L43.5 21.5 L41.5 25 L38 27Z M83.5 15 L84 26.5 L77 23Z" fill="${c}"/><ellipse cx="60" cy="70" rx="12.5" ry="9" fill="${c}" opacity=".85"/>`;
+  const calicoHead = (a, b) => `<path d="M31 62 Q34 54 44 55 Q46 62 41 70 Q35 72 31.6 69Z" fill="${a}"/><path d="M76 49 Q84 46 87.6 55 Q88 62 82 63 Q76 60 76 49Z" fill="${b}"/>`;
+  const calicoBody = (a, b) => (w, hx) => `<ellipse cx="${(60 - hx).toFixed(1)}" cy="98" rx="${(6.5 * w).toFixed(1)}" ry="5.5" fill="${a}"/><ellipse cx="${(60 + hx + 1).toFixed(1)}" cy="101" rx="${(5.5 * w).toFixed(1)}" ry="4.6" fill="${b}"/>`;
+  const gloss = `<path d="M44 44 Q50 38.6 58 38.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".35"/>`;
+  // ===== Breeds. Each breed has its own build (shape) and several coat colors.
+  //   shape: ex/ey = ear width/height · hx/hy = head width/height · tail = tail thickness · wb = body build (× weight)
+  //          ruff = fluffy mane under the chin · tufts = lynx tips on the ears · fluff = fluffy chest and haunches · sleek = glossy coat
+  //   colors: { key: { name, fur: [base, shade, light], pink: [inner ear, nose], eyes, pat: color(s) for the markings } }
   const BREEDS = {
-    golden: { name: "Golden", desc: "Dexter's own sunny blonde coat", fur: ["#f7d27c", "#e2aa4a", "#fff0c2"], pink: ["#e8a08a", "#c9705a"], eyes: EYES_GOLD, names: ["Dexter", "Sunny", "Honey", "Butterscotch"] },
-    orange: { name: "Orange Tabby", desc: "Ginger stripes and a big appetite", fur: ["#f6a85e", "#d9772f", "#ffe4c7"], pink: ["#f29a8c", "#c9705a"], eyes: EYES_GOLD, head: tabbyHead("#c2621d"), body: tabbyBody("#c2621d"), names: ["Mango", "Pumpkin", "Garfield Jr.", "Cheeto"] },
-    silver: { name: "Silver Tabby", desc: "Cool gray with classic tabby stripes", fur: ["#cdd1d9", "#9aa0ab", "#f3f4f7"], pink: ["#eaa3ad", "#c9707a"], eyes: EYES_GREEN, head: tabbyHead("#6f7581"), body: tabbyBody("#6f7581"), names: ["Smokey", "Pepper", "Ash", "Nimbus"] },
-    black: { name: "Black Cat", desc: "Sleek midnight fur and amber eyes", fur: ["#3d3c46", "#2a2930", "#64636f"], pink: ["#c48a9a", "#9c5f70"], eyes: EYES_AMBER, names: ["Shadow", "Midnight", "Salem", "Onyx"] },
-    tuxedo: { name: "Tuxedo", desc: "Black coat with a white bib, socks and muzzle", fur: ["#35343c", "#25242a", "#f7f7f9"], pink: ["#e8a0aa", "#b56b78"], eyes: EYES_GREEN, head: `<path d="M51 68 Q50 61.6 60 61.6 Q70 61.6 69 68 Q69 77.6 60 77.6 Q51 77.6 51 68Z" fill="#f7f7f9"/>`, names: ["Oreo", "Domino", "Bandit", "Tux"] },
-    siamese: { name: "Siamese", desc: "Cream coat with dark points and blue eyes", fur: ["#f4e8d4", "#d8c09c", "#fffaf0"], pink: ["#e9a99a", "#8a5a48"], eyes: EYES_BLUE, head: `<path d="M36.5 15 L43.5 21.5 L41.5 25 L38 27Z M83.5 15 L84 26.5 L77 23Z" fill="#5a4334"/><ellipse cx="60" cy="70" rx="12.5" ry="9" fill="#6b5040" opacity=".85"/>`, names: ["Miso", "Cleo", "Sapphire", "Mochi"] },
-    calico: { name: "Calico", desc: "White with orange and black patches", fur: ["#fbf6ec", "#e6dccb", "#ffffff"], pink: ["#f2a9b0", "#c9707a"], eyes: EYES_GOLD, head: `<path d="M31 62 Q34 54 44 55 Q46 62 41 70 Q35 72 31.6 69Z" fill="#f2a04a"/><path d="M76 49 Q84 46 87.6 55 Q88 62 82 63 Q76 60 76 49Z" fill="#3a3640"/>`, body: (w, hx) => `<ellipse cx="${(60 - hx).toFixed(1)}" cy="98" rx="${(6.5 * w).toFixed(1)}" ry="5.5" fill="#f2a04a"/><ellipse cx="${(60 + hx + 1).toFixed(1)}" cy="101" rx="${(5.5 * w).toFixed(1)}" ry="4.6" fill="#3a3640"/>`, names: ["Patches", "Maple", "Biscuit", "Clover"] },
-    russian: { name: "Russian Blue", desc: "Plush blue-gray coat and green eyes", fur: ["#929fb5", "#717d93", "#c9d2df"], pink: ["#d79aa6", "#a7697a"], eyes: EYES_GREEN, names: ["Blue", "Storm", "Velvet", "Misty"] },
-    snow: { name: "Snow White", desc: "Fluffy all-white coat and sky-blue eyes", fur: ["#fbfbfd", "#e1e5ee", "#ffffff"], pink: ["#f6b3bf", "#d97f90"], eyes: EYES_BLUE, names: ["Snowball", "Cotton", "Marshmallow", "Pearl"] }
+    domestic: { name: "Domestic Shorthair", desc: "Dexter's own breed: sturdy, friendly and up for anything", shape: {}, names: ["Dexter", "Sunny", "Honey", "Biscuit"],
+      colors: { golden: { name: "Golden", fur: ["#f7d27c", "#e2aa4a", "#fff0c2"], pink: ["#e8a08a", "#c9705a"], eyes: EYES_GOLD },
+        cream: { name: "Cream", fur: ["#f6e2c4", "#e0c39a", "#fffaf0"], pink: ["#efa9a0", "#c97a70"], eyes: EYES_AMBER },
+        gray: { name: "Gray", fur: ["#b9bec8", "#8f96a3", "#e9ebf0"], pink: ["#e6a0aa", "#b5707e"], eyes: EYES_GREEN },
+        chocolate: { name: "Chocolate", fur: ["#9a6a46", "#7a4f31", "#c99f7d"], pink: ["#e3a090", "#a8624f"], eyes: EYES_AMBER } } },
+    tabby: { name: "Tabby", desc: "Classic stripes, an M on the forehead and a big appetite", shape: { ey: 1.04 }, names: ["Mango", "Pumpkin", "Tiger", "Cheeto"], pattern: "tabby",
+      colors: { orange: { name: "Orange", fur: ["#f6a85e", "#d9772f", "#ffe4c7"], pink: ["#f29a8c", "#c9705a"], eyes: EYES_GOLD, pat: "#c2621d" },
+        silver: { name: "Silver", fur: ["#cdd1d9", "#9aa0ab", "#f3f4f7"], pink: ["#eaa3ad", "#c9707a"], eyes: EYES_GREEN, pat: "#6f7581" },
+        brown: { name: "Brown", fur: ["#b98c5e", "#8d6440", "#e6cfb2"], pink: ["#e3a090", "#a8624f"], eyes: EYES_GREEN, pat: "#5b3d22" },
+        cream: { name: "Cream", fur: ["#f3dcb8", "#dfbf92", "#fff8ec"], pink: ["#efa9a0", "#c97a70"], eyes: EYES_AMBER, pat: "#c99c63" } } },
+    tuxedo: { name: "Tuxedo", desc: "Always dressed up: a white bib, socks and a white muzzle", shape: {}, names: ["Oreo", "Domino", "Bandit", "Tux"], pattern: "tux",
+      colors: { black: { name: "Black & white", fur: ["#35343c", "#25242a", "#f7f7f9"], pink: ["#e8a0aa", "#b56b78"], eyes: EYES_GREEN, pat: "#f7f7f9" },
+        gray: { name: "Gray & white", fur: ["#8a909c", "#6b717d", "#f7f7f9"], pink: ["#e8a0aa", "#b56b78"], eyes: EYES_AMBER, pat: "#f7f7f9" },
+        orange: { name: "Orange & white", fur: ["#f2a35a", "#d27a35", "#fffaf2"], pink: ["#f2a3a0", "#c9705a"], eyes: EYES_GOLD, pat: "#fffaf2" } } },
+    bombay: { name: "Bombay", desc: "A sleek, glossy mini panther with copper eyes", shape: { ex: .96, sleek: true, wb: .94 }, names: ["Shadow", "Midnight", "Salem", "Onyx"],
+      colors: { black: { name: "Black", fur: ["#2f2e36", "#1f1e24", "#55545f"], pink: ["#c48a9a", "#9c5f70"], eyes: EYES_AMBER },
+        smoke: { name: "Smoke", fur: ["#55545e", "#3d3c44", "#9a99a6"], pink: ["#c48a9a", "#9c5f70"], eyes: EYES_AMBER } } },
+    siamese: { name: "Siamese", desc: "Slender and chatty, with a wedge face, big ears and sapphire eyes", shape: { ex: 1.14, ey: 1.3, hx: .92, hy: 1.04, tail: 4.2, wb: .84 }, names: ["Miso", "Cleo", "Sapphire", "Mochi"], pattern: "points",
+      colors: { seal: { name: "Seal point", fur: ["#f4e8d4", "#d8c09c", "#fffaf0"], pink: ["#e9a99a", "#8a5a48"], eyes: EYES_BLUE, pat: "#5a4334" },
+        chocolate: { name: "Chocolate point", fur: ["#f7eddc", "#e2cdab", "#fffbf3"], pink: ["#ecb0a0", "#9a6a52"], eyes: EYES_BLUE, pat: "#8a6044" },
+        blue: { name: "Blue point", fur: ["#eef0f4", "#cfd5df", "#ffffff"], pink: ["#e8b0bc", "#8f7f9a"], eyes: EYES_BLUE, pat: "#6f7c93" },
+        lilac: { name: "Lilac point", fur: ["#f5f0f3", "#ddd2da", "#ffffff"], pink: ["#efb6c4", "#a58698"], eyes: EYES_BLUE, pat: "#a8949f" } } },
+    calico: { name: "Calico", desc: "A patchwork of three colors and plenty of personality", shape: {}, names: ["Patches", "Maple", "Clover", "Pebble"], pattern: "calico",
+      colors: { classic: { name: "Classic", fur: ["#fbf6ec", "#e6dccb", "#ffffff"], pink: ["#f2a9b0", "#c9707a"], eyes: EYES_GOLD, pat: ["#f2a04a", "#3a3640"] },
+        dilute: { name: "Dilute (pastel)", fur: ["#fbf7f1", "#e7ded2", "#ffffff"], pink: ["#f2b3b8", "#c98088"], eyes: EYES_GREEN, pat: ["#f2c99a", "#8f95a8"] } } },
+    russian: { name: "Russian Blue", desc: "Plush silver-blue coat, emerald eyes and a little smile", shape: { ex: 1.08, ey: 1.12, hx: .96, wb: .9 }, names: ["Blue", "Storm", "Velvet", "Misty"],
+      colors: { blue: { name: "Blue", fur: ["#929fb5", "#717d93", "#c9d2df"], pink: ["#d79aa6", "#a7697a"], eyes: EYES_GREEN },
+        silver: { name: "Silver blue", fur: ["#b3bdcd", "#8e99ab", "#e3e8ef"], pink: ["#dca3ae", "#a7697a"], eyes: EYES_GREEN } } },
+    persian: { name: "Persian", desc: "A round flat face, tiny ears and a cloud of fluff", shape: { ex: .84, ey: .62, hx: 1.07, hy: .97, tail: 9.4, wb: 1.18, ruff: true, fluff: true }, names: ["Snowball", "Cotton", "Marshmallow", "Pearl"],
+      colors: { white: { name: "White", fur: ["#fbfbfd", "#e1e5ee", "#ffffff"], pink: ["#f6b3bf", "#d97f90"], eyes: EYES_BLUE },
+        cream: { name: "Cream", fur: ["#f6e6cc", "#e3cba5", "#fffaf0"], pink: ["#f2b0aa", "#c97a70"], eyes: EYES_AMBER },
+        silver: { name: "Chinchilla silver", fur: ["#e6e9ef", "#bfc5d0", "#ffffff"], pink: ["#efb0bc", "#c47c8c"], eyes: EYES_GREEN },
+        black: { name: "Black", fur: ["#36353d", "#24232a", "#5c5b68"], pink: ["#c48a9a", "#9c5f70"], eyes: EYES_AMBER } } },
+    mainecoon: { name: "Maine Coon", desc: "A gentle giant with lynx ear tufts, a lion's ruff and a huge bushy tail", shape: { ex: 1.06, ey: 1.16, tail: 10, wb: 1.14, ruff: true, tufts: true, fluff: true }, names: ["Bear", "Moose", "Atlas", "Willow"], pattern: "tabby",
+      colors: { brown: { name: "Brown tabby", fur: ["#a87a4f", "#7d5733", "#e4cba9"], pink: ["#e3a090", "#a8624f"], eyes: EYES_GOLD, pat: "#4f331c" },
+        red: { name: "Red", fur: ["#e59a5a", "#c27136", "#ffe0bf"], pink: ["#f29a8c", "#c9705a"], eyes: EYES_AMBER, pat: "#a95a20" },
+        silver: { name: "Silver", fur: ["#c3c8d1", "#959ba7", "#f2f3f6"], pink: ["#eaa3ad", "#c9707a"], eyes: EYES_GREEN, pat: "#5e6470" } } }
   };
-  function setCoat(key) {
-    const B = BREEDS[key] || BREEDS.golden;
-    [FUR, FUR_D, FUR_L] = B.fur; [PINK, PINK_D] = B.pink; IRIS = B.eyes;
-    return B;
+  // older saves used one key per coat; map them to breed + color
+  const LEGACY = { golden: ["domestic", "golden"], orange: ["tabby", "orange"], silver: ["tabby", "silver"], black: ["bombay", "black"], tuxedo: ["tuxedo", "black"], siamese: ["siamese", "seal"], calico: ["calico", "classic"], russian: ["russian", "blue"], snow: ["persian", "white"] };
+  function resolveBreed(breed, color) {
+    if (LEGACY[breed] && !BREEDS[breed]) { const [b, c] = LEGACY[breed]; return [b, BREEDS[b].colors[color] ? color : c] }
+    const b = BREEDS[breed] ? breed : "domestic", cs = BREEDS[b].colors;
+    return [b, cs[color] ? color : Object.keys(cs)[0]];
   }
+  const breedName = (breed, color) => { const [b, c] = resolveBreed(breed, color); const B = BREEDS[b]; return Object.keys(B.colors).length > 1 && b !== "domestic" ? `${B.colors[c].name} ${B.name}` : b === "domestic" ? `${B.colors[c].name} ${B.name}` : B.name };
+  let SHAPE = {};
+  function setCoat(breed, color) {
+    const [b, c] = resolveBreed(breed, color), B = BREEDS[b], C = B.colors[c];
+    [FUR, FUR_D, FUR_L] = C.fur; [PINK, PINK_D] = C.pink; IRIS = C.eyes; SHAPE = B.shape || {};
+    const pat = B.pattern === "tabby" ? { head: tabbyHead(C.pat), body: tabbyBody(C.pat) } : B.pattern === "tux" ? { head: tuxHead(C.pat) } : B.pattern === "points" ? { head: pointsHead(C.pat) } : B.pattern === "calico" ? { head: calicoHead(C.pat[0], C.pat[1]), body: calicoBody(C.pat[0], C.pat[1]) } : {};
+    return { head: (pat.head || "") + (SHAPE.sleek ? gloss : ""), body: pat.body, shape: SHAPE };
+  }
+
   const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round" stroke-linecap="round"`;
   let uidN = 0;
   const sparkle = (x, y, r, c = "#ffd84a") => `<path d="M${x} ${y - r} Q${x + r * .18} ${y - r * .18} ${x + r} ${y} Q${x + r * .18} ${y + r * .18} ${x} ${y + r} Q${x - r * .18} ${y + r * .18} ${x - r} ${y} Q${x - r * .18} ${y - r * .18} ${x} ${y - r}Z" fill="${c}" stroke="${OL}" stroke-width="1"/>`;
@@ -173,7 +222,7 @@
   // o.w is his weight (0.75 slim … 1.5 chonky): it widens the body, belly and legs in every pose.
   // Parts keep their class names (dx-torso, dx-tail, dx-pawl, dx-pawr, dx-hindl, dx-hindr, dx-head …) so the study pal can animate them.
   const f1 = n => Math.round(n * 10) / 10;
-  function furTail(d, w2) { return `<path d="${d}" stroke="${OL}" stroke-width="${w2 + 4.4}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="${FUR}" stroke-width="${w2}" fill="none" stroke-linecap="round"/>` }
+  function furTail(d, w2) { w2 = SHAPE.tail || w2; return `<path d="${d}" stroke="${OL}" stroke-width="${w2 + 4.4}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="${FUR}" stroke-width="${w2}" fill="none" stroke-linecap="round"/>` }
   function leg(x, top, bot, wd, cls, far) {   // a leg column (open at the top so it blends into the body) with a paw
     const h = wd / 2, c = far ? FUR_D : FUR;
     return `<g class="${cls}"><path d="M${f1(x - h)} ${top} L${f1(x - h - .3)} ${bot - 4} Q${f1(x - h - 1.4)} ${bot + .6} ${x} ${bot + .6} Q${f1(x + h + 1.4)} ${bot + .6} ${f1(x + h + .3)} ${bot - 4} L${f1(x + h)} ${top}Z" fill="${c}"/>
@@ -270,9 +319,17 @@
     return str.slice(0, i) + open + before + str.slice(i + open.length, j) + after + str.slice(j);
   }
   function drawHead(u, o) {
+    const S = SHAPE, ex = S.ex || 1, ey = S.ey || 1;
+    const earT = (x, y) => ex !== 1 || ey !== 1 ? ` transform="translate(${x} ${y}) scale(${ex} ${ey}) translate(${-x} ${-y})"` : "";
+    const ruff = S.ruff ? `<path d="M30 70 Q24 80 33 84 Q34 92 44 90 Q48 97 56 93 Q60 99 64 93 Q72 97 76 90 Q86 92 87 84 Q96 80 90 70Z" fill="${FUR_L}" ${ln}/>` : "";
+    const head = `<g class="dx-earl"><g${earT(45, 38)}>${S.tufts ? `<path d="M36.5 15 l-1.4 -6.4 M36.5 15 l2 -5.6" stroke="${FUR_D}" stroke-width="1.8" stroke-linecap="round"/>` : ""}<path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/></g></g>
+      <g class="dx-earr"><g${earT(75, 38)}>${S.tufts ? `<path d="M83.5 15 l1.4 -6.4 M83.5 15 l-2 -5.6" stroke="${FUR_D}" stroke-width="1.8" stroke-linecap="round"/>` : ""}<path d="M85 47 L83.5 15 L64 33Z" fill="${FUR}" ${ln}/><path d="M81 40 L80 22.5 L69 33Z" fill="${PINK}"/></g></g>
+      ${ruff}` + drawHeadBase(u, o);
+    const hx = S.hx || 1, hy = S.hy || 1;
+    return hx !== 1 || hy !== 1 ? `<g transform="translate(60 84) scale(${hx} ${hy}) translate(-60 -84)">${head}</g>` : head;
+  }
+  function drawHeadBase(u, o) {
     return `
-      <g class="dx-earl"><path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/></g>
-      <g class="dx-earr"><path d="M85 47 L83.5 15 L64 33Z" fill="${FUR}" ${ln}/><path d="M81 40 L80 22.5 L69 33Z" fill="${PINK}"/></g>
       <path d="M32.5 58 L25 61 L31.5 65 L24.5 69.5 L32 71.5 L28.5 76 L37 75.5 Q43 85 60 85.5 Q77 85 83 75.5 L91.5 76 L88 71.5 L95.5 69.5 L88.5 65 L95 61 L87.5 58 Q88 33 60 32 Q32 33 32.5 58Z" fill="${FUR}" ${ln}/>
       <path d="M37 74 Q47 82.5 60 83 Q73 82.5 83 74 Q77 86 60 86 Q43 86 37 74Z" fill="${FUR_D}" opacity=".55"/>
       <path d="M41 45 L42 27 L50 39 L53 21 L60 37 L66 20.5 L69.5 37 L78 25 L79 45 Q60 39 41 45Z" fill="${FUR_L}" ${ln}/>
@@ -287,13 +344,14 @@
 
   // The kitten at full size, standing on y=108. o: { sc, eyes, tail, glasses, pose, w, outfit, neck, front, over, back }
   function kitty(u, o) {
-    const w = Math.min(1.5, Math.max(.75, +o.w || 1)), pose = o.pose || "sit";
+    const w = Math.min(1.75, Math.max(.65, (+o.w || 1) * (SHAPE.wb || 1))), pose = o.pose || "sit";
     const P = pose === "stand" ? standBody(o, w, u) : pose === "lie" ? lieBody(o, w, u) : sitBody(o, w);
     const glasses = o.glasses ? `<circle cx="48.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><circle cx="71.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><path d="M58.5 58.5 Q60 56.5 61.5 58.5" stroke="${OL}" stroke-width="2" fill="none"/><path d="M41 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><path d="M64 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>` : "";
     const sc = o.sc, chonk = 1 + (w - 1) * .08;
     // outfits are drawn for the sitting torso; on the standing/lying body they're mapped onto its side and clipped to it
     let body = P.body;
-    if (pose === "sit") body += (o.bodyPat ? o.bodyPat(w, 16 * w) : "") + (o.outfit || "");
+    const fluff = SHAPE.fluff && pose === "sit" ? `<path d="M${f1(60 - 25 * w)} 104 q-3 -4 0 -7 q-3 -4 1 -7 M${f1(60 + 25 * w)} 104 q3 -4 0 -7 q3 -4 -1 -7" stroke="${OL}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M${f1(60 - 7 * w)} 84 l-2.4 5 l3.4 -1.4 l-1.4 5 l3.4 -2 M${f1(60 + 7 * w)} 84 l2.4 5 l-3.4 -1.4 l1.4 5 l-3.4 -2" stroke="${FUR_D}" stroke-width="1.2" fill="none" stroke-linecap="round"/>` : "";
+    if (pose === "sit") body += (o.bodyPat ? o.bodyPat(w, 16 * w) : "") + fluff + (o.outfit || "");
     else if (o.outfit) body = body.replace('<g class="dx-outfit" clip-path="url(#' + P.clip + ')"></g>', `<g class="dx-outfit" clip-path="url(#${P.clip})"><g transform="${P.outfitMap}">${o.outfit}</g></g>`);
     const MY = o.myst != null ? mystic(u, o.myst, P, w) : null;
     if (MY) { if (pose === "lie") body = addToTail(body, MY.spirits, MY.wisp); else P.back = addToTail(P.back, MY.spirits, MY.wisp) }
@@ -353,7 +411,7 @@
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
     const L = look || {};
-    const coat = setCoat(L.breed || load().breed);
+    const S0 = L.breed ? null : load(), coat = setCoat(L.breed || S0.breed, L.breed ? L.color : S0.color);
     const svg = kitty(u, { headPat: coat.head || "", bodyPat: coat.body || null, sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
       outfit: pick("outfit"), neck: neckLayer(E, L.collar || load().collar), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     setCoat("golden");
@@ -498,6 +556,8 @@ body.bb-on{padding-bottom:96px}
 .ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
 .ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}
 .ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
+.ct-cafe{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:calc(100% - 32px);margin:4px 16px 14px;border:0;border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:#4a2f1d;background:linear-gradient(135deg,#ffe8c7,#f9c99a);box-shadow:0 6px 18px rgba(201,120,40,.25)}
+.ct-cafe .ic{font-size:30px}.ct-cafe b{display:block;font-size:17px}.ct-cafe small{display:block;font-size:13px;opacity:.85}.ct-cafe i{font-style:normal;font-size:24px}
 .ct-breeds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}
 .ct-breed{border:2px solid transparent;background:var(--c-fill);border-radius:16px;padding:6px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;font:inherit;color:inherit}
 .ct-breed svg{width:72px;height:72px}.ct-breed b{font-size:13px}.ct-breed.sel{border-color:var(--c-acc);background:color-mix(in srgb,var(--c-acc) 10%,var(--c-fill))}
@@ -544,6 +604,31 @@ body.bb-on{padding-bottom:96px}
 /* Study pal: Dexter beside the question, playing with yarn */
 .bb-pal{position:fixed;left:0;top:0;z-index:58;width:var(--ps,72px);height:var(--ps,72px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .55s cubic-bezier(.34,1.3,.5,1),opacity .3s;-webkit-tap-highlight-color:transparent}
 .bb-palon .bb-dock{display:none}
+.cf-veil{position:fixed;inset:0;z-index:130;background:rgba(40,24,12,.55);display:flex;align-items:center;justify-content:center;animation:bbFade .3s}
+.cf-room{position:relative;width:min(520px,100vw);height:min(920px,100dvh,100vh);background:#fbeedd;overflow:hidden;border-radius:clamp(0px,calc((100vw - 520px) * 9),26px);box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.cf-scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cf-top{position:absolute;z-index:2;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;background:linear-gradient(rgba(74,47,29,.82),rgba(74,47,29,0));color:#fff}
+.cf-top b{display:block;font:800 20px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.cf-top small{font:500 13px -apple-system,sans-serif;opacity:.9}
+.cf-x{border:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);color:#4a2f1d;font-size:16px;cursor:pointer}
+.cf-cat{cursor:pointer;transition:transform 2.3s ease-in-out;outline:none}.cf-cat:hover>svg,.cf-cat:focus>svg{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #ffd84a)}
+.cf-cat .dx-blink{animation:bbBlink 5s ease-in-out infinite}.cf-cat .dx-tail{animation:bbTailSway 3.4s ease-in-out infinite}.cf-cat .dx-earr{animation:bbEarFlick 7s ease-in-out infinite}
+.cf-cat.walk .dx-pawl,.cf-cat.walk .dx-hindr{animation:bbStride .36s ease-in-out infinite alternate}.cf-cat.walk .dx-pawr,.cf-cat.walk .dx-hindl{animation:bbStride .36s ease-in-out -.36s infinite alternate-reverse}
+.cf-bub{animation:bbFade .3s}
+.cf-sheet{position:absolute;z-index:3;left:0;right:0;bottom:0;background:#fffaf3;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25);animation:bbUp .3s;max-height:78%;overflow:auto;color:#3a2a1e}
+.cf-close{position:absolute;top:10px;right:12px;border:0;background:#f1e4d3;width:32px;height:32px;border-radius:50%;cursor:pointer;color:#4a2f1d}
+.cf-meet{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}.cf-meet>svg{width:120px;height:120px;background:radial-gradient(circle,#ffe9c9,#fffaf3 70%);border-radius:50%}
+.cf-kicker{margin:0;font:700 11.5px -apple-system,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#c27a2c}.cf-meet h3{margin:2px 0 4px;font:800 22px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}
+.cf-desc{margin:0 0 4px;font-size:14px;line-height:1.4;color:#6b5240}
+.cf-lab{margin:14px 0 6px;font:700 12px -apple-system,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#8a6a50}
+.cf-colors{display:flex;flex-wrap:wrap;gap:8px}.cf-col{display:flex;align-items:center;gap:6px;border:2px solid #ecdcc6;background:#fff;border-radius:999px;padding:5px 11px 5px 5px;font:600 13px -apple-system,sans-serif;color:#4a2f1d;cursor:pointer}
+.cf-col i{width:22px;height:22px;border-radius:50%;border:1.5px solid #3a2a1e}.cf-col.on{border-color:#ff8a00;background:#fff4e6}
+.cf-name{width:100%;border:2px solid #ecdcc6;border-radius:14px;padding:10px 12px;font:600 16px -apple-system,sans-serif;color:#3a2a1e;background:#fff}
+.cf-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.cf-go{flex:1 1 140px;border:0;border-radius:14px;padding:13px 14px;font:700 15.5px -apple-system,sans-serif;cursor:pointer;background:linear-gradient(135deg,#ffb340,#ff8a00);color:#fff;box-shadow:0 4px 12px rgba(255,138,0,.3)}
+.cf-go.alt{background:#fff;color:#c26a12;box-shadow:inset 0 0 0 2px #ffcf99}.cf-go.ghost{background:#f1e4d3;color:#6b5240;box-shadow:none}
+@media (prefers-reduced-motion:reduce){.cf-cat{transition:none}}
+.bb-tree{position:fixed;left:0;top:0;z-index:55;pointer-events:none;transition:transform .5s ease}.bb-tree svg{display:block;width:100%;height:100%;filter:drop-shadow(0 4px 10px rgba(0,0,0,.12))}
+.bb-mate.leap .bb-palart{animation:bbLeap .8s cubic-bezier(.3,.7,.4,1)}
+@keyframes bbLeap{0%{transform:none}30%{transform:translateY(8%) scaleY(.88)}60%{transform:translateY(-34%) scaleY(1.06)}100%{transform:none}}
 .bb-mate{position:fixed;left:0;top:0;z-index:57;width:var(--ps,62px);height:var(--ps,62px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .9s cubic-bezier(.3,1.1,.5,1);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .bb-mate .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}.bb-mate .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
 .bb-mate .bb-mname{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font:700 9.5px -apple-system,BlinkMacSystemFont,sans-serif;background:rgba(255,255,255,.92);color:#3a3a3c;border-radius:999px;padding:1px 6px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.15)}
@@ -769,7 +854,7 @@ body.bb-on{padding-bottom:96px}
     return `<div class="pal-prog">
       <div class="bb-big">${art(k)}</div>
       <h3 id="bbName">${esc(name(s))}</h3>
-      <p class="bb-sub">Level ${L} of ${MAX_LV} · ${esc(st.form)} · ${esc(stageName(k, s))} · ${esc((BREEDS[s.breed] || BREEDS.golden).name)}</p>
+      <p class="bb-sub">Level ${L} of ${MAX_LV} · ${esc(st.form)} · ${esc(stageName(k, s))} · ${esc(breedName(s.breed, s.color))}</p>
       <div class="bb-stats">
         <div><b>${fmt(s.pts)}</b><span>total XP</span></div>
         <div><b>${s.streak}${s.streak >= 3 ? `<i class="fl">${FLAME}</i>` : ""}</b><span>in a row · ×${mult}</span></div>
@@ -787,6 +872,7 @@ body.bb-on{padding-bottom:96px}
         <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half.</p>
         <p><b>Win streaks multiply XP and gold:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes anything away. Each evolution adds ${EVOLVE_BONUS} gold.</p>
       </details>
+      <div class="bb-spot"><b>Cat tree</b>${treeOn() ? "On: your cats live on a cat tree on question pages." : "Off: your cats sit on their own."}<br><button type="button" id="bbTreeT">${treeOn() ? "Hide the cat tree" : "Show the cat tree"}</button></div>
       <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys).</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button></div>
     </div>`;
@@ -940,18 +1026,13 @@ body.bb-on{padding-bottom:96px}
     // Cats: the household. Pick who to train, who comes along on screen, and adopt new breeds.
     function catsHTML() {
       const { H, list } = catList(), n = list.length, full = n >= MAX_CATS;
-      if (!st.breed) st.breed = Object.keys(BREEDS).find(b => !list.some(c => c.breed === b)) || "orange";
-      const B = BREEDS[st.breed], used = new Set(list.map(c => (c.nick || "Dexter").toLowerCase()));
-      const suggest = B.names.find(x => !used.has(x.toLowerCase())) || B.names[0] + " " + (n + 1);
       return `<p class="ct-h">Your cats<small>The cat in training earns XP from your answers. Up to ${MAX_ALONG} others can come along on screen and play.</small></p>
         <div class="ct-list">${list.map(c => { const k2 = stageOf(c.pts | 0); return `<div class="ct-cat${c.active ? " on" : ""}">
-          ${art(k2, c.equip || { badges: [] }, { breed: c.breed, collar: c.collar, w: c.weight, eyes: k2 ? "happy" : "closed", plain: true })}
-          <span><b>${esc(c.nick || "Dexter")}</b><small>${esc((BREEDS[c.breed] || BREEDS.golden).name)} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
+          ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: k2 ? "happy" : "closed", plain: true })}
+          <span><b>${esc(c.nick || "Dexter")}</b><small>${esc(breedName(c.breed, c.color))} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
           <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
             <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>`}</span></div>` }).join("")}</div>
-        <p class="ct-h">Adopt a cat<small>${full ? `Your home is full (${MAX_CATS} cats).` : "Free! Pick a breed and a name. New cats start as freshmen at Level 1."}</small></p>
-        ${full ? "" : `<div class="ct-breeds">${Object.entries(BREEDS).map(([key, b]) => `<button type="button" class="ct-breed${key === st.breed ? " sel" : ""}" data-breed="${key}" aria-pressed="${key === st.breed}">${art(1, { badges: [] }, { breed: key, eyes: "open", plain: true })}<b>${esc(b.name)}</b></button>`).join("")}</div>
-        <div class="ct-adopt"><p><b>${esc(B.name)}</b>: ${esc(B.desc)}.</p><div class="ct-row"><input id="ctName" maxlength="24" value="${esc(suggest)}" aria-label="New cat's name"><button type="button" class="sh-act" id="ctAdopt">Adopt</button></div></div>`}`;
+        <button type="button" class="ct-cafe" id="ctCafe"><span class="ic" aria-hidden="true">☕</span><span><b>Visit the Cat Café</b><small>${full ? `Your home is full (${MAX_CATS} cats), but your cats love to hang out here.` : "Meet cats of every breed, pick a coat color, and bring one home to study."}</small></span><i aria-hidden="true">›</i></button>`;
     }
     // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
     function badgesHTML(s) {
@@ -1022,13 +1103,13 @@ body.bb-on{padding-bottom:96px}
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
         if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
+        $("bbTreeT").onclick = () => { try { treeOn() ? localStorage.setItem(TREE_KEY, "0") : localStorage.removeItem(TREE_KEY) } catch (e) { } palSlot = 0; layoutTree(); settle(); refreshMates(); paint() };
         return;
       }
       if (st.tab === "cats") {
         shop.querySelectorAll("[data-train]").forEach(b => b.onclick = () => keepScroll(() => { trainCat(b.dataset.train); paint(); paintDock(); refreshMates() }));
         shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); saveHouse(H); paint(); refreshMates() }));
-        shop.querySelectorAll("[data-breed]").forEach(b => b.onclick = () => keepScroll(() => { st.breed = b.dataset.breed; paint() }));
-        if ($("ctAdopt")) $("ctAdopt").onclick = () => keepScroll(() => { const nm = ($("ctName").value || "").trim().slice(0, 24) || BREEDS[st.breed].names[0]; if (adoptCat(st.breed, nm)) { pop(`<b>Welcome home, ${esc(nm)}!</b><small>${esc(BREEDS[st.breed].name)}</small>`, "buy"); st.breed = null } paint(); refreshMates() });
+        $("ctCafe").onclick = () => { closeShop(); openCafe() };
         return;
       }
       if (st.tab === "badges") {
@@ -1070,6 +1151,131 @@ body.bb-on{padding-bottom:96px}
     paint(); st.opened = true; $("shDone").focus();   // the panel animates in once; later repaints don't replay it
   }
   const openShop = sub => openPal("shop", sub), openCard = () => openPal("closet");
+  // ===== The Cat Café: where you meet new cats (one of every breed is lounging about) and where your own cats chill
+  // when they aren't studying. Tap a cat to meet them: pick a coat color, name them, and bring them home to study.
+  const CAFE_SPOTS = [
+    { x: 102, y: 250, z: 80, pose: "lie" }, { x: 270, y: 210, z: 56, pose: "sit" }, { x: 304, y: 268, z: 54, pose: "lie" }, { x: 318, y: 350, z: 68, pose: "sit" },
+    { x: 58, y: 420, z: 76, pose: "lie" }, { x: 142, y: 416, z: 74, pose: "sit" }, { x: 112, y: 560, z: 88, pose: "sit" }, { x: 232, y: 578, z: 88, pose: "sit" },
+    { x: 72, y: 612, z: 78, pose: "lie" }, { x: 325, y: 452, z: 62, pose: "sit" }, { x: 248, y: 486, z: 62, pose: "lie" }, { x: 330, y: 614, z: 72, pose: "sit" }
+  ];
+  const CAFE_SCENE = `<defs>
+      <linearGradient id="cfWall" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fbeedd"/><stop offset="1" stop-color="#f1d9bd"/></linearGradient>
+      <linearGradient id="cfSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8ec8f5"/><stop offset=".65" stop-color="#ffd9b0"/><stop offset="1" stop-color="#ffb98a"/></linearGradient>
+      <linearGradient id="cfWood" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c8925f"/><stop offset="1" stop-color="#a87445"/></linearGradient>
+      <linearGradient id="cfFloor" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d9a873"/><stop offset="1" stop-color="#c08a56"/></linearGradient>
+      <radialGradient id="cfGlow"><stop offset="0" stop-color="#ffe7a8" stop-opacity=".75"/><stop offset="1" stop-color="#ffe7a8" stop-opacity="0"/></radialGradient>
+      <pattern id="cfPaw" width="36" height="36" patternUnits="userSpaceOnUse"><g fill="#efd2b0" opacity=".7" transform="translate(18 18)"><ellipse cy="2" rx="3" ry="2.4"/><circle cx="-3" cy="-2" r="1.2"/><circle cx="-1" cy="-3.6" r="1.2"/><circle cx="1" cy="-3.6" r="1.2"/><circle cx="3" cy="-2" r="1.2"/></g></pattern>
+      <clipPath id="cfWin"><path d="M36 246 V120 Q36 70 100 70 Q164 70 164 120 V246Z"/></clipPath></defs>
+    <rect width="360" height="400" fill="url(#cfWall)"/><rect width="360" height="300" fill="url(#cfPaw)"/>
+    <rect y="300" width="360" height="100" fill="#d3a679"/><path d="M0 300 H360" stroke="#8a5a32" stroke-width="4"/>${[18, 108, 198, 288].map(x => `<rect x="${x}" y="314" width="66" height="72" rx="4" fill="none" stroke="#b9875a" stroke-width="2.4"/>`).join("")}
+    <rect y="400" width="360" height="240" fill="url(#cfFloor)"/>${[430, 470, 515, 565, 620].map(y => `<path d="M0 ${y} H360" stroke="#b07c4a" stroke-width="1.4" opacity=".6"/>`).join("")}${[60, 150, 250, 330].map((x, i) => `<path d="M${x} ${400 + i * 10} v30" stroke="#b07c4a" stroke-width="1.2" opacity=".5"/>`).join("")}
+    <g clip-path="url(#cfWin)"><rect x="30" y="64" width="140" height="190" fill="url(#cfSky)"/><circle cx="130" cy="150" r="16" fill="#ffe9a8" opacity=".9"/>
+      <g fill="#fff" opacity=".9"><animateTransform attributeName="transform" type="translate" values="-60 0;180 0" dur="38s" repeatCount="indefinite"/><ellipse cx="40" cy="104" rx="20" ry="7"/><ellipse cx="54" cy="99" rx="12" ry="8"/></g>
+      <g fill="#fff" opacity=".75"><animateTransform attributeName="transform" type="translate" values="-140 0;120 0" dur="52s" repeatCount="indefinite"/><ellipse cx="80" cy="128" rx="16" ry="5"/><ellipse cx="90" cy="124" rx="9" ry="6"/></g>
+      <path d="M30 246 V196 h16 v-22 h14 v30 h12 v-40 h18 v26 h14 v-16 h16 v32 h14 v-24 h16 v60Z" fill="#c98f7a" opacity=".55"/><path d="M30 246 V214 h22 v-12 h18 v18 h20 v-8 h24 v14 h20 v-20 h26 v54Z" fill="#a8707a" opacity=".55"/></g>
+    <path d="M36 246 V120 Q36 70 100 70 Q164 70 164 120 V246" fill="none" stroke="#8a5a32" stroke-width="7"/><path d="M100 72 V246 M38 160 H162" stroke="#8a5a32" stroke-width="4"/>
+    <path d="M20 62 Q30 160 22 250 L44 250 Q38 160 40 64Z" fill="#e98a7a" stroke="#3a2a1e" stroke-width="2"/><path d="M180 62 Q170 160 178 250 L156 250 Q162 160 160 64Z" fill="#e98a7a" stroke="#3a2a1e" stroke-width="2"/><path d="M14 58 H186" stroke="#8a5a32" stroke-width="5" stroke-linecap="round"/>
+    <rect x="24" y="246" width="152" height="12" rx="4" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="2"/>
+    <g transform="translate(46 246)"><path d="M-9 0 L-7 -16 H7 L9 0Z" fill="#d9774a" stroke="#3a2a1e" stroke-width="1.8"/><path d="M0 -16 Q-12 -34 -4 -40 M0 -16 Q8 -36 14 -30 M0 -16 Q-2 -40 4 -46" stroke="#4f9d3a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+    <rect x="198" y="58" width="146" height="124" rx="6" fill="#8a5a32" stroke="#3a2a1e" stroke-width="2"/><rect x="205" y="65" width="132" height="110" rx="3" fill="#2f4a3d"/>
+    <g font-family="'Chalkboard SE','Comic Sans MS','Segoe Print',cursive" fill="#f4f1e8"><text x="271" y="88" font-size="16" text-anchor="middle" font-weight="700">☕ Cat Café</text><text x="214" y="110" font-size="10.5">Purr-ista latte</text><text x="328" y="110" font-size="10.5" text-anchor="end">3</text><text x="214" y="127" font-size="10.5">Catnip tea</text><text x="328" y="127" font-size="10.5" text-anchor="end">2</text><text x="214" y="144" font-size="10.5">Tuna toastie</text><text x="328" y="144" font-size="10.5" text-anchor="end">4</text><text x="271" y="164" font-size="10" text-anchor="middle" fill="#ffd1dc">study breaks ♥</text></g>
+    <rect x="212" y="214" width="136" height="8" rx="3" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="1.8"/><rect x="236" y="272" width="122" height="8" rx="3" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="1.8"/>
+    ${[[216, "#e85d75", 26], [224, "#4f8dff", 30], [232, "#ffcf33", 24], [240, "#34c759", 28]].map(([x, c, h]) => `<rect x="${x}" y="${214 - h}" width="8" height="${h}" rx="1.5" fill="${c}" stroke="#3a2a1e" stroke-width="1.4"/>`).join("")}
+    <g transform="translate(332 214)"><path d="M-8 0 L-6 -12 H6 L8 0Z" fill="#f2f2f2" stroke="#3a2a1e" stroke-width="1.6"/><path d="M0 -12 Q-10 6 -18 30 M0 -12 Q4 12 -2 40 M0 -12 Q12 4 14 26" stroke="#4f9d3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>${[[-14, 18], [-4, 30], [12, 18], [-16, 30]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="3.4" ry="2.2" fill="#5fae45"/>`).join("")}</g>
+    <g transform="translate(256 272)"><rect x="-8" y="-14" width="16" height="14" rx="3" fill="#ffe4ec" stroke="#3a2a1e" stroke-width="1.6"/><path d="M8 -10 q6 0 6 4 q0 4 -6 4" stroke="#3a2a1e" stroke-width="1.6" fill="none"/><text x="0" y="-4" font-size="8" text-anchor="middle">🐟</text></g>
+    ${[120, 260].map((x, i) => `<g><animateTransform attributeName="transform" type="rotate" values="-3 ${x} 0;3 ${x} 0;-3 ${x} 0" dur="${5 + i}s" repeatCount="indefinite"/><path d="M${x} 0 V36" stroke="#3a2a1e" stroke-width="1.6"/><ellipse cx="${x}" cy="64" rx="60" ry="40" fill="url(#cfGlow)"/><path d="M${x - 16} 50 Q${x} 30 ${x + 16} 50Z" fill="#2f4a3d" stroke="#3a2a1e" stroke-width="1.8"/><circle cx="${x}" cy="52" r="5" fill="#ffe7a8"/></g>`).join("")}
+    <path d="M0 22 Q90 48 180 26 T360 30" stroke="#3a2a1e" stroke-width="1.4" fill="none"/>${Array.from({ length: 13 }, (_, i) => { const x = 8 + i * 28, y = 22 + Math.sin(i * .9) * 8 + 10; return `<circle cx="${x}" cy="${y.toFixed(1)}" r="4" fill="${["#ffd84a", "#ff8fb3", "#7dd3fc", "#a3e635"][i % 4]}"><animate attributeName="opacity" values=".45;1;.45" dur="${1.6 + (i % 3) * .5}s" begin="${(i * .23).toFixed(2)}s" repeatCount="indefinite"/></circle>` }).join("")}
+    <rect x="226" y="350" width="140" height="122" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="2.2"/><rect x="220" y="342" width="148" height="12" rx="4" fill="#8a5a32" stroke="#3a2a1e" stroke-width="2"/>${[238, 284].map(x => `<rect x="${x}" y="366" width="36" height="92" rx="4" fill="none" stroke="#8a5a32" stroke-width="2"/>`).join("")}
+    <g transform="translate(250 342)"><rect x="-14" y="-30" width="34" height="30" rx="4" fill="#9aa3ad" stroke="#3a2a1e" stroke-width="1.8"/><rect x="-9" y="-24" width="24" height="7" rx="2" fill="#2f2e36"/><path d="M-2 -6 v4 M8 -6 v4" stroke="#3a2a1e" stroke-width="2"/><rect x="0" y="-6" width="8" height="6" rx="1.5" fill="#fff" stroke="#3a2a1e" stroke-width="1.2"/>
+      ${[0, 1, 2].map(i => `<path d="M${-2 + i * 5} -34 q-3 -6 0 -12 q3 -6 0 -12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0"><animate attributeName="opacity" values="0;.85;0" dur="2.4s" begin="${i * .8}s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 4;0 -6" dur="2.4s" begin="${i * .8}s" repeatCount="indefinite"/></path>`).join("")}</g>
+    <g transform="translate(346 342)"><path d="M-14 0 Q-14 -22 0 -22 Q14 -22 14 0Z" fill="#fff" fill-opacity=".5" stroke="#3a2a1e" stroke-width="1.6"/><circle cx="-5" cy="-6" r="4" fill="#f4b183"/><circle cx="4" cy="-7" r="4.4" fill="#e8916a"/></g>
+    <path d="M0 372 H184 Q192 372 192 384 V440 H0Z" fill="#7aa3cf" stroke="#3a2a1e" stroke-width="2.2"/><rect x="0" y="352" width="176" height="34" rx="12" fill="#8fb6dd" stroke="#3a2a1e" stroke-width="2.2"/><rect x="168" y="364" width="24" height="76" rx="10" fill="#8fb6dd" stroke="#3a2a1e" stroke-width="2.2"/><path d="M86 386 V438" stroke="#5f86b2" stroke-width="2"/>
+    <rect x="12" y="364" width="30" height="24" rx="8" fill="#ffd1dc" stroke="#3a2a1e" stroke-width="1.8" transform="rotate(-8 27 376)"/>
+    <ellipse cx="180" cy="576" rx="168" ry="54" fill="#e98a7a" stroke="#3a2a1e" stroke-width="2.2"/><ellipse cx="180" cy="576" rx="146" ry="42" fill="none" stroke="#fff3e6" stroke-width="3" stroke-dasharray="8 6"/><ellipse cx="180" cy="576" rx="100" ry="26" fill="#f2a493"/>
+    <g transform="translate(248 432)"><ellipse cx="0" cy="0" rx="30" ry="7" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="2"/><path d="M0 7 V48 M-12 50 H12" stroke="#3a2a1e" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-8 -2 V-14 H8 V-2Z" fill="#fff" stroke="#3a2a1e" stroke-width="1.6"/><path d="M8 -12 q5 0 5 4 q0 4 -5 4" stroke="#3a2a1e" stroke-width="1.6" fill="none"/><ellipse cx="0" cy="-14" rx="8" ry="2.4" fill="#c98f5a"/><path d="M-2 -14.4 q2 -2 4 0 q-2 2.4 -2 2.4 q0 0 -2 -2.4Z" fill="#fff"/>
+      ${[0, 1].map(i => `<path d="M${-3 + i * 6} -18 q-3 -5 0 -10" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0"><animate attributeName="opacity" values="0;.8;0" dur="2.8s" begin="${i * 1.1}s" repeatCount="indefinite"/></path>`).join("")}</g>
+    <g transform="translate(72 604)"><path d="M-44 0 Q-44 22 0 24 Q44 22 44 0Z" fill="#c99a5b" stroke="#3a2a1e" stroke-width="2.2"/><path d="M-40 6 Q0 14 40 6 M-36 14 Q0 22 36 14" stroke="#a87a3e" stroke-width="1.6" fill="none"/><ellipse cx="0" cy="0" rx="44" ry="10" fill="#f4e1c1" stroke="#3a2a1e" stroke-width="2"/></g>
+    <g transform="translate(325 452)"><rect x="-6" y="0" width="12" height="160" fill="#dcbf8f" stroke="#3a2a1e" stroke-width="1.8"/><ellipse cx="0" cy="2" rx="30" ry="6" fill="#7aa3cf" stroke="#3a2a1e" stroke-width="1.8"/><rect x="-28" y="154" width="56" height="10" rx="4" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="1.8"/></g>`;
+  function cafeResidents() {
+    const { list } = catList(), chill = list.filter(c => !c.active && !c.along).slice(0, 3);
+    const day = Math.floor(Date.now() / 864e5);
+    const guests = Object.keys(BREEDS).map((b, i) => { const cs = Object.keys(BREEDS[b].colors); return { guest: true, breed: b, color: cs[(day + i) % cs.length], nick: "", pts: 0 } });
+    return chill.map(c => Object.assign({ mine: true }, c)).concat(guests).slice(0, CAFE_SPOTS.length - 2);
+  }
+  let cafe = null;
+  function openCafe() {
+    if (cafe) cafe.remove();
+    const R = cafeResidents(), spots = CAFE_SPOTS.map((_, i) => i), order = spots.slice().sort(() => Math.random() - .5);
+    R.forEach((r, i) => { r.spot = order[i] });
+    cafe = document.createElement("div"); cafe.className = "cf-veil"; cafe.setAttribute("role", "dialog"); cafe.setAttribute("aria-modal", "true"); cafe.setAttribute("aria-label", "The Cat Café");
+    cafe.innerHTML = `<div class="cf-room"><div class="cf-top"><span><b>☕ The Cat Café</b><small>Tap a cat to meet them</small></span><button type="button" class="cf-x" aria-label="Leave the café">✕</button></div>
+      <svg class="cf-scene" viewBox="0 0 360 640" preserveAspectRatio="xMidYMax slice">${CAFE_SCENE}<g class="cf-cats"></g><g class="cf-fx"></g></svg>
+      <div class="cf-sheet" hidden></div></div>`;
+    document.body.appendChild(cafe);
+    const G = cafe.querySelector(".cf-cats"), sheet = cafe.querySelector(".cf-sheet");
+    const drawCat = (r, walking) => {
+      const sp = CAFE_SPOTS[r.spot], pose = walking ? "stand" : sp.pose, k = stageOf(r.pts | 0);
+      const eyes = walking ? "open" : pose === "lie" ? (Math.random() < .5 ? "sleep" : "sleepy") : ["open", "wide", "happy", "sleepy"][Math.random() * 4 | 0];
+      const svg = art(k, r.equip || { badges: [] }, { breed: r.breed, color: r.color, collar: r.collar || "navy", w: r.weight || 1, eyes, pose, flip: walking && r.face > 0, plain: !r.mine }).replace("<svg ", `<svg x="-40" y="-72" width="80" height="80" `);
+      const tag = r.mine ? `<g transform="translate(0 8)"><rect x="-22" y="-6" width="44" height="12" rx="6" fill="#fff" stroke="#3a2a1e" stroke-width="1"/><text y="3" font-size="7.5" font-weight="700" text-anchor="middle" fill="#3a2a1e" font-family="-apple-system,sans-serif">${esc((r.nick || "Dexter").slice(0, 10))} ♥</text></g>` : "";
+      return svg + tag;
+    };
+    R.forEach((r, i) => {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("class", "cf-cat"); g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
+      g.setAttribute("aria-label", r.mine ? `${r.nick || "Dexter"}, your ${breedName(r.breed, r.color)}` : `Meet ${/^[AEIOU]/i.test(breedName(r.breed, r.color)) ? "an" : "a"} ${breedName(r.breed, r.color)}`);
+      const sp = CAFE_SPOTS[r.spot]; g.style.transform = `translate(${sp.x}px,${sp.y}px) scale(${sp.z / 80})`; g.innerHTML = drawCat(r); G.appendChild(g); r.g = g;
+      const open = () => meet(r); g.addEventListener("click", open); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open() } });
+    });
+    // life in the café: cats wander between spots, blink, and chirp
+    const free = () => CAFE_SPOTS.map((_, i) => i).filter(i => !R.some(r => r.spot === i));
+    const bubble = (r, text) => { const sp = CAFE_SPOTS[r.spot], t = document.createElementNS("http://www.w3.org/2000/svg", "g"); t.setAttribute("class", "cf-bub"); t.innerHTML = `<rect x="${sp.x - 22}" y="${sp.y - sp.z - 18}" width="44" height="16" rx="8" fill="#fff" stroke="#3a2a1e" stroke-width="1.2"/><text x="${sp.x}" y="${sp.y - sp.z - 7}" font-size="9" font-weight="700" text-anchor="middle" font-family="-apple-system,sans-serif" fill="#3a2a1e">${text}</text>`; cafe.querySelector(".cf-fx").appendChild(t); setTimeout(() => t.remove(), 2200) };
+    const life = setInterval(() => {
+      if (!cafe || !document.body.contains(cafe)) { clearInterval(life); return }
+      if (!sheet.hidden) return;
+      const r = R[Math.random() * R.length | 0];
+      if (Math.random() < .55) { const f = free(); if (!f.length) return; const to = f[Math.random() * f.length | 0], a = CAFE_SPOTS[r.spot], b = CAFE_SPOTS[to];
+        r.face = b.x > a.x ? 1 : -1; r.g.innerHTML = drawCat(r, true); r.spot = to; r.g.classList.add("walk"); r.g.style.transform = `translate(${b.x}px,${b.y}px) scale(${b.z / 80})`;
+        setTimeout(() => { r.g.classList.remove("walk"); r.g.innerHTML = drawCat(r) }, 2400);
+      } else bubble(r, ["mrrp?", "meow!", "purr…", "♥", "mew", "zzz"][Math.random() * 6 | 0]);
+    }, 2600);
+    const close = () => { clearInterval(life); if (cafe) { cafe.remove(); cafe = null } };
+    cafe.querySelector(".cf-x").onclick = close;
+    cafe.addEventListener("keydown", e => { if (e.key === "Escape") { if (!sheet.hidden) sheet.hidden = true; else close() } });
+    // meeting a cat
+    function meet(r) {
+      const H = household(), n = Object.keys(H.cats).length, full = n >= MAX_CATS, B = BREEDS[resolveBreed(r.breed)[0]];
+      let color = resolveBreed(r.breed, r.color)[1];
+      const used = new Set(catList().list.map(c => (c.nick || "Dexter").toLowerCase()));
+      const draw = () => {
+        const k = r.mine ? stageOf(r.pts | 0) : 0;
+        sheet.innerHTML = `<button type="button" class="cf-close" aria-label="Back to the café">✕</button>
+          <div class="cf-meet">${art(k, r.equip || { badges: [] }, { breed: r.breed, color, collar: r.collar || "navy", w: r.weight || 1, eyes: "happy", plain: !r.mine })}
+          <div><p class="cf-kicker">${r.mine ? "Your cat" : "Looking for a study buddy"}</p><h3>${r.mine ? esc(r.nick || "Dexter") : esc(B.name)}</h3><p class="cf-desc">${esc(B.desc)}.</p>
+          ${r.mine ? `<p class="cf-desc">${esc(breedName(r.breed, r.color))} · Lv ${level(r.pts | 0)} · ${esc(STAGES[stageOf(r.pts | 0)].form)}</p>` : ""}</div></div>
+          ${r.mine ? `<div class="cf-acts"><button type="button" class="cf-go" data-do="train">📚 Study with me</button><button type="button" class="cf-go alt" data-do="along">🎒 Come along</button><button type="button" class="cf-go ghost" data-do="stay">Keep chilling</button></div>`
+          : full ? `<p class="cf-desc">Your home is full (${MAX_CATS} cats). Visit anytime to say hi!</p>`
+          : `<p class="cf-lab">Coat color</p><div class="cf-colors">${Object.entries(B.colors).map(([key, c]) => `<button type="button" class="cf-col${key === color ? " on" : ""}" data-col="${key}" aria-pressed="${key === color}"><i style="background:linear-gradient(135deg,${c.fur[0]} 55%,${c.pat ? (Array.isArray(c.pat) ? c.pat[0] : c.pat) : c.fur[1]} 55%)"></i>${esc(c.name)}</button>`).join("")}</div>
+            <p class="cf-lab">Name</p><input class="cf-name" maxlength="24" value="${esc(B.names.find(x => !used.has(x.toLowerCase())) || B.names[0])}" aria-label="Name">
+            <div class="cf-acts"><button type="button" class="cf-go" data-do="adopt-train">🐾 Bring to study</button><button type="button" class="cf-go alt" data-do="adopt">Adopt · come along</button></div>`}`;
+        sheet.querySelector(".cf-close").onclick = () => { sheet.hidden = true };
+        sheet.querySelectorAll("[data-col]").forEach(b => b.onclick = () => { const nm = sheet.querySelector(".cf-name").value; color = b.dataset.col; draw(); sheet.querySelector(".cf-name").value = nm });
+        sheet.querySelectorAll("[data-do]").forEach(b => b.onclick = () => {
+          const d = b.dataset.do, H2 = household();
+          if (d === "stay") { sheet.hidden = true; return }
+          let id = r.id, nm = r.nick || "Dexter";
+          if (d.startsWith("adopt")) { nm = (sheet.querySelector(".cf-name").value || "").trim().slice(0, 24) || B.names[0]; id = adoptCat(resolveBreed(r.breed)[0], nm, color); if (!id) return }
+          if (d === "train" || d === "adopt-train") trainCat(id);
+          else if (d === "along") { const H3 = household(); if (!H3.along.includes(id)) { H3.along = H3.along.concat(id).slice(-MAX_ALONG); saveHouse(H3) } }
+          close(); paintDock(); checkPal(); paintPal(); refreshMates(); settle();
+          pop(`<b>${d.startsWith("adopt") ? `Welcome home, ${esc(nm)}!` : `${esc(nm)} is coming to study!`}</b><small>${esc(breedName(resolveBreed(r.breed)[0], color))}</small>`, "buy");
+        });
+        sheet.hidden = false;
+      };
+      draw();
+    }
+    cafe.querySelector(".cf-x").focus();
+  }
   // ===== Reading badges: every finished Read & Learn chapter (saved by read/index.html) earns its badge
   const READ_KEY = KEY.split("-")[0] + "-read-v1";
   // how many times a chapter has been finished (restarting keeps the count; older saves only have "finished")
@@ -1157,7 +1363,51 @@ body.bb-on{padding-bottom:96px}
     const all = [...document.querySelectorAll(".opt")], opt = all.find(shown) || all[0];   // a question below the fold still counts
     return opt ? opt.closest("#card, .card, .clue, article, section") || opt.parentElement : null;
   }
+  // ===== The cat tree: on question pages the cats live on a cozy multi-floor cat tree standing on the bottom of the
+  // screen (in the margin beside the questions when there's room). Floors: a carpeted top perch for two, a hammock, the
+  // roof of a cubby house, and the base. Toys: a swinging pom-pom, a toy mouse and a ball. The cat in training heads
+  // off to answers and comes back; the others stay on the tree, hop between floors and play. Settings: Progress tab.
+  const TREE_KEY = KEY + "-tree";
+  const treeOn = () => { try { return localStorage.getItem(TREE_KEY) !== "0" } catch (e) { return true } };
+  const T_SLOTS = [{ x: 66, y: 39, pose: "sit" }, { x: 134, y: 39, pose: "sit" }, { x: 146, y: 113, pose: "lie" }, { x: 58, y: 150, pose: "sit" }, { x: 130, y: 246, pose: "sit" }];
+  const T_ADJ = { 0: 1, 1: 0, 2: 1, 3: 4, 4: 3 };
+  let treeBox = null, palSlot = 0;
+  const TREE_SVG = `<svg viewBox="0 0 200 262" aria-hidden="true"><defs>
+    <pattern id="bbSisal" width="8" height="5" patternUnits="userSpaceOnUse"><rect width="8" height="5" fill="#dcbf8f"/><path d="M0 2.5 Q2 1 4 2.5 T8 2.5" stroke="#b28c57" stroke-width="1.4" fill="none"/></pattern>
+    <linearGradient id="bbWood" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e8c9a0"/><stop offset="1" stop-color="#c99f72"/></linearGradient>
+    <linearGradient id="bbCarpet" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9cc0e4"/><stop offset="1" stop-color="#7aa3cf"/></linearGradient></defs>
+    <ellipse cx="102" cy="258" rx="96" ry="5" fill="#000" opacity=".1"/>
+    <rect x="12" y="244" width="180" height="14" rx="6" fill="url(#bbWood)" stroke="#3a2a1e" stroke-width="2.2"/><rect x="12" y="241" width="180" height="7" rx="3.5" fill="url(#bbCarpet)" stroke="#3a2a1e" stroke-width="2"/>
+    <rect x="92" y="40" width="18" height="203" fill="url(#bbSisal)" stroke="#3a2a1e" stroke-width="2.2"/>
+    <rect x="152" y="104" width="12" height="139" fill="url(#bbSisal)" stroke="#3a2a1e" stroke-width="2"/>
+    <path d="M110 100 Q146 136 182 100" stroke="#3a2a1e" stroke-width="5.4" fill="none" stroke-linecap="round"/><path d="M110 100 Q146 136 182 100 Q146 122 110 100Z" fill="#f5a9bf" stroke="#3a2a1e" stroke-width="2"/><path d="M118 104 Q146 128 174 104" stroke="#fff" stroke-width="1.4" fill="none" opacity=".6" stroke-dasharray="3 3"/>
+    <rect x="16" y="150" width="82" height="92" rx="8" fill="url(#bbWood)" stroke="#3a2a1e" stroke-width="2.2"/><rect x="14" y="146" width="86" height="9" rx="4.5" fill="url(#bbCarpet)" stroke="#3a2a1e" stroke-width="2"/>
+    <circle cx="57" cy="198" r="19" fill="#5b3f2b" stroke="#3a2a1e" stroke-width="2.2"/><path d="M42 205 Q57 196 72 205" stroke="#7a573c" stroke-width="3" fill="none"/>
+    <ellipse cx="100" cy="44" rx="86" ry="9" fill="url(#bbWood)" stroke="#3a2a1e" stroke-width="2.2"/><ellipse cx="100" cy="39" rx="86" ry="9" fill="url(#bbCarpet)" stroke="#3a2a1e" stroke-width="2.2"/>
+    <g><animateTransform attributeName="transform" type="rotate" values="-14 178 46;14 178 46;-14 178 46" dur="2.8s" repeatCount="indefinite"/><path d="M178 46 V78" stroke="#3a2a1e" stroke-width="1.4"/><circle cx="178" cy="82" r="7" fill="#ff8fb3" stroke="#3a2a1e" stroke-width="1.8"/><path d="M174 79 l8 6 M182 79 l-8 6" stroke="#ffd0df" stroke-width="1.4"/></g>
+    <g transform="translate(40 236)"><path d="M-12 2 Q-18 0 -16 -6" stroke="#8a8f99" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="0" rx="10" ry="6" fill="#b8bec8" stroke="#3a2a1e" stroke-width="1.6"/><circle cx="5" cy="-5" r="3.2" fill="#ffc2cf" stroke="#3a2a1e" stroke-width="1.2"/><circle cx="8.4" cy="-.6" r="1" fill="#3a2a1e"/></g>
+    <g transform="translate(176 233)"><circle r="7" fill="#ffd84a" stroke="#3a2a1e" stroke-width="1.8"/><path d="M-6 -3 Q0 1 6 -3 M-6 3 Q0 7 6 3" stroke="#e85d75" stroke-width="1.6" fill="none"/></g>
+  </svg>`;
+  function treeLayout() {
+    const S0 = Math.round((innerWidth >= 900 ? 96 : 72) * sizeK()), TW = Math.min(Math.round(S0 * 2.25), innerWidth - 12), TH = Math.round(TW * 1.31), k = TW / 200;
+    const sp = getSpot(), card = questionCard(), r = card && card.getBoundingClientRect();
+    const x = sp ? PAD + sp.fx * Math.max(0, innerWidth - TW - 2 * PAD) : r && r.right + 12 + TW <= innerWidth - 6 ? r.right + 12 : innerWidth - TW - 6;
+    return { x, y: innerHeight - TH - 4, TW, TH, k };
+  }
+  function layoutTree() {
+    let t = $("bbTree");
+    if (!palOn || off() || !treeOn()) { if (t) t.remove(); treeBox = null; document.body.style.paddingBottom = ""; return null }
+    if (!t) { t = document.createElement("div"); t.id = "bbTree"; t.className = "bb-tree"; t.innerHTML = TREE_SVG; document.body.appendChild(t) }
+    treeBox = treeLayout();
+    t.style.width = treeBox.TW + "px"; t.style.height = treeBox.TH + "px"; t.style.transform = `translate(${Math.round(treeBox.x)}px,${Math.round(treeBox.y)}px)`;
+    // on phones the tree stands over the bottom of the page: leave room to scroll the content above it
+    document.body.style.paddingBottom = innerWidth < 900 ? (treeBox.TH + 16) + "px" : "";
+    return treeBox;
+  }
+  function slotPos(i, size) { const b = treeBox, sl = T_SLOTS[i]; return { x: b.x + sl.x * b.k - size / 2, y: b.y + sl.y * b.k - size * .9 } }
+  const takenSlots = () => new Set([palSlot, ...mates.map(m => m.slot)]);
   function home() {
+    if (treeOn() && palOn && layoutTree()) return slotPos(palSlot, palSize());
     const S = palSize(), sp = getSpot(), card = questionCard();
     if (sp) return spotXY(sp, S);
     if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
@@ -1179,24 +1429,26 @@ body.bb-on{padding-bottom:96px}
       const c = list.find(x => x.id === id); if (!c) return;
       const el = document.createElement("button"); el.type = "button"; el.className = "bb-mate"; el.setAttribute("aria-label", `${c.nick || "Dexter"} is here too. Open your cats`);
       el.onclick = () => openPal("cats"); document.body.appendChild(el);
-      mates.push({ c, el, i, act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
+      const free = [1, 2, 3, 4].filter(x => x !== palSlot && !mates.some(m => m.slot === x));
+      mates.push({ c, el, i, slot: free[0], act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
     });
     mates.forEach(paintMate); placeMates();
     if (mates.length) {
       mateT = setInterval(() => mates.forEach(m => { if (!m.busy && !m.moving) { m.act = act === "nap" ? "nap" : MATE_ACTS[Math.random() * MATE_ACTS.length | 0]; paintMate(m) } }), 17000);
-      playT = setInterval(interact, 13000); setTimeout(interact, 4000);
+      playT = setInterval(() => { Math.random() < .55 ? interact() : treeLife() }, 9000); setTimeout(interact, 4000);
     }
   }
   function paintMate(m) {
     const c = m.c, k = stageOf(c.pts | 0), sz = mateSize(c), a = act === "nap" && !m.busy ? "nap" : m.act;
-    const pose = m.moving || m.pose === "stand" ? "stand" : a === "nap" ? "lie" : "sit";
+    const pose = m.moving || m.pose === "stand" ? "stand" : a === "nap" || (treeBox && T_SLOTS[m.slot] && T_SLOTS[m.slot].pose === "lie") ? "lie" : "sit";
     m.el.style.setProperty("--ps", sz + "px");
     ACTS.concat("nap").forEach(x => m.el.classList.toggle("act-" + x, x === a && !m.moving && !m.busy));
     m.el.classList.toggle("moving", m.moving);
     const eyes = m.eyes || (m.moving ? "open" : a === "nap" ? "sleep" : ACT_EYES[a] || "open");
-    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, collar: c.collar, w: c.weight, eyes: k ? eyes : (eyes === "happy" ? "happy" : "closed"), pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
+    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: k ? eyes : (eyes === "happy" ? "happy" : "closed"), pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
   }
   function matePos(m, at) {
+    if (treeBox && m.slot != null) { const q = slotPos(m.slot, mateSize(m.c)), P = slotPos(palSlot, palSize()); m.side = P.x >= q.x ? 1 : -1; return q }
     const S = palSize(), sz = mateSize(m.c), A = at || palAt; if (!A) return null;
     // stand on the open side: to his right if there's room (on wide screens that's the margin, away from the questions)
     const need = (mates.length || 1) * sz * .8 + 8, side = innerWidth - (A.x + S) >= need ? 1 : A.x >= need ? -1 : (A.x + S / 2 > innerWidth / 2 ? -1 : 1);
@@ -1205,7 +1457,8 @@ body.bb-on{padding-bottom:96px}
     return { x: Math.min(Math.max(x, 4), innerWidth - sz - 4), y: Math.min(A.y + S - sz + 2, innerHeight - sz - 4) };
   }
   function placeMates(at) { mates.forEach(m => { if (m.busy === "chase") return; const q = matePos(m, at); if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
-  function matesMove(to) {   // trot after the cat in training
+  function matesMove(to) {   // trot after the cat in training (on the tree they stay home and watch)
+    if (treeBox) return;
     mates.forEach(m => { const q = matePos(m, to); if (!q || !m.at || Math.hypot(q.x - m.at.x, q.y - m.at.y) < 14) return; m.moving = true; m.face = q.x > m.at.x ? 1 : -1; paintMate(m);
       clearTimeout(m.walkT); m.walkT = setTimeout(() => { m.moving = false; paintMate(m) }, 1000 + m.i * 150) });
   }
@@ -1217,6 +1470,7 @@ body.bb-on{padding-bottom:96px}
   function interact() {
     const p = $("bbPal"); if (!p || !mates.length || visiting || moving || document.hidden || act === "nap") return;
     const m = mates[Math.random() * mates.length | 0]; if (m.busy || m.moving) return;
+    if (treeBox && m.slot !== T_ADJ[palSlot]) { hopTo(m, T_ADJ[palSlot]); setTimeout(interact, 1300); return }   // come over first
     const kind = ["nuzzle", "chase", "groom", "pounce"][Math.random() * 4 | 0];
     p.style.setProperty("--side", -m.side);
     if (kind === "nuzzle") {   // lean in, heads touch, hearts
@@ -1228,6 +1482,25 @@ body.bb-on{padding-bottom:96px}
     } else {   // chase: a lap behind and around him, while he watches
       busy(m, "chase", 2800, () => { m.pose = "stand"; m.face = m.side > 0 ? -1 : 1; m.eyes = "dilated"; setMood("dilated", 2800); m.el.style.setProperty("--run", (palSize() * 1.6 + mateSize(m.c)) + "px") });
     }
+  }
+  // hop to another floor of the tree (swapping with whoever is there)
+  function hopTo(m, slot) {
+    if (!treeBox || slot == null || m.slot === slot) return;
+    if (slot === palSlot) return;
+    const other = mates.find(x => x !== m && x.slot === slot);
+    const leap = x => { x.el.classList.remove("leap"); void x.el.offsetWidth; x.el.classList.add("leap"); setTimeout(() => x.el.classList.remove("leap"), 900) };
+    if (other) { other.slot = m.slot; leap(other) }
+    m.slot = slot; leap(m); placeMates(); setTimeout(() => mates.forEach(paintMate), 450);
+  }
+  // now and then someone moves around the tree; two companions sometimes play together
+  function treeLife() {
+    if (!treeBox || !mates.length || visiting || moving || document.hidden || act === "nap") return;
+    const r = Math.random(), taken = takenSlots(), free = [0, 1, 2, 3, 4].filter(x => !taken.has(x));
+    if (mates.length > 1 && r < .35 && !mates[0].busy && !mates[1].busy) {   // the two companions play: swap floors with a bump and hearts
+      const [a, b2] = mates; const sa = a.slot; hopTo(a, b2.slot); if (b2.slot === sa || b2.slot === a.slot) { } fx(a.el, ["💞", "✨"], 2); fx(b2.el, ["😺"], 1); return;
+    }
+    if (r < .75 && free.length) { const m = mates[Math.random() * mates.length | 0]; if (!m.busy) hopTo(m, free[Math.random() * free.length | 0]); return }
+    if (free.length && !$("bbPal").classList.contains("drag")) { palSlot = free[Math.random() * free.length | 0]; settle(); setTimeout(() => { if (Math.random() < .5) { palSlot = 0 === palSlot ? 0 : (takenSlots().has(0) ? palSlot : 0); settle() } }, 9000) }
   }
   function mateReact(good) {
     mates.forEach((m, i) => { if (m.busy) return;
@@ -1242,7 +1515,7 @@ body.bb-on{padding-bottom:96px}
     if (!palAt || document.body.classList.contains("bb-scrolling")) place(h); else walkTo(h);
   }
   function checkPal() {
-    if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); clearMates(); return }
+    if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); clearMates(); layoutTree(); return }
     if (!palOn && document.querySelector(".opt")) { palOn = true; document.body.classList.add("bb-palon"); paintPal(); place(home()); refreshMates() }
   }
   function paintPal() {
@@ -1253,7 +1526,7 @@ body.bb-on{padding-bottom:96px}
     p.style.setProperty("--ps", palSize() + "px");
     p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]} · drag to move him`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
-    const pose = moving ? "stand" : ACT_POSE[act] || "sit";
+    const pose = moving ? "stand" : treeBox && T_SLOTS[palSlot].pose === "lie" && act !== "box" ? "lie" : ACT_POSE[act] || "sit";
     ["sit", "stand", "lie"].forEach(x => p.classList.toggle("pose-" + x, x === pose)); p.classList.toggle("moving", moving);
     p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? (k ? "open" : "closed") : eyesNow(k), pose, flip: pose === "stand" && facing > 0, boxed: act === "box" && !moving })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
@@ -1357,5 +1630,5 @@ body.bb-on{padding-bottom:96px}
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); syncBadges(); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
+  window.BioBuddy = { openCafe: () => openCafe(), enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
 })();
