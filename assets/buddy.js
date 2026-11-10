@@ -52,27 +52,31 @@
   // ===== The household: several cats, one in training. The cat in training lives in KEY (so everything above works
   // unchanged); the others wait in CATS_KEY. Gold and owned items (wardrobe, badges) belong to the household and stay put
   // when you switch; each cat keeps its own XP, level, name, breed, outfit, collar and weight.
-  const CATS_KEY = KEY.replace(/-v1$/, "") + "-cats-v1", MAX_CATS = 6, MAX_ALONG = 2;
+  const CATS_KEY = KEY.replace(/-v1$/, "") + "-cats-v1", MAX_CATS = 6, MAX_ALONG = MAX_CATS - 1;   // every cat can be on screen at once
   const CAT_FIELDS = ["pts", "correct", "streak", "best", "last", "nick", "equip", "collar", "weight", "breed", "color", "born"];
   const pickCat = s => Object.fromEntries(CAT_FIELDS.filter(f => s[f] !== undefined).map(f => [f, s[f]]));
   function household() {
     let H = null; try { H = JSON.parse(localStorage.getItem(CATS_KEY) || "null") } catch (e) { }
     if (!H || !H.cats || !H.active) { const s = load(); H = { active: "c1", cats: { c1: Object.assign(pickCat(s), { breed: s.breed || "domestic", color: s.color || "golden", nick: s.nick || "" }) }, along: [] } }
     H.along = (H.along || []).filter(id => H.cats[id] && id !== H.active).slice(0, MAX_ALONG);
+    H.co = (H.co || []).filter(id => H.along.includes(id));   // co-trainees: on-screen cats that share the XP
     return H;
   }
   const saveHouse = H => { try { localStorage.setItem(CATS_KEY, JSON.stringify(H)) } catch (e) { } };
   function catList() {   // every cat, the one in training with its live state
     const H = household(), s = load();
     H.cats[H.active] = Object.assign({}, H.cats[H.active], pickCat(s));
-    return { H, list: Object.entries(H.cats).map(([id, c]) => Object.assign({ id, active: id === H.active, along: H.along.includes(id) }, c)) };
+    return { H, list: Object.entries(H.cats).map(([id, c]) => Object.assign({ id, active: id === H.active, along: H.along.includes(id), co: H.co.includes(id) }, c)) };
   }
   function trainCat(id) {
     const H = household(); if (!H.cats[id] || id === H.active) return;
     const s = load(); H.cats[H.active] = pickCat(s);
     const c = Object.assign({ pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick: "", equip: { badges: [] }, collar: "navy", weight: 1, breed: "domestic", color: "golden" }, H.cats[id]);
     CAT_FIELDS.forEach(f => { s[f] = c[f] }); delete s.badge;
-    H.along = H.along.filter(x => x !== id); if (!H.along.includes(H.active) && H.along.length < MAX_ALONG) H.along.push(H.active);   // the old trainee comes along
+    const wasCo = H.co.includes(id);
+    H.along = H.along.filter(x => x !== id); H.co = H.co.filter(x => x !== id);
+    if (!H.along.includes(H.active)) H.along.push(H.active);   // the old trainee comes along
+    if (wasCo) H.co.push(H.active);                            // swapping within a co-training group keeps the group
     H.active = id; save(s); saveHouse(H);
   }
   function adoptCat(breed, nick, color) {
@@ -558,7 +562,8 @@ body.bb-on{padding-bottom:96px}
 .ct-btns{display:flex;flex-direction:column;gap:6px;align-items:stretch}.ct-btns .sh-act{padding:7px 12px;font-size:13px}
 .ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
 .ct-unpin{border:0;background:none;color:var(--c-acc);font:600 12px -apple-system,sans-serif;cursor:pointer;padding:0}
-.ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}
+.ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}.ct-co input:disabled+*,.ct-along:has(input:disabled){opacity:.45;cursor:default}
+.ct-split{font-size:11.5px;color:var(--c-muted);font-weight:600}.xsplit{font-size:.8em;opacity:.85}.bb-mate.co .bb-mname{background:#fff4c2}.bb-crowd .bb-mate .bb-mname{font-size:8.5px;padding:1px 4px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
 .ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
 .ct-cafe{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:calc(100% - 32px);margin:4px 16px 14px;border:0;border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:#4a2f1d;background:linear-gradient(135deg,#ffe8c7,#f9c99a);box-shadow:0 6px 18px rgba(201,120,40,.25)}
 .ct-cafe .ic{font-size:30px}.ct-cafe b{display:block;font-size:17px}.ct-cafe small{display:block;font-size:13px;opacity:.85}.ct-cafe i{font-style:normal;font-size:24px}
@@ -955,20 +960,29 @@ body.bb-on{padding-bottom:96px}
     const r = X ? X.rate(detail) : { xp: 10, tier: { key: "easy", name: "Easy" } };
     const s = load(), before = stageOf(s.pts), lvBefore = level(s.pts);
     s.streak = (s.streak | 0) + 1; s.best = Math.max(s.best | 0, s.streak); s.last = Date.now(); s.correct = (s.correct | 0) + 1;
-    const mult = X ? X.multiplier(s.streak) : 1, earned = Math.round(r.xp * mult);
+    const mult = X ? X.multiplier(s.streak) : 1, total = Math.round(r.xp * mult);
+    // Co-training: the XP is split evenly between the cat in training and every co-trainee (gold is the household's, not split)
+    const H = household(), co = H.co.filter(id => H.cats[id]), n = 1 + co.length, earned = Math.max(1, Math.round(total / n));
     s.pts += earned;
+    const coUps = co.map(id => { const c = H.cats[id], b = stageOf(c.pts | 0), lv0 = level(c.pts | 0); c.pts = (c.pts | 0) + earned; c.correct = (c.correct | 0) + 1; return { id, c, evolved: stageOf(c.pts) > b, lvUp: level(c.pts) > lv0 } });
+    if (co.length) saveHouse(H);
     const goldBase = (GOLD_PER[r.tier.key] || 3), coins = Math.max(1, Math.round((r.repeat ? Math.ceil(goldBase / 2) : goldBase) * mult));
     const evolved = stageOf(s.pts) > before;
     s.gold = (s.gold | 0) + coins + (evolved ? EVOLVE_BONUS : 0);
     save(s);
-    window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
+    window.dispatchEvent(new CustomEvent("bio:xp", { detail: { earned, total, split: n, base: r.xp, mult, tier: r.tier, streak: s.streak, pts: s.pts } }));
     if (off()) return;
     paintDock(); visit(); if (palOn) setMood("happy", 1700);
+    coUps.forEach(u => { const m = mates.find(z => z.c.id === u.id); if (!m) return; m.c.pts = u.c.pts; paintMate(m); placeMates();
+      m.el.classList.remove("hop"); void m.el.offsetWidth; m.el.classList.add("hop"); setTimeout(() => m.el.classList.remove("hop"), 700);
+      if (u.evolved || u.lvUp) fx(m.el, u.evolved ? ["🌟", "✨", "🌟"] : ["⬆️", "✨"]) });
+    const evo = coUps.filter(u => u.evolved);
+    if (evo.length) setTimeout(() => pop(`<b>${evo.map(u => esc(u.c.nick || "Dexter")).join(" & ")} evolved!</b><small>${evo.map(u => esc(STAGES[stageOf(u.c.pts)].name)).join(" · ")}</small>`, "hot"), 1300);
     const d = anchor(); if (!d) return;
     d.classList.remove("hop", "sad"); void d.offsetWidth; d.classList.add("hop");
     say(MEOWS[Math.floor(Math.random() * MEOWS.length)]); meowSound(before);
     const lv = level(s.pts);
-    pop(`<b>+${earned} XP <span class="gc">${COIN}+${coins}</span></b><small><span class="xpb t-${r.tier.key}">${esc(r.tier.name)}</span>${mult > 1 ? ` ×${mult} streak` : ""}${lv > lvBefore ? ` · Lv ${lv}!` : ""}</small>`);
+    pop(`<b>+${earned} XP${n > 1 ? ` <span class="xsplit">×${n} cats</span>` : ""} <span class="gc">${COIN}+${coins}</span></b><small><span class="xpb t-${r.tier.key}">${esc(r.tier.name)}</span>${mult > 1 ? ` ×${mult} streak` : ""}${n > 1 ? ` · ${total} XP split ${n} ways` : ""}${lv > lvBefore ? ` · Lv ${lv}!` : ""}</small>`);
     if (STREAK_CHEERS[s.streak]) setTimeout(() => pop(`<b>${FLAME} ${STREAK_CHEERS[s.streak]}</b><small>XP ×${mult} while it lasts</small>`, "hot"), 650);
     const after = stageOf(s.pts);
     if (after > before) setTimeout(() => evolve(before, after), 900);
@@ -1031,12 +1045,13 @@ body.bb-on{padding-bottom:96px}
     // Cats: the household. Pick who to train, who comes along on screen, and adopt new breeds.
     function catsHTML() {
       const { H, list } = catList(), n = list.length, full = n >= MAX_CATS;
-      return `<p class="ct-h">Your cats<small>The cat in training earns XP from your answers. Up to ${MAX_ALONG} others can come along on screen and play.</small></p>
+      return `<p class="ct-h">Your cats<small>The cat in training earns XP from your answers. Any of your other cats can come along on screen too. Tick <b>Co-train</b> to train several at once: each answer's XP is split evenly between them.</small></p>
         <div class="ct-list">${list.map(c => { const k2 = stageOf(c.pts | 0); return `<div class="ct-cat${c.active ? " on" : ""}">
           ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: "happy", plain: true })}
           <span><b>${esc(c.nick || "Dexter")}</b><small>${esc(breedName(c.breed, c.color))} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
-          <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
-            <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>${c.along && H.spots && H.spots[c.id] ? `<button type="button" class="ct-unpin" data-unpin="${c.id}">↺ Back beside him</button>` : ""}`}</span></div>` }).join("")}</div>
+          <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>${H.co.length ? `<span class="ct-split">XP split ${H.co.length + 1} ways</span>` : ""}` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
+            <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>
+            <label class="ct-along ct-co"><input type="checkbox" data-co="${c.id}"${c.co ? " checked" : ""}${c.along ? "" : " disabled"}> 📚 Co-train</label>${c.along && H.spots && H.spots[c.id] ? `<button type="button" class="ct-unpin" data-unpin="${c.id}">↺ Back beside him</button>` : ""}`}</span></div>` }).join("")}</div>
         <button type="button" class="ct-cafe" id="ctCafe"><span class="ic" aria-hidden="true">☕</span><span><b>Visit the Cat Café</b><small>${full ? `Your home is full (${MAX_CATS} cats), but your cats love to hang out here.` : "Meet cats of every breed, pick a coat color, and bring one home to study."}</small></span><i aria-hidden="true">›</i></button>`;
     }
     // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
@@ -1113,7 +1128,8 @@ body.bb-on{padding-bottom:96px}
       if (st.tab === "cats") {
         shop.querySelectorAll("[data-train]").forEach(b => b.onclick = () => keepScroll(() => { trainCat(b.dataset.train); paint(); paintDock(); refreshMates() }));
         shop.querySelectorAll("[data-unpin]").forEach(b => b.onclick = () => keepScroll(() => { setMateSpot(b.dataset.unpin, null); paint(); placeMates() }));
-        shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); saveHouse(H); paint(); refreshMates() }));
+        shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); H.co = H.co.filter(x => H.along.includes(x)); saveHouse(H); paint(); refreshMates() }));
+        shop.querySelectorAll("[data-co]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.co; H.co = b.checked ? H.co.filter(x => x !== id).concat(id) : H.co.filter(x => x !== id); saveHouse(H); paint(); refreshMates() }));
         $("ctCafe").onclick = () => { closeShop(); openCafe() };
         return;
       }
@@ -1494,8 +1510,9 @@ body.bb-on{padding-bottom:96px}
         drop: (x, y) => { setMateSpot(me.id, xySpot(x, y, mateSize(c))); const m = mates.find(z => z.el === el); if (m) { fx(el, ["📍"], 1); paintMate(m) } }
       });
       const free = [1, 2, 3, 4].filter(x => x !== palSlot && !mates.some(m => m.slot === x));
-      mates.push({ c, el, i, slot: free[0], act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
+      mates.push({ c, el, i, co: H.co.includes(id), slot: free[0], act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
     });
+    document.body.classList.toggle("bb-crowd", mates.length > 3);
     mates.forEach(paintMate); placeMates();
     if (mates.length) {
       mateT = setInterval(() => mates.forEach(m => { if (!m.busy && !m.moving) { m.act = act === "nap" ? "nap" : MATE_ACTS[Math.random() * MATE_ACTS.length | 0]; paintMate(m) } }), 17000);
@@ -1509,7 +1526,8 @@ body.bb-on{padding-bottom:96px}
     ACTS.concat("nap").forEach(x => m.el.classList.toggle("act-" + x, x === a && !m.moving && !m.busy));
     m.el.classList.toggle("moving", m.moving);
     const eyes = m.eyes || (m.moving ? "open" : a === "nap" ? "sleep" : ACT_EYES[a] || "open");
-    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
+    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${m.co ? "📚 " : ""}${esc(c.nick || "Dexter")}</span>`;
+    m.el.classList.toggle("co", !!m.co);
   }
   function matePos(m, at) {
     const own = mateSpot(m.c.id);
@@ -1518,10 +1536,15 @@ body.bb-on{padding-bottom:96px}
     if (treeBox && m.slot != null) { const q = slotPos(m.slot, mateSize(m.c)), P = slotPos(palSlot, palSize()); m.side = P.x >= q.x ? 1 : -1; return q }
     const S = palSize(), sz = mateSize(m.c), A = at || palAt; if (!A) return null;
     // stand on the open side: to his right if there's room (on wide screens that's the margin, away from the questions)
-    const need = (mates.length || 1) * sz * .8 + 8, side = innerWidth - (A.x + S) >= need ? 1 : A.x >= need ? -1 : (A.x + S / 2 > innerWidth / 2 ? -1 : 1);
+    const free = mates.filter(z => !mateSpot(z.c.id)), k = Math.max(0, free.indexOf(m)), cnt = free.length || 1;
+    const need = Math.min(cnt, 3) * sz * .8 + 8, side = innerWidth - (A.x + S) >= need ? 1 : A.x >= need ? -1 : (A.x + S / 2 > innerWidth / 2 ? -1 : 1);
     m.side = side;
-    const x = side < 0 ? A.x - sz * .78 - m.i * sz * .74 : A.x + S * .78 + m.i * sz * .74;
-    return { x: Math.min(Math.max(x, 4), innerWidth - sz - 4), y: Math.min(A.y + S - sz + 2, innerHeight - sz - 4) };
+    // with lots of cats out, wrap them into rows stacked above each other instead of running off the screen
+    const gap = Math.max(sz * .74, cnt > 3 ? 48 : 0);   // room for the name tags when there's a crowd
+    const room = side > 0 ? innerWidth - (A.x + S * .78) - 4 : A.x + sz * .22 - 4, per = Math.max(1, Math.min(cnt, Math.floor((room - sz) / gap) + 1));
+    const col = k % per, row = Math.floor(k / per);
+    const x = side < 0 ? A.x - sz * .78 - col * gap : A.x + S * .78 + col * gap;
+    return { x: Math.min(Math.max(x, 4), innerWidth - sz - 4), y: Math.max(4, Math.min(A.y + S - sz + 2, innerHeight - sz - 4) - row * (sz + 10)) };
   }
   function placeMates(at) { mates.forEach(m => { if (m.busy === "chase") return; const q = matePos(m, at); if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
   function matesMove(to) {   // trot after the cat in training (on the tree they stay home and watch)
