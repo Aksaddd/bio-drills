@@ -49,6 +49,39 @@
     return s;
   }
   const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch (e) { } };
+  // ===== The household: several cats, one in training. The cat in training lives in KEY (so everything above works
+  // unchanged); the others wait in CATS_KEY. Gold and owned items (wardrobe, badges) belong to the household and stay put
+  // when you switch; each cat keeps its own XP, level, name, breed, outfit, collar and weight.
+  const CATS_KEY = KEY.replace(/-v1$/, "") + "-cats-v1", MAX_CATS = 6, MAX_ALONG = 2;
+  const CAT_FIELDS = ["pts", "correct", "streak", "best", "last", "nick", "equip", "collar", "weight", "breed", "born"];
+  const pickCat = s => Object.fromEntries(CAT_FIELDS.filter(f => s[f] !== undefined).map(f => [f, s[f]]));
+  function household() {
+    let H = null; try { H = JSON.parse(localStorage.getItem(CATS_KEY) || "null") } catch (e) { }
+    if (!H || !H.cats || !H.active) { const s = load(); H = { active: "c1", cats: { c1: Object.assign(pickCat(s), { breed: s.breed || "golden", nick: s.nick || "" }) }, along: [] } }
+    H.along = (H.along || []).filter(id => H.cats[id] && id !== H.active).slice(0, MAX_ALONG);
+    return H;
+  }
+  const saveHouse = H => { try { localStorage.setItem(CATS_KEY, JSON.stringify(H)) } catch (e) { } };
+  function catList() {   // every cat, the one in training with its live state
+    const H = household(), s = load();
+    H.cats[H.active] = Object.assign({}, H.cats[H.active], pickCat(s));
+    return { H, list: Object.entries(H.cats).map(([id, c]) => Object.assign({ id, active: id === H.active, along: H.along.includes(id) }, c)) };
+  }
+  function trainCat(id) {
+    const H = household(); if (!H.cats[id] || id === H.active) return;
+    const s = load(); H.cats[H.active] = pickCat(s);
+    const c = Object.assign({ pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick: "", equip: { badges: [] }, collar: "navy", weight: 1, breed: "golden" }, H.cats[id]);
+    CAT_FIELDS.forEach(f => { s[f] = c[f] }); delete s.badge;
+    H.along = H.along.filter(x => x !== id); if (!H.along.includes(H.active) && H.along.length < MAX_ALONG) H.along.push(H.active);   // the old trainee comes along
+    H.active = id; save(s); saveHouse(H);
+  }
+  function adoptCat(breed, nick) {
+    const H = household(); if (Object.keys(H.cats).length >= MAX_CATS) return null;
+    const id = "c" + Date.now().toString(36);
+    H.cats[id] = { pts: 0, correct: 0, streak: 0, best: 0, last: 0, nick, equip: { badges: [] }, collar: "navy", weight: 1, breed, born: Date.now() };
+    if (H.along.length < MAX_ALONG) H.along.push(id);
+    saveHouse(H); return id;
+  }
   const off = () => { try { return localStorage.getItem(OFF_KEY) === "1" } catch (e) { return false } };
   const stageOf = pts => { let k = 0; STAGES.forEach((s, i) => { if (pts >= s.at) k = i }); return k };
   const nextAt = k => STAGES[k + 1] ? STAGES[k + 1].at : null;
@@ -70,7 +103,30 @@
   // big glossy eyes with two highlights, pink blush with hatch marks, an "ω" mouth, thick clean outlines and
   // flat cel shading. He goes from a sleepy freshman to a professor, gaining one piece of gear per form.
   const OL = "#3a2a1e", OW = 2.4;
-  const FUR = "#f7d27c", FUR_D = "#e2aa4a", FUR_L = "#fff0c2", PINK = "#e8a08a", PINK_D = "#c9705a";
+  // fur colors are set per drawing from the cat's breed (see BREEDS); these are the golden defaults
+  let FUR = "#f7d27c", FUR_D = "#e2aa4a", FUR_L = "#fff0c2", PINK = "#e8a08a", PINK_D = "#c9705a";
+  let IRIS = ["#9a6a24", "#b98a35", "#7d9a3c", "#3f8a45", "#2a6436"];
+  // ===== Breeds: the same chibi cat in different coats. Each has fur colors, eyes and its own markings
+  // (head markings sit under the eyes; body markings go on the sitting body). Names are the breed, not the cat.
+  const EYES_GOLD = IRIS.slice(), EYES_BLUE = ["#bfe6ff", "#8fd0ff", "#4fa8f0", "#2f7fd0", "#1d5aa8"], EYES_AMBER = ["#fff1a8", "#ffd34d", "#f2a900", "#c97c00", "#8a5200"], EYES_GREEN = ["#d9f99d", "#a3e635", "#65a30d", "#3f7a12", "#2a5a0c"];
+  const tabbyHead = c => `<path d="M31.5 63 l6 1 M31.8 67.4 l5.6 0 M88.5 63 l-6 1 M88.2 67.4 l-5.6 0" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/><path d="M47.5 47.6 l2.2 -3.4 M60 46.4 v-3.8 M72.5 47.6 l-2.2 -3.4" stroke="${c}" stroke-width="1.9" stroke-linecap="round"/>`;
+  const tabbyBody = c => (w, hx) => `<path d="M${(60 - hx - 7 * w).toFixed(1)} 95 q4 -2.6 8 0 M${(60 - hx - 6 * w).toFixed(1)} 100 q4 -2.6 8 0 M${(60 + hx - 1 * w).toFixed(1)} 95 q4 -2.6 8 0 M${(60 + hx - 2 * w).toFixed(1)} 100 q4 -2.6 8 0" stroke="${c}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  const BREEDS = {
+    golden: { name: "Golden", desc: "Dexter's own sunny blonde coat", fur: ["#f7d27c", "#e2aa4a", "#fff0c2"], pink: ["#e8a08a", "#c9705a"], eyes: EYES_GOLD, names: ["Dexter", "Sunny", "Honey", "Butterscotch"] },
+    orange: { name: "Orange Tabby", desc: "Ginger stripes and a big appetite", fur: ["#f6a85e", "#d9772f", "#ffe4c7"], pink: ["#f29a8c", "#c9705a"], eyes: EYES_GOLD, head: tabbyHead("#c2621d"), body: tabbyBody("#c2621d"), names: ["Mango", "Pumpkin", "Garfield Jr.", "Cheeto"] },
+    silver: { name: "Silver Tabby", desc: "Cool gray with classic tabby stripes", fur: ["#cdd1d9", "#9aa0ab", "#f3f4f7"], pink: ["#eaa3ad", "#c9707a"], eyes: EYES_GREEN, head: tabbyHead("#6f7581"), body: tabbyBody("#6f7581"), names: ["Smokey", "Pepper", "Ash", "Nimbus"] },
+    black: { name: "Black Cat", desc: "Sleek midnight fur and amber eyes", fur: ["#3d3c46", "#2a2930", "#64636f"], pink: ["#c48a9a", "#9c5f70"], eyes: EYES_AMBER, names: ["Shadow", "Midnight", "Salem", "Onyx"] },
+    tuxedo: { name: "Tuxedo", desc: "Black coat with a white bib, socks and muzzle", fur: ["#35343c", "#25242a", "#f7f7f9"], pink: ["#e8a0aa", "#b56b78"], eyes: EYES_GREEN, head: `<path d="M51 68 Q50 61.6 60 61.6 Q70 61.6 69 68 Q69 77.6 60 77.6 Q51 77.6 51 68Z" fill="#f7f7f9"/>`, names: ["Oreo", "Domino", "Bandit", "Tux"] },
+    siamese: { name: "Siamese", desc: "Cream coat with dark points and blue eyes", fur: ["#f4e8d4", "#d8c09c", "#fffaf0"], pink: ["#e9a99a", "#8a5a48"], eyes: EYES_BLUE, head: `<path d="M36.5 15 L43.5 21.5 L41.5 25 L38 27Z M83.5 15 L84 26.5 L77 23Z" fill="#5a4334"/><ellipse cx="60" cy="70" rx="12.5" ry="9" fill="#6b5040" opacity=".85"/>`, names: ["Miso", "Cleo", "Sapphire", "Mochi"] },
+    calico: { name: "Calico", desc: "White with orange and black patches", fur: ["#fbf6ec", "#e6dccb", "#ffffff"], pink: ["#f2a9b0", "#c9707a"], eyes: EYES_GOLD, head: `<path d="M31 62 Q34 54 44 55 Q46 62 41 70 Q35 72 31.6 69Z" fill="#f2a04a"/><path d="M76 49 Q84 46 87.6 55 Q88 62 82 63 Q76 60 76 49Z" fill="#3a3640"/>`, body: (w, hx) => `<ellipse cx="${(60 - hx).toFixed(1)}" cy="98" rx="${(6.5 * w).toFixed(1)}" ry="5.5" fill="#f2a04a"/><ellipse cx="${(60 + hx + 1).toFixed(1)}" cy="101" rx="${(5.5 * w).toFixed(1)}" ry="4.6" fill="#3a3640"/>`, names: ["Patches", "Maple", "Biscuit", "Clover"] },
+    russian: { name: "Russian Blue", desc: "Plush blue-gray coat and green eyes", fur: ["#929fb5", "#717d93", "#c9d2df"], pink: ["#d79aa6", "#a7697a"], eyes: EYES_GREEN, names: ["Blue", "Storm", "Velvet", "Misty"] },
+    snow: { name: "Snow White", desc: "Fluffy all-white coat and sky-blue eyes", fur: ["#fbfbfd", "#e1e5ee", "#ffffff"], pink: ["#f6b3bf", "#d97f90"], eyes: EYES_BLUE, names: ["Snowball", "Cotton", "Marshmallow", "Pearl"] }
+  };
+  function setCoat(key) {
+    const B = BREEDS[key] || BREEDS.golden;
+    [FUR, FUR_D, FUR_L] = B.fur; [PINK, PINK_D] = B.pink; IRIS = B.eyes;
+    return B;
+  }
   const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round" stroke-linecap="round"`;
   let uidN = 0;
   const sparkle = (x, y, r, c = "#ffd84a") => `<path d="M${x} ${y - r} Q${x + r * .18} ${y - r * .18} ${x + r} ${y} Q${x + r * .18} ${y + r * .18} ${x} ${y + r} Q${x - r * .18} ${y + r * .18} ${x - r} ${y} Q${x - r * .18} ${y - r * .18} ${x} ${y - r}Z" fill="${c}" stroke="${OL}" stroke-width="1"/>`;
@@ -221,6 +277,7 @@
       <path d="M37 74 Q47 82.5 60 83 Q73 82.5 83 74 Q77 86 60 86 Q43 86 37 74Z" fill="${FUR_D}" opacity=".55"/>
       <path d="M41 45 L42 27 L50 39 L53 21 L60 37 L66 20.5 L69.5 37 L78 25 L79 45 Q60 39 41 45Z" fill="${FUR_L}" ${ln}/>
       <path d="M50 39 L52 31 M60 37 L64 28 M69.5 37 L74 31" stroke="${FUR_D}" stroke-width="1.4" stroke-linecap="round"/>
+      ${o.headPat || ""}
       <g class="dx-eyes"><g class="dx-blink">${eye(u, 48.5, 60, o.eyes)}${eye(u, 71.5, 60, o.eyes)}</g></g>
       
       <path d="M58.2 67.6 L61.8 67.6 L60 69.8Z" fill="${PINK_D}" stroke="${OL}" stroke-width="1" stroke-linejoin="round"/>
@@ -236,7 +293,7 @@
     const sc = o.sc, chonk = 1 + (w - 1) * .08;
     // outfits are drawn for the sitting torso; on the standing/lying body they're mapped onto its side and clipped to it
     let body = P.body;
-    if (pose === "sit") body += o.outfit || "";
+    if (pose === "sit") body += (o.bodyPat ? o.bodyPat(w, 16 * w) : "") + (o.outfit || "");
     else if (o.outfit) body = body.replace('<g class="dx-outfit" clip-path="url(#' + P.clip + ')"></g>', `<g class="dx-outfit" clip-path="url(#${P.clip})"><g transform="${P.outfitMap}">${o.outfit}</g></g>`);
     const MY = o.myst != null ? mystic(u, o.myst, P, w) : null;
     if (MY) { if (pose === "lie") body = addToTail(body, MY.spirits, MY.wisp); else P.back = addToTail(P.back, MY.spirits, MY.wisp) }
@@ -244,7 +301,7 @@
     const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck" transform="translate(60 ${pose === "sit" ? 7.5 : 4}) scale(.9 1) translate(-60 0)">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${MY ? MY.head : ""}${glasses}${o.front || ""}</g></g></g>`;
     const inner = o.boxed ? (MY ? MY.back : "") + headG + (MY ? MY.front : "") : `${MY ? MY.back : ""}<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
       <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}${MY ? MY.front : ""}`;
-    return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
+    return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="${IRIS[0]}"/><stop offset=".32" stop-color="${IRIS[1]}"/><stop offset=".55" stop-color="${IRIS[2]}"/><stop offset=".8" stop-color="${IRIS[3]}"/><stop offset="1" stop-color="${IRIS[4]}"/></radialGradient></defs>
       ${o.flip ? `<g transform="translate(120 0) scale(-1 1)">${inner}</g>` : inner}`;
   }
   // ===== The collar: every Dexter wears one (in every form), in the color the student picks; badges pin onto it
@@ -296,8 +353,10 @@
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
     const L = look || {};
-    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
+    const coat = setCoat(L.breed || load().breed);
+    const svg = kitty(u, { headPat: coat.head || "", bodyPat: coat.body || null, sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
       outfit: pick("outfit"), neck: neckLayer(E, L.collar || load().collar), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
+    setCoat("golden");
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -430,7 +489,21 @@ body.bb-on{padding-bottom:96px}
 .sh-tile.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
 .sh-note{margin:16px 18px 0;font-size:12.5px;color:var(--c-muted)}
 @media (max-width:420px){.sh-grid{grid-template-columns:repeat(3,1fr)}.sh-tile>svg{height:50px}}
-.sh-tabs.pal{margin:2px 16px 10px;--tabs:4}
+.sh-tabs.pal{margin:2px 16px 10px;--tabs:5}.sh-tabs.pal button{font-size:13.5px;padding:7px 2px}
+.ct-list{display:flex;flex-direction:column;gap:8px;margin:0 16px 12px}
+.ct-cat{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:var(--c-fill);border-radius:16px;padding:8px 12px 8px 6px;text-align:left}
+.ct-cat.on{background:color-mix(in srgb,#34c759 14%,var(--c-fill));box-shadow:inset 0 0 0 2px #34c759}
+.ct-cat svg{width:64px;height:64px}.ct-cat b{display:block;font-size:16px}.ct-cat small{display:block;color:var(--c-muted);font-size:12.5px;line-height:1.3}
+.ct-btns{display:flex;flex-direction:column;gap:6px;align-items:stretch}.ct-btns .sh-act{padding:7px 12px;font-size:13px}
+.ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
+.ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}
+.ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
+.ct-breeds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}
+.ct-breed{border:2px solid transparent;background:var(--c-fill);border-radius:16px;padding:6px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;font:inherit;color:inherit}
+.ct-breed svg{width:72px;height:72px}.ct-breed b{font-size:13px}.ct-breed.sel{border-color:var(--c-acc);background:color-mix(in srgb,var(--c-acc) 10%,var(--c-fill))}
+.ct-adopt{margin:0 16px 14px;background:var(--c-fill);border-radius:16px;padding:12px 14px;text-align:left}
+.ct-adopt p{margin:0 0 8px;font-size:13.5px;color:var(--c-muted)}.ct-row{display:flex;gap:8px;flex-wrap:wrap}
+.ct-row input{flex:1;min-width:130px;border:1.5px solid rgba(0,0,0,.12);border-radius:12px;padding:9px 12px;font:500 15px -apple-system,sans-serif;background:var(--c-bg);color:var(--c-ink)}
 .bc-case{margin:4px 16px 12px;border-radius:20px;padding:14px 14px 16px;background:linear-gradient(160deg,#c62828,#8e1b1b);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 6px 18px rgba(142,27,27,.3);color:#fff}
 .bc-top{display:flex;align-items:center;justify-content:space-between;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;margin:0 4px 10px;letter-spacing:.02em}
 .bc-top small{font:600 12.5px -apple-system,sans-serif;opacity:.85}
@@ -471,6 +544,24 @@ body.bb-on{padding-bottom:96px}
 /* Study pal: Dexter beside the question, playing with yarn */
 .bb-pal{position:fixed;left:0;top:0;z-index:58;width:var(--ps,72px);height:var(--ps,72px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .55s cubic-bezier(.34,1.3,.5,1),opacity .3s;-webkit-tap-highlight-color:transparent}
 .bb-palon .bb-dock{display:none}
+.bb-mate{position:fixed;left:0;top:0;z-index:57;width:var(--ps,62px);height:var(--ps,62px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .9s cubic-bezier(.3,1.1,.5,1);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.bb-mate .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}.bb-mate .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
+.bb-mate .bb-mname{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font:700 9.5px -apple-system,BlinkMacSystemFont,sans-serif;background:rgba(255,255,255,.92);color:#3a3a3c;border-radius:999px;padding:1px 6px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.bb-mate:not(.act-nap) .dx-blink{animation:bbBlink 5.2s ease-in-out 1.3s infinite}
+.bb-mate.hop .bb-palart{animation:bbHop .6s cubic-bezier(.3,1.6,.5,1)}
+.bb-mate.moving .dx-pawl,.bb-mate.moving .dx-hindr{animation:bbStride .36s ease-in-out infinite alternate}.bb-mate.moving .dx-pawr,.bb-mate.moving .dx-hindl{animation:bbStride .36s ease-in-out -.36s infinite alternate-reverse}
+.bb-mate.moving .bb-palart{animation:bbBob .18s ease-in-out infinite alternate}
+.bb-mate.i-nuzzle .bb-palart{animation:bbNuzzle 2.6s ease-in-out}.bb-pal.i-nuzzle .bb-palart{animation:bbNuzzle 2.6s ease-in-out}
+@keyframes bbNuzzle{0%,100%{transform:none}25%,75%{transform:translateX(calc(var(--side,1) * 16%)) rotate(calc(var(--side,1) * 9deg))}50%{transform:translateX(calc(var(--side,1) * 18%)) rotate(calc(var(--side,1) * 12deg))}}
+.bb-mate.i-groom .bb-palart{animation:bbGroom 2.6s ease-in-out}
+@keyframes bbGroom{0%,100%{transform:none}20%,80%{transform:translateX(calc(var(--side,1) * 20%)) translateY(-6%) rotate(calc(var(--side,1) * 14deg))}35%,65%{transform:translateX(calc(var(--side,1) * 22%)) translateY(-9%) rotate(calc(var(--side,1) * 18deg))}50%{transform:translateX(calc(var(--side,1) * 20%)) translateY(-6%) rotate(calc(var(--side,1) * 12deg))}}
+.bb-mate.i-pounce .bb-palart{animation:bbPlayPounce 2.2s ease-in-out}
+@keyframes bbPlayPounce{0%,50%{transform:translateY(6%) scaleY(.92)}55%,60%{transform:translateY(6%) scaleY(.92) rotate(calc(var(--side,1) * -3deg))}75%{transform:translateX(calc(var(--side,1) * 34%)) translateY(-26%)}90%{transform:translateX(calc(var(--side,1) * 30%))}100%{transform:none}}
+.bb-mate.i-chase{z-index:56}.bb-mate.i-chase .bb-palart{animation:bbChase 2.8s ease-in-out}
+@keyframes bbChase{0%{transform:none}45%{transform:translate(calc(var(--side,1) * var(--run,150px)),-8%)}50%{transform:translate(calc(var(--side,1) * var(--run,150px)),-8%) scaleX(-1)}95%{transform:scaleX(-1)}100%{transform:none}}
+.bb-fx{position:fixed;z-index:60;pointer-events:none;font-size:16px;animation:bbFx 2s ease-out forwards}
+@keyframes bbFx{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1;transform:translateY(-8px) scale(1)}100%{opacity:0;transform:translateY(-46px) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.bb-mate .bb-palart,.bb-fx{animation:none!important}}
 .bb-pal,.bb-dock{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
 .bb-pal.drag,.bb-dock.drag{transition:none;cursor:grabbing;z-index:130}
 .bb-pal.drag .bb-palart{transform:translateY(-6px) scale(1.1) rotate(-5deg);filter:drop-shadow(0 12px 14px rgba(0,0,0,.22))}
@@ -666,6 +757,7 @@ body.bb-on{padding-bottom:96px}
       <span class="bb-pic">${art(k)}</span><span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   const name = s => s.nick || "Dexter";
+  const stageName = (k, s) => STAGES[k].name.replace("Dexter", name(s));
   const COIN = `<svg class="coin" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#ffcf33" stroke="#b07d0f" stroke-width="1.4"/><circle cx="8" cy="8" r="4.2" fill="none" stroke="#d9a21b" stroke-width="1.2"/><path d="M6.6 5.6 q1.4 -1 2.8 0" stroke="#fff6cf" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>`;
   const HANGER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7 a2.2 2.2 0 1 1 2.2 -2.2 c0 1.4 -2.2 1.8 -2.2 3.4 L21 15 a1.4 1.4 0 0 1 -.9 2.5 H3.9 A1.4 1.4 0 0 1 3 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
   const FLAME = `<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M6 1 C7 4 10 5 10 9 C10 12 8 13 6 13 C4 13 2 12 2 9 C2 7 3 6 4 5 C4 7 5 8 6 8 C6 6 5 4 6 1Z" fill="currentColor"/></svg>`;
@@ -677,7 +769,7 @@ body.bb-on{padding-bottom:96px}
     return `<div class="pal-prog">
       <div class="bb-big">${art(k)}</div>
       <h3 id="bbName">${esc(name(s))}</h3>
-      <p class="bb-sub">Level ${L} of ${MAX_LV} · ${esc(st.form)} · ${esc(st.name)}</p>
+      <p class="bb-sub">Level ${L} of ${MAX_LV} · ${esc(st.form)} · ${esc(stageName(k, s))} · ${esc((BREEDS[s.breed] || BREEDS.golden).name)}</p>
       <div class="bb-stats">
         <div><b>${fmt(s.pts)}</b><span>total XP</span></div>
         <div><b>${s.streak}${s.streak >= 3 ? `<i class="fl">${FLAME}</i>` : ""}</b><span>in a row · ×${mult}</span></div>
@@ -688,7 +780,7 @@ body.bb-on{padding-bottom:96px}
       <p class="bb-next">${nx === null ? (L >= MAX_LV ? "Fully grown and Level 100. You've mastered it all!" : `Fully grown! ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1} of ${MAX_LV}.`) : `Evolves at Lv ${level(nx)} · ${fmt(nx - s.pts)} XP to go · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
       ${up ? `<p class="bb-next" style="margin-top:-8px">${s.streak ? `${up.at - s.streak} more right in a row for` : `Get ${up.at} right in a row for`} ×${up.mult} XP</p>` : ""}
       <div class="bb-fact"><b>The biology</b>${esc(st.fact)}</div>
-      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}" style="--lz:${(34 + 4.4 * i).toFixed(1)}px">${art(i)}<span>${i > k ? `Lv ${level(x.at)}` : esc(x.name)}</span></div>`).join("")}</div>
+      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}" style="--lz:${(34 + 4.4 * i).toFixed(1)}px">${art(i)}<span>${i > k ? `Lv ${level(x.at)}` : esc(stageName(i, s))}</span></div>`).join("")}</div>
       <details class="bb-how"><summary>How XP and gold work</summary>
         <p>Every question is rated by how hard it is. Harder questions earn more XP and gold:</p>
         <ul class="bb-tiers">${X ? X.TIERS.map(t => `<li><span class="xpb t-${t.key}">${t.name}</span>${t.xp} XP · ${GOLD_PER[t.key]} gold</li>`).join("") : ""}</ul>
@@ -802,7 +894,7 @@ body.bb-on{padding-bottom:96px}
     const ev = document.createElement("div"); ev.className = "bb-evo"; ev.setAttribute("role", "dialog"); ev.setAttribute("aria-modal", "true"); ev.setAttribute("aria-live", "polite");
     ev.innerHTML = `<p class="msg" id="bbMsg">${esc(who)} is starting to glow…</p>
       <div class="stage"><div class="glow"></div><span class="old">${art(from)}</span><span class="new">${art(to)}</span></div>
-      <div class="reveal"><h2>${esc(who)} evolved into ${esc(b.name)}!</h2><p class="evo-gold">${COIN} +${EVOLVE_BONUS} gold evolution bonus</p><p style="margin-top:8px">${esc(b.form)} stage · ${esc(b.fact)}</p></div>
+      <div class="reveal"><h2>${esc(who)} evolved into ${esc(stageName(to, s))}!</h2><p class="evo-gold">${COIN} +${EVOLVE_BONUS} gold evolution bonus</p><p style="margin-top:8px">${esc(b.form)} stage · ${esc(b.fact)}</p></div>
       <button type="button" id="bbEvoOk">Keep studying</button>`;
     document.body.appendChild(ev);
     const finish = () => {
@@ -845,6 +937,22 @@ body.bb-on{padding-bottom:96px}
         <span class="tag">${esc(it.set)}</span><span class="pr">${on ? "Wearing" : own ? "Owned" : `${COIN}${it.price}`}</span></button>`;
     }
     // Closet: every slot lets you pick one of your items, Dexter's own gear for this form, or nothing at all
+    // Cats: the household. Pick who to train, who comes along on screen, and adopt new breeds.
+    function catsHTML() {
+      const { H, list } = catList(), n = list.length, full = n >= MAX_CATS;
+      if (!st.breed) st.breed = Object.keys(BREEDS).find(b => !list.some(c => c.breed === b)) || "orange";
+      const B = BREEDS[st.breed], used = new Set(list.map(c => (c.nick || "Dexter").toLowerCase()));
+      const suggest = B.names.find(x => !used.has(x.toLowerCase())) || B.names[0] + " " + (n + 1);
+      return `<p class="ct-h">Your cats<small>The cat in training earns XP from your answers. Up to ${MAX_ALONG} others can come along on screen and play.</small></p>
+        <div class="ct-list">${list.map(c => { const k2 = stageOf(c.pts | 0); return `<div class="ct-cat${c.active ? " on" : ""}">
+          ${art(k2, c.equip || { badges: [] }, { breed: c.breed, collar: c.collar, w: c.weight, eyes: k2 ? "happy" : "closed", plain: true })}
+          <span><b>${esc(c.nick || "Dexter")}</b><small>${esc((BREEDS[c.breed] || BREEDS.golden).name)} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
+          <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
+            <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>`}</span></div>` }).join("")}</div>
+        <p class="ct-h">Adopt a cat<small>${full ? `Your home is full (${MAX_CATS} cats).` : "Free! Pick a breed and a name. New cats start as freshmen at Level 1."}</small></p>
+        ${full ? "" : `<div class="ct-breeds">${Object.entries(BREEDS).map(([key, b]) => `<button type="button" class="ct-breed${key === st.breed ? " sel" : ""}" data-breed="${key}" aria-pressed="${key === st.breed}">${art(1, { badges: [] }, { breed: key, eyes: "open", plain: true })}<b>${esc(b.name)}</b></button>`).join("")}</div>
+        <div class="ct-adopt"><p><b>${esc(B.name)}</b>: ${esc(B.desc)}.</p><div class="ct-row"><input id="ctName" maxlength="24" value="${esc(suggest)}" aria-label="New cat's name"><button type="button" class="sh-act" id="ctAdopt">Adopt</button></div></div>`}`;
+    }
     // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
     function badgesHTML(s) {
       const B = W.ITEMS.filter(i => i.slot === "badge"), got = B.filter(i => s.owned.includes(i.id));
@@ -900,11 +1008,11 @@ body.bb-on{padding-bottom:96px}
     function paint() {
       const s = load(), k = stageOf(s.pts);
       syncBadges();
-      const body = st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(s, k);
+      const body = st.tab === "cats" ? catsHTML() : st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(s, k);
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
-        <div class="sh-tabs pal" role="tablist">${[["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
-        ${st.tab === "progress" ? "" : `<div class="sh-stage" style="--dz:${(.84 + .07 * k).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
+        <div class="sh-tabs pal" role="tablist">${[["cats", "Cats"], ["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
+        ${st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${(.84 + .07 * k).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -914,6 +1022,13 @@ body.bb-on{padding-bottom:96px}
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
         if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
+        return;
+      }
+      if (st.tab === "cats") {
+        shop.querySelectorAll("[data-train]").forEach(b => b.onclick = () => keepScroll(() => { trainCat(b.dataset.train); paint(); paintDock(); refreshMates() }));
+        shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); saveHouse(H); paint(); refreshMates() }));
+        shop.querySelectorAll("[data-breed]").forEach(b => b.onclick = () => keepScroll(() => { st.breed = b.dataset.breed; paint() }));
+        if ($("ctAdopt")) $("ctAdopt").onclick = () => keepScroll(() => { const nm = ($("ctName").value || "").trim().slice(0, 24) || BREEDS[st.breed].names[0]; if (adoptCat(st.breed, nm)) { pop(`<b>Welcome home, ${esc(nm)}!</b><small>${esc(BREEDS[st.breed].name)}</small>`, "buy"); st.breed = null } paint(); refreshMates() });
         return;
       }
       if (st.tab === "badges") {
@@ -1011,6 +1126,7 @@ body.bb-on{padding-bottom:96px}
   const ACT_POSE = { mouse: "stand", laser: "stand", tail: "stand", nap: "lie" };
   let moving = false, facing = -1, walkT = 0;
   function walkTo(pos, then) {
+    matesMove(pos);
     const dx = palAt ? pos.x - palAt.x : 0, far = !palAt || Math.hypot(dx, pos.y - palAt.y) > 14;
     if (far) { const f = dx > 2 ? 1 : dx < -2 ? -1 : facing; if (!moving || f !== facing) { moving = true; facing = f; paintPal() } }
     place(pos);
@@ -1022,7 +1138,7 @@ body.bb-on{padding-bottom:96px}
     return mood || ACT_EYES[act] || "open";
   }
   function setMood(m, ms) { mood = m; clearTimeout(moodT); paintPal(); moodT = setTimeout(() => { mood = null; paintPal() }, ms) }
-  function setAct(a) { if (a !== act) { act = a; paintPal() } }
+  function setAct(a) { if (a !== act) { const was = act; act = a; paintPal(); if (a === "nap" || was === "nap") mates.forEach(paintMate) } }
   function nextAct() { const pool = ACTS.filter(x => x !== act); setAct(pool[Math.random() * pool.length | 0]) }
   setInterval(() => {   // a new game every 15 s; a cat nap after 45 s without any interaction
     if (!palOn || off() || visiting || document.hidden) return;
@@ -1047,15 +1163,87 @@ body.bb-on{padding-bottom:96px}
     if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
     return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
   }
-  function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)` }
+  function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)`; placeMates() }
+  // ===== Companion cats: up to two other cats from the household come along on screen. They sit beside the cat in
+  // training, follow when he trots off, play their own games, cheer right answers, comfort him after a miss, and every
+  // so often interact with him: a nuzzle, a chase around him, grooming, or a play-pounce. Tap one to open the Cats tab.
+  const MATE_ACTS = ["yarn", "feather", "leaf", "tail", "butterfly"];
+  let mates = [], mateT = 0, playT = 0;
+  const mateSize = c => Math.round((innerWidth >= 900 ? 96 : 72) * (.84 + .07 * stageOf(c.pts | 0)) * .86);
+  function clearMates() { mates.forEach(m => m.el.remove()); mates = []; clearInterval(mateT); clearInterval(playT); mateT = playT = 0 }
+  function refreshMates() {
+    clearMates();
+    if (!palOn || off()) return;
+    const { H, list } = catList();
+    H.along.forEach((id, i) => {
+      const c = list.find(x => x.id === id); if (!c) return;
+      const el = document.createElement("button"); el.type = "button"; el.className = "bb-mate"; el.setAttribute("aria-label", `${c.nick || "Dexter"} is here too. Open your cats`);
+      el.onclick = () => openPal("cats"); document.body.appendChild(el);
+      mates.push({ c, el, i, act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
+    });
+    mates.forEach(paintMate); placeMates();
+    if (mates.length) {
+      mateT = setInterval(() => mates.forEach(m => { if (!m.busy && !m.moving) { m.act = act === "nap" ? "nap" : MATE_ACTS[Math.random() * MATE_ACTS.length | 0]; paintMate(m) } }), 17000);
+      playT = setInterval(interact, 13000); setTimeout(interact, 4000);
+    }
+  }
+  function paintMate(m) {
+    const c = m.c, k = stageOf(c.pts | 0), sz = mateSize(c), a = act === "nap" && !m.busy ? "nap" : m.act;
+    const pose = m.moving || m.pose === "stand" ? "stand" : a === "nap" ? "lie" : "sit";
+    m.el.style.setProperty("--ps", sz + "px");
+    ACTS.concat("nap").forEach(x => m.el.classList.toggle("act-" + x, x === a && !m.moving && !m.busy));
+    m.el.classList.toggle("moving", m.moving);
+    const eyes = m.eyes || (m.moving ? "open" : a === "nap" ? "sleep" : ACT_EYES[a] || "open");
+    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, collar: c.collar, w: c.weight, eyes: k ? eyes : (eyes === "happy" ? "happy" : "closed"), pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
+  }
+  function matePos(m, at) {
+    const S = palSize(), sz = mateSize(m.c), A = at || palAt; if (!A) return null;
+    // stand on the open side: to his right if there's room (on wide screens that's the margin, away from the questions)
+    const need = (mates.length || 1) * sz * .8 + 8, side = innerWidth - (A.x + S) >= need ? 1 : A.x >= need ? -1 : (A.x + S / 2 > innerWidth / 2 ? -1 : 1);
+    m.side = side;
+    const x = side < 0 ? A.x - sz * .78 - m.i * sz * .74 : A.x + S * .78 + m.i * sz * .74;
+    return { x: Math.min(Math.max(x, 4), innerWidth - sz - 4), y: Math.min(A.y + S - sz + 2, innerHeight - sz - 4) };
+  }
+  function placeMates(at) { mates.forEach(m => { if (m.busy === "chase") return; const q = matePos(m, at); if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
+  function matesMove(to) {   // trot after the cat in training
+    mates.forEach(m => { const q = matePos(m, to); if (!q || !m.at || Math.hypot(q.x - m.at.x, q.y - m.at.y) < 14) return; m.moving = true; m.face = q.x > m.at.x ? 1 : -1; paintMate(m);
+      clearTimeout(m.walkT); m.walkT = setTimeout(() => { m.moving = false; paintMate(m) }, 1000 + m.i * 150) });
+  }
+  const fx = (el, chars, n = 3) => { const r = el.getBoundingClientRect(); for (let i = 0; i < n; i++) { const f = document.createElement("span"); f.className = "bb-fx"; f.textContent = chars[i % chars.length]; f.style.left = (r.left + r.width * (.3 + Math.random() * .4)) + "px"; f.style.top = (r.top + r.height * .15) + "px"; f.style.animationDelay = (i * .25) + "s"; document.body.appendChild(f); setTimeout(() => f.remove(), 2200) } };
+  function busy(m, kind, ms, setup, done) {
+    m.busy = kind; m.el.classList.add("i-" + kind); setup && setup(); paintMate(m);
+    setTimeout(() => { m.el.classList.remove("i-" + kind); m.busy = null; m.eyes = null; m.pose = "sit"; done && done(); paintMate(m); placeMates() }, ms);
+  }
+  function interact() {
+    const p = $("bbPal"); if (!p || !mates.length || visiting || moving || document.hidden || act === "nap") return;
+    const m = mates[Math.random() * mates.length | 0]; if (m.busy || m.moving) return;
+    const kind = ["nuzzle", "chase", "groom", "pounce"][Math.random() * 4 | 0];
+    p.style.setProperty("--side", -m.side);
+    if (kind === "nuzzle") {   // lean in, heads touch, hearts
+      busy(m, "nuzzle", 2600, () => { m.eyes = "happy"; p.classList.add("i-nuzzle"); setMood("happy", 2600); fx(m.el, ["💛", "💕", "💛"]) }, () => p.classList.remove("i-nuzzle"));
+    } else if (kind === "groom") {   // a few licks on his head; he closes his eyes happily
+      busy(m, "groom", 2600, () => { m.eyes = "focus"; setMood("happy", 2600); fx(p, ["✨", "💧", "✨"]) });
+    } else if (kind === "pounce") {   // crouch, wiggle, play-pounce; he hops
+      busy(m, "pounce", 2200, () => { m.pose = "stand"; m.face = m.side > 0 ? -1 : 1; m.eyes = "dilated"; setTimeout(() => { p.classList.remove("hop"); void p.offsetWidth; p.classList.add("hop"); setMood("wide", 900) }, 1300) });
+    } else {   // chase: a lap behind and around him, while he watches
+      busy(m, "chase", 2800, () => { m.pose = "stand"; m.face = m.side > 0 ? -1 : 1; m.eyes = "dilated"; setMood("dilated", 2800); m.el.style.setProperty("--run", (palSize() * 1.6 + mateSize(m.c)) + "px") });
+    }
+  }
+  function mateReact(good) {
+    mates.forEach((m, i) => { if (m.busy) return;
+      if (good) { m.eyes = "happy"; m.el.classList.remove("hop"); void m.el.offsetWidth; m.el.classList.add("hop"); paintMate(m); setTimeout(() => { m.eyes = null; m.el.classList.remove("hop"); paintMate(m) }, 1500) }
+      else if (i === 0) busy(m, "nuzzle", 2000, () => { m.eyes = "sad"; const p = $("bbPal"); if (p) { p.style.setProperty("--side", -m.side); p.classList.add("i-nuzzle") } fx(m.el, ["💗"], 1) }, () => { const p = $("bbPal"); if (p) p.classList.remove("i-nuzzle") });   // a comforting nuzzle
+    });
+  }
+  addEventListener("resize", () => { mates.forEach(paintMate); placeMates() });
   function settle() {
     if (!palOn || visiting) return;
     const h = home(); if (palAt && Math.abs(h.x - palAt.x) < 1 && Math.abs(h.y - palAt.y) < 1) return;
     if (!palAt || document.body.classList.contains("bb-scrolling")) place(h); else walkTo(h);
   }
   function checkPal() {
-    if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); return }
-    if (!palOn && document.querySelector(".opt")) { palOn = true; document.body.classList.add("bb-palon"); paintPal(); place(home()) }
+    if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); clearMates(); return }
+    if (!palOn && document.querySelector(".opt")) { palOn = true; document.body.classList.add("bb-palon"); paintPal(); place(home()); refreshMates() }
   }
   function paintPal() {
     if (!palOn || off()) return;
@@ -1076,7 +1264,7 @@ body.bb-on{padding-bottom:96px}
     const pos = cr && cr.right + S + 28 <= innerWidth ? { x: cr.right + 16, y: r.top + r.height / 2 - S * .6 } : { x: Math.min(r.right - S * .8, innerWidth - S - 6), y: r.top + r.height / 2 - S * .85 };
     pos.y = Math.min(Math.max(pos.y, 8), innerHeight - S - 8);
     clearTimeout(visiting); p.classList.remove("run"); void p.offsetWidth; p.classList.add("run");
-    moving = true; facing = palAt && pos.x > palAt.x + 2 ? 1 : -1; paintPal(); place(pos);
+    moving = true; facing = palAt && pos.x > palAt.x + 2 ? 1 : -1; paintPal(); matesMove(pos); place(pos);
     setTimeout(() => { if (visiting) { moving = false; paintPal() } }, 650);   // arrives: back to his game's pose to react
     visiting = setTimeout(() => { visiting = 0; p.classList.remove("run"); settle() }, 2300);
   }
@@ -1164,6 +1352,8 @@ body.bb-on{padding-bottom:96px}
   function setEnabled(on) { try { on ? localStorage.removeItem(OFF_KEY) : localStorage.setItem(OFF_KEY, "1") } catch (e) { } paintDock() }
   window.addEventListener("bio:correct", gain);
   window.addEventListener("bio:wrong", miss);
+  window.addEventListener("bio:correct", () => mateReact(true));
+  window.addEventListener("bio:wrong", () => mateReact(false));
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); syncBadges(); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();

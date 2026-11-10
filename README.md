@@ -106,6 +106,16 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Lying:** a curled loaf for naps, paws tucked and tail wrapped around.
   - Hats, glasses, neckwear and badges move with his head. Outfits are mapped onto the side of his standing or lying body.
 - **Weight:** a slider in the Closet goes from Slim through Just right, Well fed and Chubby to Absolute chonk (0.75–1.5, saved as `weight` in his state). It widens his body, belly, haunches and legs in every pose.
+- **Breeds and a household of cats:** the **Cats** tab in the companion's panel lists every cat in the household. A free adoption picks from 9 breeds, each the same chibi cat with its own coat, eyes and markings: Golden (Dexter), Orange Tabby, Silver Tabby, Black Cat, Tuxedo, Siamese, Calico, Russian Blue, Snow White (`BREEDS` / `setCoat()` in `assets/buddy.js`). Up to 6 cats.
+  - **Training:** one cat is *in training* and earns the XP. *Train* switches with one tap.
+  - **What's per cat:** XP, level, evolution, name, breed, outfit, collar color, pinned badges and weight.
+  - **What's shared:** gold, owned items and earned badges belong to the household.
+  - **Storage:** the cat in training lives in `bio-dexter-v1` as before, and the others wait in `bio-dexter-cats-v1` (`household()`, `trainCat()`, `adoptCat()`). Stage names use each cat's own name ("Freshman Mango").
+- **Companions on screen:** tick *On screen* for up to 2 other cats, and they sit beside the cat in training on question pages, on the open side so they don't cover the questions. A cat you stop training comes along automatically.
+  - **Following:** they trot after him when he moves, play their own games, and nap when he naps.
+  - **Answers:** they hop with happy eyes on a right answer. After a miss, one comes over for a comforting nuzzle.
+  - **Interactions:** about every 13 seconds one interacts with him: a nuzzle with hearts, grooming his head (he closes his eyes happily), a crouch-and-pounce game (he hops), or a chase lap around him while he watches.
+  - **Tapping one** opens the Cats tab.
 - **Mystic Dexter:** every form is a little magical, and more so as he evolves. He also grows bigger with each evolution: the study pal goes from 84% size as a freshman to 119% as the Professor, as do the Closet stage, the greeting and the evolution line. The layers are drawn with SVG `<animate>`, so they move everywhere he appears (`MYST` and `mystic()` in `assets/buddy.js`):
   - **Every form:** a glowing forehead gem, a soft pulsing aura that grows and changes color, and floating sparks of light.
   - **Sophomore and up:** a spirit flame on his tail tip.
