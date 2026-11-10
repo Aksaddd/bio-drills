@@ -716,6 +716,18 @@ body.bb-on{padding-bottom:96px}
 @keyframes bbTail{0%,35%,100%{transform:none}45%{transform:scaleX(-1) translateX(5%)}55%{transform:translateX(5%) rotate(6deg)}65%{transform:scaleX(-1) translateX(-5%) rotate(-6deg)}75%{transform:translateX(-3%)}}
 @keyframes bbBreathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.95)}}
 @keyframes bbZ{0%{transform:translateY(4px);opacity:0}30%{opacity:1}100%{transform:translateY(-10px);opacity:0}}
+html:not(.bb-showlv) .bb-pal .bb-lv,html:not(.bb-showlv) .bb-dock .bb-lv,html:not(.bb-showlv) .bb-mate .bb-mlv{display:none}
+.bb-mate .bb-mlv{font-weight:800;color:#6e6e73}.bb-showlv .bb-mate.stk .bb-mname{display:block}
+.pf-card{margin:12px 16px 0;padding:14px 16px;border-radius:18px;background:var(--c-fill)}
+.pf-top{display:flex;align-items:center;gap:12px}.pf-lv{flex:none;width:58px;height:58px;border-radius:50%;background:#1d1d1f;color:#fff;display:grid;place-items:center;text-align:center;font:800 20px/1 -apple-system,BlinkMacSystemFont,sans-serif}.pf-lv small{display:block;font-size:9.5px;font-weight:700;opacity:.7;letter-spacing:.04em}
+[data-theme="dark"] .pf-lv{background:#f5f5f7;color:#1d1d1f}
+.pf-who{min-width:0;flex:1}.pf-who b{display:block;font-size:16px}.pf-who span{display:block;font-size:13px;color:var(--c-muted)}
+.pf-bar{height:8px;border-radius:99px;background:color-mix(in srgb,var(--c-muted) 22%,transparent);margin:10px 0 4px;overflow:hidden}.pf-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#34c759,#30d158)}
+.pf-xp{font-size:12px;color:var(--c-muted)}
+.pf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.pf-grid div{background:var(--c-bg,rgba(255,255,255,.7));border-radius:12px;padding:8px 6px;text-align:center}
+.pf-grid b{display:block;font-size:16px;font-variant-numeric:tabular-nums}.pf-grid span{display:block;font-size:11px;color:var(--c-muted)}
+.pf-prog{margin:4px 16px 10px}.pf-acc{margin:16px 16px 0}
+.pf-tog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:14px;cursor:pointer}.pf-tog input{width:20px;height:20px;accent-color:#34c759}
 .bb-pal .bb-lv{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);font:700 10.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#1d1d1f;color:#fff;border-radius:980px;padding:2px 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
 [data-theme="dark"] .bb-pal .bb-lv{background:#f5f5f7;color:#1d1d1f}
 .bb-pal .bb-streak{top:-4px;left:-6px}
@@ -895,6 +907,7 @@ body.bb-on{padding-bottom:96px}
         <p><b>Win streaks multiply XP and gold:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes anything away. Each evolution adds ${EVOLVE_BONUS} gold.</p>
       </details>
       <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys). Each companion cat can be dragged to its own spot too.</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
+      <label class="pf-tog pf-prog"><span>Show levels on the cats on screen</span><input type="checkbox" id="pgShowLv"${showLv() ? " checked" : ""}></label>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button></div>
     </div>`;
   }
@@ -914,6 +927,11 @@ body.bb-on{padding-bottom:96px}
     setTimeout(() => { p.remove(); live.splice(live.indexOf(rec), 1) }, 1500);
   }
   // ===== Dexter's reactions: an excited "Meow!" (bubble + a little synthesized meow) or a dropped yarn ball
+  // Levels on screen: hidden by default (tap a cat to see its level and stats); this setting shows them on the cats
+  const LV_KEY = "bio-dexter-showlv";
+  const showLv = () => { try { return localStorage.getItem(LV_KEY) === "1" } catch (e) { return false } };
+  function setShowLv(on) { try { on ? localStorage.setItem(LV_KEY, "1") : localStorage.removeItem(LV_KEY) } catch (e) { } document.documentElement.classList.toggle("bb-showlv", on) }
+  document.documentElement.classList.toggle("bb-showlv", showLv());
   const SOUND_KEY = "bio-dexter-sound";
   const soundOn = () => { try { return localStorage.getItem(SOUND_KEY) !== "0" } catch (e) { return true } };
   const setSound = on => { try { on ? localStorage.removeItem(SOUND_KEY) : localStorage.setItem(SOUND_KEY, "0") } catch (e) { } };
@@ -1037,10 +1055,10 @@ body.bb-on{padding-bottom:96px}
   let shop = null;
   const NONE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 18 L18 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const OWN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 l2.2 5.4 5.8 .5 -4.4 3.8 1.4 5.7 L12 15.3 7 18.4 l1.4 -5.7 L4 8.9 l5.8 -.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>`;
-  function openPal(tab, sub) {
+  function openPal(tab, sub, dress) {
     const W = window.BioWardrobe;
     if (shop) shop.remove();
-    const st = { tab: tab || "closet", sub: sub || "hat", sel: null, tryEq: Object.assign({}, load().equip) };
+    const st = { tab: tab || "closet", sub: sub || "hat", sel: null, tryEq: Object.assign({}, load().equip), dress: dress || null };
     shop = document.createElement("div"); shop.className = "bb-veil"; document.body.appendChild(shop);
     shop.onclick = e => { if (e.target === shop) closeShop() };
     const SUBS = [["hat", "Hats"], ["outfit", "Outfits"], ["acc", "Accessories"]];
@@ -1053,7 +1071,7 @@ body.bb-on{padding-bottom:96px}
       const s = load(), H = household(), id = dressId();
       if (id === H.active) return Object.assign(s, { _id: id });
       const c = H.cats[id];
-      return Object.assign({}, s, { equip: Object.assign({ badges: [] }, c.equip), collar: c.collar || "navy", weight: c.weight || 1, pts: c.pts | 0, nick: c.nick || "", breed: c.breed, color: c.color, _id: id, _other: true });
+      return Object.assign({}, s, { equip: Object.assign({ badges: [] }, c.equip), collar: c.collar || "navy", weight: c.weight || 1, pts: c.pts | 0, nick: c.nick || "", breed: c.breed, color: c.color, correct: c.correct | 0, best: c.best | 0, streak: 0, _id: id, _other: true });
     }
     function dressSet(fn) {
       const H = household(), id = dressId();
@@ -1062,6 +1080,18 @@ body.bb-on{padding-bottom:96px}
       fn(t); c.equip = t.equip; c.collar = t.collar; c.weight = t.weight; saveHouse(H); refreshMates(); return Object.assign({}, c, t);
     }
     const dressArt = (d, eyes) => d._other ? art(stageOf(d.pts), d.equip, { breed: d.breed, color: d.color, collar: d.collar, w: d.weight, eyes }) : art(stageOf(d.pts), d.equip, { eyes });
+    function statsHTML(d) {   // the cat's profile: level, XP to the next level, form, and its numbers
+      const H = household(), id = d._id, L = level(d.pts | 0), a = lvXP(L), b = lvXP(Math.min(MAX_LV, L + 1)), k = stageOf(d.pts | 0), pct = L >= MAX_LV ? 100 : Math.round(100 * ((d.pts | 0) - a) / Math.max(1, b - a));
+      const role = id === H.active ? "✓ In training" : H.co.includes(id) ? "📚 Co-training" : H.along.includes(id) ? "On screen" : "☕ Chilling in the café";
+      const nx = STAGES[k + 1];
+      return `<div class="pf-card"><div class="pf-top"><span class="pf-lv"><span><small>LV</small>${L}</span></span>
+          <span class="pf-who"><b>${esc(stageName(k, d))}</b><span>${esc(breedName(d.breed || load().breed, d.color || load().color))} · ${esc(STAGES[k].form)}</span><span>${role}</span></span></div>
+        <div class="pf-bar" role="progressbar" aria-label="XP to the next level" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+        <div class="pf-xp">${L >= MAX_LV ? "Level 100: mastered it all!" : `${fmt((d.pts | 0) - a)} / ${fmt(b - a)} XP to Lv ${L + 1}`}${nx ? ` · evolves in ${fmt(nx.at - (d.pts | 0))} XP` : ""}</div>
+        <div class="pf-grid"><div><b>${fmt(d.pts | 0)}</b><span>Total XP</span></div><div><b>${fmt(d.correct | 0)}</b><span>Right answers</span></div><div><b>${d.best | 0}</b><span>Best streak</span></div>
+          <div><b>${id === H.active ? (d.streak | 0) : "–"}</b><span>Streak now</span></div><div><b>${(d.equip.badges || []).length}</b><span>Badges pinned</span></div><div><b>${esc(weightLabel(d.weight || 1))}</b><span>Weight</span></div></div>
+        <label class="pf-tog"><span>Show levels on the cats on screen</span><input type="checkbox" id="pfShowLv"${showLv() ? " checked" : ""}></label></div>`;
+    }
     function dressPicker() {   // flip through your cats: arrows on the stage, plus a strip of all of them
       const { list } = catList(); if (list.length < 2) return "";
       const id = dressId();
@@ -1152,10 +1182,11 @@ body.bb-on{padding-bottom:96px}
       const d = st.tab === "closet" && W ? dressGet() : null, many = d && catList().list.length > 1;
       const body = st.tab === "cats" ? catsHTML() : st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(d, stageOf(d.pts));
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
-        <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
+        <div class="sh-head"><h3 id="shTitle">${esc(name(d || s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
         <div class="sh-tabs pal" role="tablist">${[["cats", "Cats"], ["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
         ${d ? `${dressPicker()}<div class="sh-stage cl-stage" style="--dz:${sizeFor(d.pts).toFixed(2)}">${many ? `<button type="button" class="cl-arrow l" data-step="-1" aria-label="Previous cat">‹</button>` : ""}<span class="cl-who">${dressArt(d, "wide")}</span>${many ? `<span class="cl-name">Dressing <b>${esc(name(d))}</b></span><button type="button" class="cl-arrow r" data-step="1" aria-label="Next cat">›</button>` : ""}</div>`
           : st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${sizeFor(s.pts).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: "wide" })}</div>`}
+        ${d ? statsHTML(d) + `<p class="sh-cap pf-acc">Accessories &amp; looks</p>` : ""}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -1164,6 +1195,7 @@ body.bb-on{padding-bottom:96px}
       if (st.tab === "progress") {
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
+        if ($("pgShowLv")) $("pgShowLv").onchange = e => { setShowLv(e.target.checked); refreshMates() };
         if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); const H = household(); H.spots = {}; saveHouse(H); paint(); placeMates() };
         return;
       }
@@ -1187,6 +1219,7 @@ body.bb-on{padding-bottom:96px}
       }
       if (st.tab === "closet") {
         const set = fn => keepScroll(() => { dressSet(fn); paint(); paintDock() });
+        $("pfShowLv").onchange = e => { setShowLv(e.target.checked); refreshMates() };
         shop.querySelectorAll("[data-dress]").forEach(b => b.onclick = () => keepScroll(() => { st.dress = b.dataset.dress; paint() }));
         shop.querySelectorAll("[data-step]").forEach(b => b.onclick = () => keepScroll(() => { const L = catList().list, i = L.findIndex(c => c.id === dressId()); st.dress = L[(i + +b.dataset.step + L.length) % L.length].id; paint() }));
         // weight: the stage updates live while dragging; the rest of the page when you let go
@@ -1636,7 +1669,7 @@ body.bb-on{padding-bottom:96px}
     H.along.forEach((id, i) => {
       const c = list.find(x => x.id === id); if (!c) return;
       const el = document.createElement("button"); el.type = "button"; el.className = "bb-mate"; el.setAttribute("aria-label", `${c.nick || "Dexter"} is here too. Open your cats`);
-      el.onclick = () => openPal("cats"); document.body.appendChild(el);
+      el.onclick = () => openPal("closet", null, id); document.body.appendChild(el);
       const me = { id }; el.title = `${c.nick || "Dexter"} · drag to move`;
       makeMovable(el, () => mateSize(c), (x, y) => { const m = mates.find(z => z.el === el); if (m) { m.at = { x, y }; el.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)` } }, {
         origin: () => { const m = mates.find(z => z.el === el); return m && m.at ? m.at : { x: 0, y: 0 } },
@@ -1659,7 +1692,7 @@ body.bb-on{padding-bottom:96px}
     ACTS.concat("nap").forEach(x => m.el.classList.toggle("act-" + x, x === a && !m.moving && !m.busy));
     m.el.classList.toggle("moving", m.moving);
     const eyes = m.eyes || (m.moving ? "open" : a === "nap" ? "sleep" : ACT_EYES[a] || "open");
-    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${m.co ? "📚 " : ""}${esc(c.nick || "Dexter")}</span>`;
+    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${m.co ? "📚 " : ""}${esc(c.nick || "Dexter")}<span class="bb-mlv"> · Lv ${level(c.pts | 0)}</span></span>`;
     m.el.classList.toggle("co", !!m.co);
   }
   function matePos(m, at) {
@@ -1757,7 +1790,7 @@ body.bb-on{padding-bottom:96px}
     if (!palOn || off()) return;
     const s = load(), k = stageOf(s.pts), mult = XP() ? XP().multiplier(s.streak) : 1;
     let p = $("bbPal");
-    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("cats"); document.body.appendChild(p); makeMovable(p, palSize, (x, y) => place({ x, y })); if (palAt) place(palAt) }
+    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet", null, household().active); document.body.appendChild(p); makeMovable(p, palSize, (x, y) => place({ x, y })); if (palAt) place(palAt) }
     p.style.setProperty("--ps", palSize() + "px");
     p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]} · drag to move him`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
@@ -1883,5 +1916,5 @@ body.bb-on{padding-bottom:96px}
     return { count: R.length, cats: pick.map((r, i) => ({ mine: !!r.mine, nick: r.nick || "", name: breedName(r.breed, r.color),
       svg: art(stageOf(r.pts | 0), r.equip || { badges: [] }, { breed: r.breed, color: r.color, collar: r.collar || "navy", w: r.weight || 1, eyes: eyes[i % eyes.length], pose: i === 2 ? "lie" : "sit", plain: !r.mine }) })) };
   }
-  window.BioBuddy = { openCafe: () => openCafe(), cafeWindow, enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
+  window.BioBuddy = { openCafe: () => openCafe(), cafeWindow, showLv, setShowLv, enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
 })();
