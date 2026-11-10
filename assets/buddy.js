@@ -11,16 +11,16 @@
   // Dexter: an original blonde kitten (anime/chibi style) who grows up as the student answers correctly.
   // Six forms at the same XP thresholds as before. Each form's card fact ties Dexter to this course: plants, fungi and plant signals.
   const STAGES = [
-    { at: 0, name: "Newborn Dexter", form: "Sleepy newborn", color: "#e2aa4a",
-      fact: "Newborn Dexter sleeps most of the day, a bit like a dormant seed. Abscisic acid (ABA) keeps a seed dormant until heavy rain, light or a long cold spell signals that it's safe to grow." },
-    { at: 100, name: "Kitten Dexter", form: "Curious kitten", color: "#26365e",
-      fact: "Kitten Dexter's favorite snack is cat grass: wheat or oat seedlings. They're monocots, with one cotyledon, parallel leaf veins, scattered vascular bundles and fibrous roots." },
-    { at: 350, name: "Pouncer Dexter", form: "Playful pouncer", color: "#4f8dff",
+    { at: 0, name: "Freshman Dexter", form: "Sleepy freshman", color: "#e2aa4a",
+      fact: "Freshman Dexter sleeps through most of his 8 a.m. lectures, a bit like a dormant seed. Abscisic acid (ABA) keeps a seed dormant until heavy rain, light or a long cold spell signals that it's safe to grow." },
+    { at: 100, name: "Sophomore Dexter", form: "Curious sophomore", color: "#26365e",
+      fact: "Sophomore Dexter's favorite study snack is cat grass: wheat or oat seedlings. They're monocots, with one cotyledon, parallel leaf veins, scattered vascular bundles and fibrous roots." },
+    { at: 350, name: "Junior Dexter", form: "Playful junior", color: "#4f8dff",
       fact: "Catnip makes Dexter pounce because of nepetalactone, a secondary compound the plant makes to repel insect herbivores. It's a chemical defense, like the ones in Ch 39." },
-    { at: 900, name: "Fighter Dexter", form: "Fighter", color: "#c0392b",
+    { at: 900, name: "Senior Dexter", form: "Determined senior", color: "#c0392b",
       fact: "Plants fight back too. The hypersensitive response kills cells around an infection to wall it off, and methylsalicylic acid travels through the phloem to trigger systemic acquired resistance." },
-    { at: 1800, name: "Lab Cat Dexter", form: "Lab assistant", color: "#3fa5e8",
-      fact: "Lab Cat Dexter's favorite experiment is phototropism. Light makes auxin move to a coleoptile's shaded side; cells there elongate (the acid growth hypothesis) and the shoot bends toward the light." },
+    { at: 1800, name: "Grad Student Dexter", form: "Grad student in the lab", color: "#3fa5e8",
+      fact: "Grad Student Dexter's thesis experiment is phototropism. Light makes auxin move to a coleoptile's shaded side; cells there elongate (the acid growth hypothesis) and the shoot bends toward the light." },
     { at: 3200, name: "Professor Dexter", form: "Professor", color: "#2d2f3a",
       fact: "Professor Dexter's big lecture: fungi absorb their food, digesting it outside their bodies with enzymes, and they're more closely related to cats (animals) than to plants." }
   ];
@@ -51,7 +51,7 @@
   const stageOf = pts => { let k = 0; STAGES.forEach((s, i) => { if (pts >= s.at) k = i }); return k };
   const nextAt = k => STAGES[k + 1] ? STAGES[k + 1].at : null;
   // Levels 1–100. Reaching level L takes A·(L−1)^1.5 XP, with Level 100 at 20,000 XP: quick early levels,
-  // a long climb at the top. Forms land at Lv 3 (Kitten Dexter), 7, 13, 20 and 30 (Professor Dexter); 30–100 is mastery.
+  // a long climb at the top. Forms land at Lv 3 (Sophomore Dexter), 7, 13, 20 and 30 (Professor Dexter); 30–100 is mastery.
   const MAX_LV = 100, MAX_XP = 20000, LV_A = MAX_XP / Math.pow(MAX_LV - 1, 1.5);
   const lvXP = L => L <= 1 ? 0 : Math.ceil(LV_A * Math.pow(L - 1, 1.5));
   function level(pts) {
@@ -66,7 +66,7 @@
   // ===== Artwork (viewBox 0 0 120 120): Dexter, an original blonde kitten drawn in an anime/chibi style.
   // Design rules: front-facing chibi proportions (big head, small body), golden-blonde fur with a spiky blonde fringe,
   // big glossy eyes with two highlights, pink blush with hatch marks, an "ω" mouth, thick clean outlines and
-  // flat cel shading. He grows from a sleepy newborn into a professor, gaining one piece of gear per form.
+  // flat cel shading. He goes from a sleepy freshman to a professor, gaining one piece of gear per form.
   const OL = "#3a2a1e", OW = 2.4;
   const FUR = "#f7d27c", FUR_D = "#e2aa4a", FUR_L = "#fff0c2", PINK = "#e8a08a", PINK_D = "#c9705a";
   const ln = `stroke="${OL}" stroke-width="${OW}" stroke-linejoin="round" stroke-linecap="round"`;
@@ -75,7 +75,7 @@
   // Eye expressions. "open" is his everyday look; the study pal switches between the others by mood:
   //   wide (wonder: sparkly, brows up) · dilated (playing/hunting: big round pupils, as real cats' widen) · focus (stalking:
   //   lids lowered toward the nose, big pupils) · sleepy (content: heavy lids, a slow blink) · sad (outer lids droop, worried
-  //   brows, a tear) · happy (closed ^ ^ smile) · sleep (relaxed closed lids) · closed (the newborn's sleepy look)
+  //   brows, a tear) · happy (closed ^ ^ smile) · sleep (relaxed closed lids) · closed (the freshman's sleepy look)
   const EYE = {   // pupil rx/ry, lid drop at outer/inner corner, brow outer/inner y offset, highlight scale
     open: { p: [1.9, 3.3], dO: 0, dI: 0, bO: -10.6, bI: -8.4, hi: 1 },
     wide: { p: [2.6, 3.5], dO: -1.2, dI: -1.2, bO: -13, bI: -12.2, hi: 1.3, star: true },
@@ -166,10 +166,10 @@
   //   aura    a soft glow behind him that grows and shifts color
   //   motes   floating sparks of light
   //   gem     a glowing crystal on his forehead (every form)
-  //   marks   luminous stripes on his cheeks (Pouncer and up)
+  //   marks   luminous stripes on his cheeks (Junior and up)
   //   wisp    a spirit flame on the tip of his tail (Kitten and up)
-  //   spirits ghostly extra tails that sway beside his real one (Fighter: 1, Lab Cat: 2, Professor: 3)
-  //   runes   a slowly turning rune circle behind him (Lab Cat: half ring, Professor: full ring of glyphs)
+  //   spirits ghostly extra tails that sway beside his real one (Senior and Grad Student: 1, Professor: 2)
+  //   runes   a slowly turning rune circle behind him (Grad Student: half ring of paw prints, Professor: full ring)
   // All drawn with SVG <animate>, so they move wherever he appears.
   const MYST = [
     { c: "#c4b5fd", c2: "#f5f3ff", aura: .34, r: 36, motes: 4, gem: "#c4b5fd" },
@@ -986,7 +986,7 @@ body.bb-on{padding-bottom:96px}
   }
   const ACT_EYES = { yarn: "open", butterfly: "wide", mouse: "focus", laser: "dilated", feather: "dilated", leaf: "wide", box: "sleepy", tail: "dilated", nap: "sleep" };
   function eyesNow(k) {
-    if (k === 0) return mood || (act === "nap" ? "sleep" : "closed");   // the newborn's eyes stay shut unless he's reacting
+    if (k === 0) return mood || (act === "nap" ? "sleep" : "closed");   // the sleepy freshman's eyes stay shut unless he's reacting
     return mood || ACT_EYES[act] || "open";
   }
   function setMood(m, ms) { mood = m; clearTimeout(moodT); paintPal(); moodT = setTimeout(() => { mood = null; paintPal() }, ms) }
@@ -998,7 +998,7 @@ body.bb-on{padding-bottom:96px}
   }, 15000);
   ["pointerdown", "keydown", "scroll", "touchstart"].forEach(t => addEventListener(t, () => { lastMove = Date.now(); if (act === "nap") nextAct() }, { passive: true, capture: true }));
   const shown = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
-  const sizeK = () => .84 + .07 * stageOf(load().pts);   // he grows with each evolution: 84% as a newborn → 119% as the Professor
+  const sizeK = () => .84 + .07 * stageOf(load().pts);   // he grows with each evolution: 84% as a freshman → 119% as the Professor
   const palSize = () => Math.round((innerWidth >= 900 ? 96 : 72) * sizeK());
   function anchor() { const p = $("bbPal"); return palOn && p ? p : $("bbDock") }
   function anchorRect(d) {   // where Dexter is headed (he may still be moving)
