@@ -60,6 +60,13 @@
 .rd-tool{border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 10px;font:600 12.5px var(--body);cursor:pointer;display:inline-flex;gap:4px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.1);white-space:nowrap}
 .rd-tool.on{background:#ffd60a;color:#1d1d1f}.rd-tool b{background:var(--accent);color:#fff;border-radius:999px;padding:0 6px;font-size:11px}.rd-tool b:empty{display:none}
 @media (max-width:520px){.rd-tool span{display:none}.rd-score-mini{display:none}}
+.rd-tool.rd-tool-restart{background:#ff9f0a;color:#fff;font-size:13.5px;padding:7px 13px;box-shadow:0 2px 8px rgba(255,159,10,.4)}.rd-tool-restart em{font-style:normal}
+.rd-restartrow{margin-top:12px}
+.rd-restart{display:flex;align-items:center;gap:12px;width:100%;border:0;cursor:pointer;text-align:left;border-radius:16px;padding:12px 16px;min-height:60px;background:linear-gradient(135deg,#ffb340,#ff8a00);color:#fff;box-shadow:0 6px 18px rgba(255,138,0,.3);font:inherit;transition:transform .12s}
+.rd-restart:hover{transform:translateY(-1px)}.rd-restart:active{transform:scale(.99)}
+.rd-restart .ic{width:40px;height:40px;flex:none;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font:700 24px var(--body)}
+.rd-restart b{display:block;font:700 18px var(--display)}.rd-restart small{display:block;font:500 13.5px var(--body);opacity:.92}
+.btn.rd-endrestart{background:#ff9f0a;color:#fff;font-size:16px;padding:13px 24px}
 .rd-book{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:0;text-align:left;cursor:pointer;background:var(--paper);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);font:inherit;color:inherit}
 .rd-book>span:first-child{font-size:24px}.rd-book b{display:block;font:650 16px var(--display)}.rd-book small{color:var(--muted);font-size:13px}.rd-book i{color:var(--accent);font-style:normal;font-size:20px}
 mark.an{color:inherit;border-radius:3px;padding:0 1px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -287,8 +294,9 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
     $("backLink").textContent = "← All chapters"; $("backLink").href = "#";
     const p = chProgress(c), shown = c.sections.slice(0, S.finished ? c.sections.length : S.at + 1);
     const nextC = R[ci + 1];
-    $("view").innerHTML = `<div class="rd-head"><p class="rd-kicker">${c.ch} · Chapter ${ci + 1} of ${R.length}</p><p class="rd-lead">${c.intro}</p></div>
-      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool" id="rdRestart" title="Restart this chapter from the first passage">↺<span>Restart</span></button><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
+    $("view").innerHTML = `<div class="rd-head"><p class="rd-kicker">${c.ch} · Chapter ${ci + 1} of ${R.length}</p><p class="rd-lead">${c.intro}</p>
+      ${S.at || Object.keys(S.a).length || doneCount(S) ? `<div class="rd-restartrow"><button type="button" class="rd-restart" id="rdRestartBig"><span class="ic" aria-hidden="true">↺</span><span><b>Restart chapter</b><small>${doneCount(S) ? `Finished ${doneCount(S) === 1 ? "once" : doneCount(S) + " times"} · ${tierOf(c).next ? `finish again to make the badge ${tierOf(c).next.name}` : "badge is Legendary"}` : "Start over from passage 1"}</small></span></button></div>` : ""}</div>
+      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool rd-tool-restart" id="rdRestart" title="Restart this chapter from the first passage">↺ <em>Restart</em></button><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
       ${shown.map((s, i) => `<section class="rd-sec" id="sec${i}"><p class="rd-step">Passage ${i + 1}</p><h2>${s.h}</h2><div class="rd-prose">${s.html}</div>${(s.play || []).map((b, j) => window.ReadPlay.html(b, i + "-" + j, (S.w || {})[i + "-" + j])).join("")}${checkHTML(c, s, i)}</section>`).join("")}
       ${S.finished ? endHTML(c, nextC, ci) : S.at + 1 < c.sections.length ? `<div class="rd-locked">🔒 ${c.sections.length - S.at - 1} more passage${c.sections.length - S.at - 1 > 1 ? "s" : ""}: answer the questions above to keep reading</div>` : ""}`;
     wire(c);
@@ -296,13 +304,14 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
       window.ReadNotes.apply(c);
       $("anBook").onclick = () => window.ReadNotes.notebook(c.id);
       $("rdRestart").onclick = () => act(c, "restart");
+      if ($("rdRestartBig")) $("rdRestartBig").onclick = () => act(c, "restart");
     }
   }
   function endHTML(c, nextC, ci) {
     const p = chProgress(c), ids = c.sections.flatMap(s => s.qs), missedHere = ids.filter(id => chState(c).a[id] && !chState(c).a[id].ok).length;
     return `<section class="rd-sec rd-end card" id="end"><p class="rd-step">Chapter complete${doneCount(chState(c)) > 1 ? ` · finished ${doneCount(chState(c))} times` : " · badge earned"}</p>${badgeSVG(c, "rd-endbadge")}<h2>${esc((badgeOf(c) || {}).name || c.title)} <span class="rd-tier t${tierOf(c).lv}">${tierOf(c).name}</span></h2><p class="rd-lead" style="margin-top:-6px">${esc(c.title)}${tierOf(c).next ? ` · finish it ${tierOf(c).next.at - doneCount(chState(c))} more time${tierOf(c).next.at - doneCount(chState(c)) > 1 ? "s" : ""} to make the badge ${tierOf(c).next.name}` : " · your badge is Legendary!"}</p>
       ${p.answered ? `<div class="rd-score">${Math.round(100 * p.right / p.answered)}%</div><p class="rd-lead">${p.right} of ${p.answered} right${missedHere ? ` · ${missedHere} to review in the drill's Missed tab` : ""}</p>` : `<p class="rd-lead">You read the whole chapter. Try its questions in the drill next.</p>`}
-      <div class="rd-more">${nextC ? `<a class="btn" href="#${nextC.id}">Next: ${esc(nextC.title)} ›</a>` : `<a class="btn" href="../mock/index.html">Take a Mock Exam ›</a>`}<a class="btn ghost" href="../drill/index.html">Practice in the drill</a><button class="btn ghost" data-act="badges">Badge Case</button><button class="btn ghost" data-act="reset">↺ Restart chapter</button></div></section>`;
+      <div class="rd-more">${nextC ? `<a class="btn" href="#${nextC.id}">Next: ${esc(nextC.title)} ›</a>` : `<a class="btn" href="../mock/index.html">Take a Mock Exam ›</a>`}<a class="btn ghost" href="../drill/index.html">Practice in the drill</a><button class="btn ghost" data-act="badges">Badge Case</button><button class="btn rd-endrestart" data-act="reset">↺ Restart chapter</button></div></section>`;
   }
   function wire(c) {
     const S = chState(c), view = $("view");
