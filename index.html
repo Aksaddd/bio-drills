@@ -98,7 +98,7 @@ a{color:var(--link)}
 .ico svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ico.t{font:700 19px var(--display);letter-spacing:-.02em}
 .i-blue{background:linear-gradient(180deg,#3fa2ff,#0a7cff)} .i-orange{background:linear-gradient(180deg,#ffb340,#ff9500)}
-.i-purple{background:linear-gradient(180deg,#c77dff,#a64bd9)} .i-green{background:linear-gradient(180deg,#4fd06c,#28a745)}
+.i-teal{background:linear-gradient(180deg,#5ac8d8,#30a5b8)} .i-purple{background:linear-gradient(180deg,#c77dff,#a64bd9)} .i-green{background:linear-gradient(180deg,#4fd06c,#28a745)}
 .i-red{background:linear-gradient(180deg,#ff6482,#ff2d55)} .i-yellow{background:linear-gradient(180deg,#ffd03c,#ffb000)}
 
 /* ===== Exam panel */
@@ -175,7 +175,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
 <header class="gnav"><div class="inner">
   <a class="brand" href="index.html">Bi 239</a>
   <nav aria-label="Modules">
-    <a href="drill/index.html">Drill</a><a href="board/index.html">Bio-pardy</a><a href="roots/index.html">Word Roots</a><a href="hw3/index.html">HW 3</a><a href="mock/index.html">Mock Exam</a><a href="review/index.html">Review List</a>
+    <a href="read/index.html">Read</a><a href="drill/index.html">Drill</a><a href="board/index.html">Bio-pardy</a><a href="roots/index.html">Word Roots</a><a href="hw3/index.html">HW 3</a><a href="mock/index.html">Mock Exam</a><a href="review/index.html">Review List</a>
   </nav>
   <button type="button" class="setbtn" id="settingsBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
 </div></header>
@@ -201,6 +201,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
 </div></section>
 
 <nav class="modbar" aria-label="Which modules go with the exam"><ul>
+  <li><a href="read/index.html"><span class="ico i-teal"><svg viewBox="0 0 24 24"><path d="M3 5.5C5.5 4.5 8.5 4.5 12 6.5v13c-3.5-2-6.5-2-9-1z"/><path d="M21 5.5c-2.5-1-5.5-1-9 1v13c3.5-2 6.5-2 9-1z"/></svg></span>Read &amp; Learn</a></li>
   <li><a href="drill/index.html"><span class="ico i-blue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span>Multiple&#8209;Choice Drill</a></li>
   <li><a href="board/index.html"><span class="ico t i-orange">$</span>Bio&#8209;pardy</a></li>
   <li><a href="roots/index.html"><span class="ico t i-purple">Aa</span>Word Roots</a></li>
@@ -211,8 +212,15 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
 
 <main class="inner">
   <details class="exampanel" data-ep="u3" open>
-    <summary class="ephead"><span class="eptext"><h2 id="ep">The exam</h2><p>Plant diversity, seed plants, fungi, and plant responses to signals: Ch 29, 30, 31 and 39. <span id="examWhen">Wed, Nov 11, 2:00 pm.</span></p><span class="eptools">Multiple-Choice Drill · Bio-pardy · Word Roots · HW 3 · Mock Exam · Review List</span></span><span class="epgo" aria-hidden="true"></span></summary>
+    <summary class="ephead"><span class="eptext"><h2 id="ep">The exam</h2><p>Plant diversity, seed plants, fungi, and plant responses to signals: Ch 29, 30, 31 and 39. <span id="examWhen">Wed, Nov 11, 2:00 pm.</span></p><span class="eptools">Read &amp; Learn · Multiple-Choice Drill · Bio-pardy · Word Roots · HW 3 · Mock Exam · Review List</span></span><span class="epgo" aria-hidden="true"></span></summary>
     <div class="cards">
+      <article class="card wide" id="readCard">
+        <div class="chead"><span class="ico i-teal"><svg viewBox="0 0 24 24"><path d="M3 5.5C5.5 4.5 8.5 4.5 12 6.5v13c-3.5-2-6.5-2-9-1z"/><path d="M21 5.5c-2.5-1-5.5-1-9 1v13c3.5-2 6.5-2 9-1z"/></svg></span>
+          <div><h3><a href="read/index.html">Read &amp; Learn</a></h3>
+          <p>Start here. The whole unit as short reading passages, one chapter per subject. After each passage you answer questions about what you just read, then keep reading. Answers count toward the drill.</p></div></div>
+        <div class="tags"><span>8 chapters</span><span>36 passages</span><span>159 questions in the reading</span></div>
+        <div class="prow"><div class="stack" id="readStack"></div><span class="ptext" id="readTxt">Not started</span><a class="plink" href="read/index.html" id="readGo">Start reading</a></div>
+      </article>
       <article class="card wide" data-key="bio-u3-progress-v1" data-total="203" data-optional="bio-u3-progress-v1-include-AP:30">
         <div class="chead"><span class="ico i-blue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span>
           <div><h3><a href="drill/index.html">Multiple&#8209;Choice Drill</a></h3>
@@ -302,6 +310,16 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
   const read = k => { try { return JSON.parse(localStorage.getItem(k) || "null") } catch (e) { return null } };
   const dayKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   const KEYS = { drill: "bio-u3-progress-v1", hw3: "bio-hw3-v1" };
+  { // Read & Learn: chapters finished and how far into the current one (read/index.html saves bio-read-v1)
+    const r = read("bio-read-v1") || {}, CH = ["land", "vascular", "seed", "signals", "hormones", "light", "stress", "fungi"];
+    const fin = CH.filter(k => r[k] && r[k].finished).length, started = CH.filter(k => r[k] && (r[k].at || Object.keys(r[k].a || {}).length)).length;
+    const ans = CH.reduce((n, k) => n + Object.keys((r[k] || {}).a || {}).length, 0), ok = CH.reduce((n, k) => n + Object.values((r[k] || {}).a || {}).filter(x => x.ok).length, 0);
+    if (started || fin) {
+      $("readStack").innerHTML = `<i style="width:${100 * fin / CH.length}%;background:var(--st-right)"></i>`;
+      $("readTxt").textContent = `${fin} of ${CH.length} chapters read${ans ? ` · ${ok} of ${ans} right` : ""}`;
+      $("readGo").textContent = fin === CH.length ? "Read again" : "Continue";
+    }
+  }
   // Same statuses as the drills: right / wrong (last answer) or marked for review (takes priority).
   function levels(s, total) {
     const n = { right: 0, wrong: 0, review: 0 }; let a = 0, c = 0, seen = 0;

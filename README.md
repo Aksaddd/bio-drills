@@ -18,6 +18,13 @@ The look follows Apple's design language: the system font (San Francisco), `#f5f
 | Mock Exam | `mock/` | A fresh 50- or 100-question exam each time from the drill, 40% from HW 3. Change answers until you submit; flagged questions go to the Review List |
 | Review List | `review/` | Every question marked ⚑ for review, from both drills and mock exams |
 
+## Read & Learn (`read/`)
+
+The first module on the home page: the whole unit as reading comprehension. Eight chapters (the drill's eight subjects), 36 short passages written from the slides and HW 3, about a minute of reading each. After each passage come **Check yourself** questions about what was just read, shown one at a time, right in the text. Answering 3 (or all, if fewer) unlocks the next passage; the rest are bonus practice, and *Skip the questions* is always there. Key terms are bold with a soft highlight. The chapter ends with a score and links to the next chapter, the drill, or reading it again.
+
+- **Content:** `read/chapters.js` (`window.READ`). Each section is `{ h, html, qs }`, where `qs` lists question ids from the drill bank (`drill/questions.js`), so there's one source of truth for questions, answers and explanations. 159 of the bank's questions appear in the reading (all but a few figure-only and duplicate ones; Bio-pardy clues stay on the board).
+- **Progress:** saved per device as `bio-read-v1` (`{ chapterId: { at, finished, a: { questionId: { ok, p, o } } } }`); a finished chapter shows every passage and answer. Each answer is also written into the drill's progress (`bio-u3-progress-v1`: history, stats, Missed list, today's count), so the drill knows what you've learned and a miss shows up in its Missed tab. Answers fire `bio:correct` / `bio:wrong` like the drill, so Dexter follows along and earns XP and gold.
+
 ## Settings
 
 Every page has **Settings** at the top: in the home page's nav bar, and beside "← All drills" on the other pages. It opens an iOS-style sheet (`assets/settings.js`, loaded in each page's `<head>` so the theme applies before the page paints):
