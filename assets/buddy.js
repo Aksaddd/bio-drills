@@ -216,6 +216,10 @@
     { sc: 1, glasses: true, outfit: () => coat, hat: () => cap, held: () => book }
   ];
   // eq: { hat, outfit, face, neck, held } item ids; defaults to what's saved as worn
+  function pinnedBadge(E) {   // the badge on his chest, with its sparkle
+    const W = window.BioWardrobe, it = W && E.badge && E.badge !== "none" && W.byId[E.badge];
+    return it && W.badgeArt ? `<g transform="translate(69 88) scale(.64)">${W.badgeArt(it, completions(it.earn))}</g>` : "";
+  }
   function art(k, eq, look) {
     const u = "dx" + (++uidN), g = FORM_GEAR[k], W = window.BioWardrobe, E = eq || load().equip || {};
     // per slot: an item id = wear it · "none" = nothing (even the form's own gear) · unset = the form's own gear
@@ -224,7 +228,7 @@
     const face = worn("face");
     const L = look || {};
     const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, w: L.w || load().weight || 1,
-      outfit: pick("outfit"), neck: pick("neck") + pick("badge"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
+      outfit: pick("outfit"), neck: pick("neck") + pinnedBadge(E), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -364,6 +368,9 @@ body.bb-on{padding-bottom:96px}
 .bc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#1d1d1f;border-radius:14px;padding:10px;box-shadow:inset 0 3px 8px rgba(0,0,0,.6)}
 .bc-slot{aspect-ratio:1;border:0;border-radius:12px;background:radial-gradient(circle at 50% 40%,#3a3a3c,#2c2c2e);display:grid;place-items:center;cursor:pointer;padding:6px;position:relative}
 .bc-slot svg{width:100%;height:100%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.bc-n{position:absolute;bottom:2px;right:4px;font:700 10.5px -apple-system,sans-serif;font-style:normal;color:#ffd60a}
+.bc-tier{font-style:normal;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:2px;background:#e5e5ea;color:#3a3a3c}
+.bc-tier.t1{background:#e3f2ff;color:#0a64c2}.bc-tier.t2{background:#fff4c2;color:#a05a00}.bc-tier.t3{background:linear-gradient(90deg,#ffe066,#ffb300);color:#5a3300}.bc-tier.t4{background:linear-gradient(90deg,#ff375f,#ff9f0a,#ffd60a,#34c759,#0a84ff,#bf5af2);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.3)}
 .bc-slot.lock svg{filter:brightness(0) opacity(.35)}.bc-slot.lock::after{content:"?";position:absolute;color:#8e8e93;font:700 18px -apple-system,sans-serif}
 .bc-slot.sel{outline:3px solid #ffd60a;outline-offset:1px}.bc-slot.worn::before{content:"📌";position:absolute;top:-4px;right:-2px;font-size:13px}
 .bc-detail{margin:0 16px 14px;background:var(--c-fill);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center}
@@ -769,9 +776,10 @@ body.bb-on{padding-bottom:96px}
       if (!st.bsel || !W.byId[st.bsel]) st.bsel = (s.equip.badge && W.byId[s.equip.badge] ? s.equip.badge : (got[0] || B[0]).id);
       const it = W.byId[st.bsel], own = s.owned.includes(it.id), worn = s.equip.badge === it.id;
       return `<div class="bc-case"><div class="bc-top"><span>BADGE CASE</span><small>${got.length} of ${B.length} earned</small></div>
-        <div class="bc-grid">${B.map(i => `<button type="button" class="bc-slot${s.owned.includes(i.id) ? "" : " lock"}${i.id === st.bsel ? " sel" : ""}${s.equip.badge === i.id ? " worn" : ""}" data-id="${i.id}" aria-label="${esc(s.owned.includes(i.id) ? i.name : "Locked badge: " + i.chapter)}"><svg viewBox="-11 -11 22 22">${i.big}</svg></button>`).join("")}</div></div>
-        <div class="bc-detail"><svg viewBox="-11 -11 22 22" style="${own ? "" : "filter:brightness(0) opacity(.3)"}">${it.big}</svg><div class="bc-txt">
-          <b>${own ? esc(it.name) : "??? Badge"}</b><span>${own ? `Earned by finishing “${esc(it.chapter)}” in Read & Learn.` : `Finish the “${esc(it.chapter)}” chapter in Read & Learn to earn it.`}</span><br>
+        <div class="bc-grid">${B.map(i => `<button type="button" class="bc-slot${s.owned.includes(i.id) ? "" : " lock"}${i.id === st.bsel ? " sel" : ""}${s.equip.badge === i.id ? " worn" : ""}" data-id="${i.id}" aria-label="${esc(s.owned.includes(i.id) ? i.name + ", " + W.tier(completions(i.earn)).name : "Locked badge: " + i.chapter)}">${badgeSVG(i, s.owned.includes(i.id) ? completions(i.earn) : 0)}${s.owned.includes(i.id) && completions(i.earn) > 1 ? `<i class="bc-n">×${completions(i.earn)}</i>` : ""}</button>`).join("")}</div></div>
+        <div class="bc-detail">${own ? badgeSVG(it, completions(it.earn)) : `<svg viewBox="-13.5 -13.5 27 27" style="filter:brightness(0) opacity(.3)">${it.big}</svg>`}<div class="bc-txt">
+          <b>${own ? esc(it.name) : "??? Badge"}${own ? ` <em class="bc-tier t${W.tier(completions(it.earn)).lv}">${W.tier(completions(it.earn)).name}</em>` : ""}</b>
+          <span>${own ? (() => { const t = W.tier(completions(it.earn)); return `Finished “${esc(it.chapter)}” ${t.count === 1 ? "once" : t.count + " times"}. ${t.next ? `Finish it ${t.next.at - t.count} more time${t.next.at - t.count > 1 ? "s" : ""} (↺ Restart in the chapter) to make it ${t.next.name}.` : "It can't shine any brighter!"}` })() : `Finish the “${esc(it.chapter)}” chapter in Read & Learn to earn it.`}</span><br>
           ${own ? (worn ? `<button type="button" class="sh-act ghost" id="bcOff">Take it off</button>` : `<button type="button" class="sh-act" id="bcPin">Pin it on ${esc(name(s))}</button>`) : `<a class="sh-act" style="display:inline-block;text-decoration:none" href="/read/index.html#${it.earn}">Read the chapter</a>`}
         </div></div>`;
     }
@@ -864,23 +872,30 @@ body.bb-on{padding-bottom:96px}
   const openShop = sub => openPal("shop", sub), openCard = () => openPal("closet");
   // ===== Reading badges: every finished Read & Learn chapter (saved by read/index.html) earns its badge
   const READ_KEY = KEY.split("-")[0] + "-read-v1";
+  // how many times a chapter has been finished (restarting keeps the count; older saves only have "finished")
+  function completions(k) { let r = {}; try { r = JSON.parse(localStorage.getItem(READ_KEY) || "{}") || {} } catch (e) { } const c = r[k] || {}; return Math.max(c.done | 0, c.finished ? 1 : 0) }
+  const badgeSVG = (it, n, cls) => `<svg${cls ? ` class="${cls}"` : ""} viewBox="-13.5 -13.5 27 27" aria-hidden="true">${window.BioWardrobe.badgeArt(it, n)}</svg>`;
   function syncBadges() {
     const W = window.BioWardrobe; if (!W) return [];
-    let r = {}; try { r = JSON.parse(localStorage.getItem(READ_KEY) || "{}") || {} } catch (e) { }
-    const s = load(), add = W.ITEMS.filter(i => i.earn && r[i.earn] && r[i.earn].finished && !s.owned.includes(i.id));
+    const s = load(), add = W.ITEMS.filter(i => i.earn && completions(i.earn) > 0 && !s.owned.includes(i.id));
     if (add.length) { add.forEach(i => s.owned.push(i.id)); save(s) }
     return add;
   }
-  function badgeWon(item) {
-    const s = load(), el = document.createElement("div"); el.className = "bb-badge-won"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "New badge");
-    el.innerHTML = `<svg class="big" viewBox="-11 -11 22 22" aria-hidden="true">${item.big}</svg><h3>You earned the ${esc(item.name)}!</h3><p>For finishing “${esc(item.chapter)}”. It's in ${esc(name(s))}'s Badge Case.</p>
+  function badgeWon(item, up) {
+    const s = load(), el = document.createElement("div"), n = completions(item.earn), t = window.BioWardrobe.tier(n); el.className = "bb-badge-won"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", up ? "Badge upgraded" : "New badge");
+    el.innerHTML = `${badgeSVG(item, n, "big")}${up ? `<h3>Your ${esc(item.name)} is now ${t.name}!</h3><p>You've finished “${esc(item.chapter)}” ${n} times.${t.next ? ` ${t.next.at - n} more to make it ${t.next.name}.` : " It's as legendary as a badge gets."}</p>` : `<h3>You earned the ${esc(item.name)}!</h3><p>For finishing “${esc(item.chapter)}”. It's in ${esc(name(s))}'s Badge Case. Finish the chapter again to make it sparkle.</p>`}
       <div class="row"><button type="button" class="pin">Pin it on ${esc(name(s))}</button><button type="button" class="ghost later">Later</button></div>`;
     document.body.appendChild(el);
     el.querySelector(".pin").onclick = () => { const t = load(); t.equip.badge = item.id; save(t); el.remove(); paintDock(); openPal("badges") };
     el.querySelector(".later").onclick = () => el.remove();
     try { meowSound(stageOf(s.pts)) } catch (e) { }
   }
-  window.addEventListener("bio:badge", () => { syncBadges().forEach((i, n) => setTimeout(() => badgeWon(i), n * 300)); paintDock() });
+  window.addEventListener("bio:badge", e => {
+    const d = e.detail || {}, W = window.BioWardrobe;
+    const added = syncBadges(); added.forEach((i, n) => setTimeout(() => badgeWon(i), n * 300));
+    if (d.up && !added.length && W && W.byId["badge-" + d.chapter]) badgeWon(W.byId["badge-" + d.chapter], true);   // a new sparkle tier
+    paintDock();
+  });
   const openBadges = () => openPal("badges");
   function closeShop() { if (shop) { shop.remove(); shop = null } }
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeShop() });

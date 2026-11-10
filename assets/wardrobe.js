@@ -162,6 +162,27 @@
   const BADGES = [["land", "Moss Badge", "Plants move to land"], ["vascular", "Frond Badge", "Seedless vascular plants"], ["seed", "Bloom Badge", "Seed plants"], ["signals", "Sprout Badge", "Signals and tropisms"],
     ["hormones", "Ripening Badge", "Plant hormones"], ["light", "Moonlight Badge", "Light, clocks and seasons"], ["stress", "Thorn Badge", "Stress, touch and defense"], ["fungi", "Spore Badge", "Fungi"]];
   for (const [k, name, ch] of BADGES) ITEMS.push({ id: "badge-" + k, slot: "badge", set: "Badge", name, price: 0, earn: k, chapter: ch, svg: badge(k, 69, 88, 6.4), big: badge(k, 0, 0, 10) });
+  // ===== Badge sparkle: finishing a chapter again and again polishes its badge.
+  // Completions → tier: 1 Earned · 2 Shiny (a glint sweeps across) · 3 Sparkling (+ twinkling stars) · 5 Dazzling (+ golden glow)
+  // · 8 Legendary (+ a spinning rainbow ring). Drawn with SVG <animate> so it works anywhere the badge appears, even on Dexter.
+  const TIERS = [{ at: 1, name: "Earned" }, { at: 2, name: "Shiny" }, { at: 3, name: "Sparkling" }, { at: 5, name: "Dazzling" }, { at: 8, name: "Legendary" }];
+  function tier(n) {
+    let i = 0; TIERS.forEach((t, j) => { if (n >= t.at) i = j });
+    return { lv: n > 0 ? i : -1, name: n > 0 ? TIERS[i].name : "Locked", next: n > 0 ? TIERS[i + 1] || null : TIERS[0], count: n };
+  }
+  let spkN = 0;
+  const STARS = [[-11, -8, 1.9], [10.6, -9.4, 1.6], [11.4, 6, 2], [-10.2, 9, 1.5], [0, -12.4, 1.4], [-12.6, 0, 1.3], [5.6, 11.6, 1.5]];
+  const star4 = (x, y, r) => `<path d="M${x} ${y - r * 2} Q${x + r * .3} ${y - r * .3} ${x + r * 2} ${y} Q${x + r * .3} ${y + r * .3} ${x} ${y + r * 2} Q${x - r * .3} ${y + r * .3} ${x - r * 2} ${y} Q${x - r * .3} ${y - r * .3} ${x} ${y - r * 2}Z" fill="#fff8c4" stroke="#f5b400" stroke-width=".35"/>`;
+  // a badge (centered on 0,0, radius 10) with the sparkle for n completions
+  function badgeArt(item, n) {
+    const t = tier(n), id = "bspk" + (++spkN); let back = "", front = "";
+    if (t.lv >= 4) back += `<g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite"/>${["#ff375f", "#ff9f0a", "#ffd60a", "#34c759", "#0a84ff", "#bf5af2"].map((c, i) => `<path d="M${(12.6 * Math.cos(i * Math.PI / 3)).toFixed(2)} ${(12.6 * Math.sin(i * Math.PI / 3)).toFixed(2)} A12.6 12.6 0 0 1 ${(12.6 * Math.cos((i + 1) * Math.PI / 3)).toFixed(2)} ${(12.6 * Math.sin((i + 1) * Math.PI / 3)).toFixed(2)}" stroke="${c}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`).join("")}</g>`;
+    if (t.lv >= 3) back += `<circle r="12" fill="#ffd84a" opacity=".35"><animate attributeName="r" values="11;12.6;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".2;.5;.2" dur="2.4s" repeatCount="indefinite"/></circle>`;
+    if (t.lv >= 1) front += `<defs><clipPath id="${id}"><circle r="9.6"/></clipPath></defs><g clip-path="url(#${id})"><path d="M-3 -14 L1 -14 L-5 14 L-9 14Z" fill="#fff" opacity=".55"><animateTransform attributeName="transform" type="translate" values="-14 0;22 0;22 0" keyTimes="0;.45;1" dur="${t.lv >= 3 ? 2.2 : 3.2}s" repeatCount="indefinite"/></path></g>`;
+    const ns = t.lv >= 4 ? 7 : t.lv >= 3 ? 5 : t.lv >= 2 ? 3 : 0;
+    STARS.slice(0, ns).forEach(([x, y, r], i) => { front += `<g opacity="0">${star4(x, y, r)}<animate attributeName="opacity" values="0;1;0" dur="${1.5 + (i % 3) * .35}s" begin="${(i * .37).toFixed(2)}s" repeatCount="indefinite"/></g>` });
+    return back + item.big + front;
+  }
   const SLOTS = [
     { key: "hat", name: "Hats" }, { key: "outfit", name: "Outfits" },
     { key: "face", name: "Glasses", group: "Accessories" }, { key: "neck", name: "Neckwear", group: "Accessories" }, { key: "held", name: "Things to hold", group: "Accessories" },
@@ -169,5 +190,5 @@
   ];
   // Tile crops of kitten space, for showing an item on its own
   const VIEW = { hat: "24 2 72 48", outfit: "34 70 52 42", face: "34 44 52 30", neck: "36 73 48 33", held: "2 66 46 44", badge: "61.6 80.6 14.8 14.8" };
-  window.BioWardrobe = { ITEMS, SLOTS, VIEW, byId: Object.fromEntries(ITEMS.map(i => [i.id, i])) };
+  window.BioWardrobe = { ITEMS, SLOTS, VIEW, byId: Object.fromEntries(ITEMS.map(i => [i.id, i])), badgeArt, tier, TIERS };
 })();

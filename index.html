@@ -313,7 +313,7 @@ footer.site .inner{display:flex;flex-direction:column;gap:6px}
   const KEYS = { drill: "bio-u3-progress-v1", hw3: "bio-hw3-v1" };
   { // Read & Learn: chapters finished and how far into the current one (read/index.html saves bio-read-v1)
     const r = read("bio-read-v1") || {}, CH = ["land", "vascular", "seed", "signals", "hormones", "light", "stress", "fungi"];
-    const fin = CH.filter(k => r[k] && r[k].finished).length, started = CH.filter(k => r[k] && (r[k].at || Object.keys(r[k].a || {}).length)).length;
+    const fin = CH.filter(k => r[k] && (r[k].finished || r[k].done)).length, started = CH.filter(k => r[k] && (r[k].at || Object.keys(r[k].a || {}).length)).length;
     const ans = CH.reduce((n, k) => n + Object.keys((r[k] || {}).a || {}).length, 0), ok = CH.reduce((n, k) => n + Object.values((r[k] || {}).a || {}).filter(x => x.ok).length, 0);
     if (started || fin) {
       $("readStack").innerHTML = `<i style="width:${100 * fin / CH.length}%;background:var(--st-right)"></i>`;

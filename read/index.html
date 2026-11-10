@@ -86,7 +86,10 @@ mark.an.an-flash{outline:2px solid var(--accent);animation:pop .5s 2}
 .rd-btitle{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.rd-btitle b{font:700 16px var(--display);letter-spacing:.02em}.rd-btitle small{opacity:.85;font-size:12.5px}
 .rd-brow{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;background:#1d1d1f;border-radius:12px;padding:8px}
 .rd-b{aspect-ratio:1;display:grid;place-items:center}.rd-b svg{width:100%;height:100%}.rd-b:not(.got) svg{filter:brightness(0) opacity(.35)}
-.rd-emo svg{width:34px;height:34px}.rd-endbadge{width:96px;height:96px;filter:drop-shadow(0 4px 12px rgba(255,180,0,.45));animation:pop .6s}
+.rd-emo svg{width:38px;height:38px}
+.rd-times{font:600 11.5px var(--body);color:var(--good);margin-left:4px;white-space:nowrap}
+.rd-tier{font:700 12px var(--body);border-radius:999px;padding:3px 9px;vertical-align:4px;background:#e5e5ea;color:#3a3a3c}
+.rd-tier.t1{background:#e3f2ff;color:#0a64c2}.rd-tier.t2{background:#fff4c2;color:#a05a00}.rd-tier.t3{background:linear-gradient(90deg,#ffe066,#ffb300);color:#5a3300}.rd-tier.t4{background:linear-gradient(90deg,#ff375f,#ff9f0a,#ffd60a,#34c759,#0a84ff,#bf5af2);color:#fff}.rd-endbadge{width:96px;height:96px;filter:drop-shadow(0 4px 12px rgba(255,180,0,.45));animation:pop .6s}
 /* activities */
 .pl{margin:16px 0;border-radius:16px;background:var(--sunk);padding:14px;display:flex;flex-direction:column;gap:10px;font:400 15px/1.4 var(--body)}
 .pl--fig,.pl--flipbook{background:transparent;padding:0}
@@ -221,11 +224,14 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
 
   // ---- badges: finishing a chapter earns its badge (drawn in assets/wardrobe.js), which can be pinned on Dexter
   const badgeOf = c => window.BioWardrobe && window.BioWardrobe.byId["badge-" + c.id];
-  const badgeSVG = (c, cls) => { const b = badgeOf(c); return b ? `<svg class="${cls || ""}" viewBox="-11 -11 22 22" aria-hidden="true">${b.big}</svg>` : EMO[c.id] };
+  // completions: finishing a chapter again (after ↺ Restart) adds one; the badge sparkles more as the count grows
+  const doneCount = S => Math.max(S.done | 0, S.finished ? 1 : 0), earned = c => doneCount(chState(c)) > 0;
+  const tierOf = c => window.BioWardrobe ? window.BioWardrobe.tier(doneCount(chState(c))) : { lv: 0, name: "", next: null, count: 0 };
+  const badgeSVG = (c, cls) => { const b = badgeOf(c); return b ? `<svg class="${cls || ""}" viewBox="-13.5 -13.5 27 27" aria-hidden="true">${window.BioWardrobe.badgeArt ? window.BioWardrobe.badgeArt(b, doneCount(chState(c))) : b.big}</svg>` : EMO[c.id] };
   function badgeStrip() {
-    const n = R.filter(c => chState(c).finished).length;
+    const n = R.filter(earned).length;
     return `<button type="button" class="rd-badges" id="openBadges" aria-label="Badge case: ${n} of ${R.length} badges earned"><span class="rd-btitle"><b>Badge Case</b><small>${n} of ${R.length} · finish a chapter to earn its badge</small></span>
-      <span class="rd-brow">${R.map(c => `<span class="rd-b${chState(c).finished ? " got" : ""}" title="${esc(chState(c).finished ? (badgeOf(c) || {}).name || c.title : "Locked: " + c.title)}">${badgeSVG(c)}</span>`).join("")}</span></button>`;
+      <span class="rd-brow">${R.map(c => `<span class="rd-b${earned(c) ? " got" : ""}" title="${esc(earned(c) ? ((badgeOf(c) || {}).name || c.title) + " · " + tierOf(c).name : "Locked: " + c.title)}">${badgeSVG(c)}</span>`).join("")}</span></button>`;
   }
   // ---- library
   function library() {
@@ -239,8 +245,8 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
       <div class="rd-list">${R.map((c, i) => {
         const p = chProgress(c), S = chState(c), mins = Math.max(2, Math.round(words(c) / 200));
         const go = S.finished ? "Read again" : p.answered || S.at ? "Continue" : c === next ? "Start" : "Read";
-        return `<a class="rd-ch${S.finished ? " done" : ""}" href="#${c.id}"><span class="rd-emo" aria-hidden="true">${S.finished && badgeOf(c) ? badgeSVG(c) : EMO[c.id] || "📖"}</span>
-          <span><h3>${esc(c.title)}</h3><p>${c.ch} · ${c.sections.length} passages · ${acts(c)} activities · ${totalQs(c)} questions · ~${mins} min${p.answered ? ` · ${p.right} of ${p.answered} right` : ""}</p><span class="rd-bar"><i style="width:${p.pct}%"></i></span></span>
+        return `<a class="rd-ch${S.finished ? " done" : ""}" href="#${c.id}"><span class="rd-emo" aria-hidden="true">${earned(c) && badgeOf(c) ? badgeSVG(c) : EMO[c.id] || "📖"}</span>
+          <span><h3>${esc(c.title)}${doneCount(S) ? ` <small class="rd-times">${doneCount(S) > 1 ? "Finished " + doneCount(S) + "×" : "Finished"} · ${tierOf(c).name}</small>` : ""}</h3><p>${c.ch} · ${c.sections.length} passages · ${acts(c)} activities · ${totalQs(c)} questions · ~${mins} min${p.answered ? ` · ${p.right} of ${p.answered} right` : ""}</p><span class="rd-bar"><i style="width:${p.pct}%"></i></span></span>
           <span class="rd-go">${go} ›</span></a>`;
       }).join("")}</div>`;
     const ob = $("openBadges"); if (ob) ob.onclick = () => window.BioBuddy && window.BioBuddy.openBadges();
@@ -282,31 +288,32 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
     const p = chProgress(c), shown = c.sections.slice(0, S.finished ? c.sections.length : S.at + 1);
     const nextC = R[ci + 1];
     $("view").innerHTML = `<div class="rd-head"><p class="rd-kicker">${c.ch} · Chapter ${ci + 1} of ${R.length}</p><p class="rd-lead">${c.intro}</p></div>
-      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
+      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool" id="rdRestart" title="Restart this chapter from the first passage">↺<span>Restart</span></button><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
       ${shown.map((s, i) => `<section class="rd-sec" id="sec${i}"><p class="rd-step">Passage ${i + 1}</p><h2>${s.h}</h2><div class="rd-prose">${s.html}</div>${(s.play || []).map((b, j) => window.ReadPlay.html(b, i + "-" + j, (S.w || {})[i + "-" + j])).join("")}${checkHTML(c, s, i)}</section>`).join("")}
       ${S.finished ? endHTML(c, nextC, ci) : S.at + 1 < c.sections.length ? `<div class="rd-locked">🔒 ${c.sections.length - S.at - 1} more passage${c.sections.length - S.at - 1 > 1 ? "s" : ""}: answer the questions above to keep reading</div>` : ""}`;
     wire(c);
     if (window.ReadNotes) {
       window.ReadNotes.apply(c);
       $("anBook").onclick = () => window.ReadNotes.notebook(c.id);
+      $("rdRestart").onclick = () => act(c, "restart");
     }
   }
   function endHTML(c, nextC, ci) {
     const p = chProgress(c), ids = c.sections.flatMap(s => s.qs), missedHere = ids.filter(id => chState(c).a[id] && !chState(c).a[id].ok).length;
-    return `<section class="rd-sec rd-end card" id="end"><p class="rd-step">Chapter complete · badge earned</p>${badgeSVG(c, "rd-endbadge")}<h2>${esc((badgeOf(c) || {}).name || c.title)}</h2><p class="rd-lead" style="margin-top:-6px">${esc(c.title)}</p>
+    return `<section class="rd-sec rd-end card" id="end"><p class="rd-step">Chapter complete${doneCount(chState(c)) > 1 ? ` · finished ${doneCount(chState(c))} times` : " · badge earned"}</p>${badgeSVG(c, "rd-endbadge")}<h2>${esc((badgeOf(c) || {}).name || c.title)} <span class="rd-tier t${tierOf(c).lv}">${tierOf(c).name}</span></h2><p class="rd-lead" style="margin-top:-6px">${esc(c.title)}${tierOf(c).next ? ` · finish it ${tierOf(c).next.at - doneCount(chState(c))} more time${tierOf(c).next.at - doneCount(chState(c)) > 1 ? "s" : ""} to make the badge ${tierOf(c).next.name}` : " · your badge is Legendary!"}</p>
       ${p.answered ? `<div class="rd-score">${Math.round(100 * p.right / p.answered)}%</div><p class="rd-lead">${p.right} of ${p.answered} right${missedHere ? ` · ${missedHere} to review in the drill's Missed tab` : ""}</p>` : `<p class="rd-lead">You read the whole chapter. Try its questions in the drill next.</p>`}
-      <div class="rd-more">${nextC ? `<a class="btn" href="#${nextC.id}">Next: ${esc(nextC.title)} ›</a>` : `<a class="btn" href="../mock/index.html">Take a Mock Exam ›</a>`}<a class="btn ghost" href="../drill/index.html">Practice in the drill</a><button class="btn ghost" data-act="badges">Badge Case</button><button class="btn ghost" data-act="reset">Read it again</button></div></section>`;
+      <div class="rd-more">${nextC ? `<a class="btn" href="#${nextC.id}">Next: ${esc(nextC.title)} ›</a>` : `<a class="btn" href="../mock/index.html">Take a Mock Exam ›</a>`}<a class="btn ghost" href="../drill/index.html">Practice in the drill</a><button class="btn ghost" data-act="badges">Badge Case</button><button class="btn ghost" data-act="reset">↺ Restart chapter</button></div></section>`;
   }
   function wire(c) {
     const S = chState(c), view = $("view");
     c.sections.forEach((s, i) => (s.play || []).forEach((b, j) => {
       const key = i + "-" + j, el = view.querySelector(`.pl[data-k="${key}"]`); if (!el) return;
       window.ReadPlay.wire(el, b, key, (node, perfect, note, quiet) => {
-        S.w = S.w || {}; const first = !S.w[key];
+        S.w = S.w || {}; const first = !S.w[key], everBefore = !!(S.wOld || {})[key];
         if (first || perfect && !S.w[key].perfect) S.w[key] = { perfect, t: Date.now() }; save();
         const fresh = document.querySelector(`.pl[data-k="${key}"]`) || node;
         if (!quiet) window.ReadPlay.confetti(fresh);
-        if (perfect && first) window.dispatchEvent(new CustomEvent("bio:correct", { detail: { kind: "root", from: "read", missed: false } }));
+        if (perfect && first && !everBefore) window.dispatchEvent(new CustomEvent("bio:correct", { detail: { kind: "root", from: "read", missed: false } }));
         setTimeout(() => { const n = document.querySelector(`.pl[data-k="${key}"]`); if (!n) return; n.outerHTML = window.ReadPlay.html(b, key, S.w[key]); wireOne(c, i, j) }, quiet ? 0 : 1500);
       });
     }));
@@ -321,8 +328,17 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
   function act(c, a) {
     const S = chState(c);
     if (a === "badges") { window.BioBuddy && window.BioBuddy.openBadges(); return }
-    if (a === "reset") { st[c.id] = { at: 0, a: {}, w: S.w }; save(); chapter(c); scrollTo(0, 0); return }
-    if (S.at >= c.sections.length - 1) { const first = !S.finished; S.finished = true; save(); chapter(c); go("end"); if (first) setTimeout(() => window.dispatchEvent(new CustomEvent("bio:badge", { detail: { chapter: c.id } })), 700); return }
+    if (a === "reset" || a === "restart") {
+      const n = doneCount(S), t = tierOf(c);
+      if (a === "restart" && (S.at || Object.keys(S.a).length) && !confirm(`Restart “${c.title}” from the first passage?\n\nYour answers in this chapter are cleared (your notes, XP and badge stay).${n ? ` Finish it again to polish its badge${t.next ? ` (${t.next.at - n} more for ${t.next.name})` : ""}.` : ""}`)) return;
+      st[c.id] = { at: 0, a: {}, w: {}, wOld: Object.assign({}, S.wOld || {}, S.w || {}), done: n }; save();
+      for (const s of c.sections) for (const id of s.qs) { delete CUR[id]; REDO.delete(id) }
+      chapter(c); scrollTo(0, 0); return;
+    }
+    if (S.at >= c.sections.length - 1) {
+      const before = doneCount(S); S.finished = true; S.done = before + 1; save(); chapter(c); go("end");
+      const W = window.BioWardrobe, up = before > 0 && W && W.tier(before + 1).lv > W.tier(before).lv;
+      if (!before || up) setTimeout(() => window.dispatchEvent(new CustomEvent("bio:badge", { detail: { chapter: c.id, up } })), 700); return }
     S.at++; save(); chapter(c); go("sec" + S.at);
   }
   function refreshCheck(c, si) {   // after an answer, redraw only that passage's questions (activities keep their state)

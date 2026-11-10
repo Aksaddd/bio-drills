@@ -51,6 +51,13 @@ Finishing a Read & Learn chapter earns that chapter's badge:
 - **Earning one:** a celebration screen offers *Pin it on Dexter*, and the badge is then worn on his chest in every form.
 - **Badge Case:** Dexter's panel has a new **Badges** tab, a trainer-style red case with 8 slots. Locked slots show only the badge's silhouette and which chapter earns it. Tap a badge to pin it on Dexter or take it off. Earned badges also appear in the Closet.
 - **Elsewhere in Read & Learn:** the chapter list shows the case as a strip, and finished chapters show their badge.
+- **Restart and sparkle:** ↺ Restart in a chapter's top bar (or *↺ Restart chapter* at its end) starts it over from passage 1. Answers are cleared; notes, XP and the badge stay, and activities don't pay XP twice. Each finish adds to the chapter's count (`done` in `bio-read-v1`), and the badge levels up:
+  - **2 Shiny:** a glint sweeps across it.
+  - **3 Sparkling:** twinkling stars.
+  - **5 Dazzling:** a golden glow.
+  - **8 Legendary:** a spinning rainbow ring.
+
+  The sparkle shows everywhere the badge does, including pinned on Dexter. A new level gets its own celebration screen. The art is `badgeArt()` and `tier()` in `assets/wardrobe.js`, drawn with SVG `<animate>`.
 - **Syncing:** badges sync from `bio-read-v1` whenever a page loads (`syncBadges()` in `assets/buddy.js`), so chapters finished earlier count too.
 
 ## Double-tap a word
