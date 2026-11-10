@@ -484,3 +484,5 @@ a.chip{color:var(--accent)}
 [data-theme="dark"] .card.review{border-color:#48484a}
 [data-theme="dark"] .based{border-color:#48484a}
 [data-theme="dark"] input[type="checkbox"]{color-scheme:dark}
+
+.retryrow{display:flex;justify-content:flex-start}

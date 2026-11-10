@@ -384,6 +384,10 @@
   function metaRow(id, right) {
     return `<div class="meta"><span class="meta-l">${xpBadge(id)}${basedBadge(srcOf(id))}${isProf(srcOf(id)) ? `<span class="prof" title="This question comes straight from the professor's course materials">★ From the professor</span>` : ""}<span class="origin">Source: ${esc(srcOf(id))}</span><span>${esc(Q[id].tag)}</span></span>${right}</div>`;
   }
+  // Try again: clear this question's answer in the round and ask it again with the options reshuffled.
+  // The new answer replaces the old one in the round's score; the question's history keeps both.
+  const retryRow = () => `<div class="retryrow"><button class="chip" id="retryBtn" type="button"><span aria-hidden="true">↻</span> Try this question again</button></div>`;
+  function retry() { stopAuto(); const r = R(); r.log[r.pos] = null; save(); paint(); window.scrollTo({ top: Math.max(0, $("card").getBoundingClientRect().top + scrollY - 80), behavior: reduceMotion() ? "auto" : "smooth" }) }
   // Bottom navigation: Previous on the left, the forward action on the right.
   function navBar(fwdLabel, fwdId, ghostFwd) {
     const r = R();
@@ -469,7 +473,9 @@
     const more = nextUnanswered(r, r.pos) >= 0;
     $("fb").innerHTML = `${explainHTML(id, curOpts[pickedIdx].t, good, good ? "Correct!" : "Not quite. The answer is: " + txt(x.ok))}
       ${!good && !flagged(id) ? `<p class="lvnote">Want to come back to this one? Mark it for review below.</p>` : ""}
+      ${retryRow()}
       ${navBar(more ? "Next question →" : "See results →", "next")}`;
+    $("retryBtn").onclick = retry;
     const mr = $("card").querySelector(".marks"); if (mr) { mr.outerHTML = marksRow(id); wireMarks(id) }
     $("next").onclick = goNextQuestion; $("next").focus({ preventScroll: true });
     $("prevBtn").onclick = goPrev;
@@ -499,10 +505,11 @@
       <p class="q">${txt(x.q)}</p>${figure(id)}
       <div class="opts">${e.o.map((t, j) => `<button class="opt${j === e.c ? " right" : ""}${j === e.p ? " picked" : ""}${j === e.p && j !== e.c ? " wrong" : ""}" disabled><span class="bub">${"ABCDE"[j]}</span><span>${txt(t)}</span></button>`).join("")}</div>
       ${explainHTML(id, e.o[e.p], e.p === e.c, e.p === e.c ? "You got this one right." : "You picked " + "ABCDE"[e.p] + ". The answer is: " + txt(x.ok))}
-      <p class="hint">Already answered in this round, so it can't be changed.</p>
+      ${retryRow()}
       ${marksRow(id)}
       ${navBar(isLast ? lastLabel(r) : "Next →", "fwdBtn")}`;
     $("prevBtn").onclick = goPrev; $("fwdBtn").onclick = goNext; $("fwdBtn").focus({ preventScroll: true });
+    $("retryBtn").onclick = retry;
     wireMarks(id);
     wireZoom();
   }

@@ -169,7 +169,7 @@
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
     const svg = kitty(u, { sc: g.sc, eyes: (look && look.eyes) || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses,
-      mid: pick("outfit") + pick("neck"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: pick("held") + (g.over || "") });
+      mid: pick("outfit") + pick("neck") + pick("badge"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -287,7 +287,7 @@ body.bb-on{padding-bottom:96px}
 .sh-hint{flex:1;margin:0;color:var(--c-muted);font-size:14px;text-align:center}
 .sh-act{border:0;border-radius:980px;background:var(--c-acc);color:#fff;font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:10px 18px;cursor:pointer;white-space:nowrap}
 .sh-act.ghost{background:var(--c-fill);color:var(--c-acc)} .sh-act:disabled{background:var(--c-fill);color:var(--c-muted);cursor:default}
-.sh-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--c-fill);border-radius:9px;padding:2px;margin:6px 16px 4px}
+.sh-tabs{display:grid;grid-template-columns:repeat(var(--tabs,3),1fr);gap:2px;background:var(--c-fill);border-radius:9px;padding:2px;margin:6px 16px 4px}
 .sh-tabs button{border:0;background:transparent;color:inherit;border-radius:7px;padding:7px 4px;font:500 14px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
 .sh-tabs button[aria-selected="true"]{background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.12)} [data-theme="dark"] .sh-tabs button[aria-selected="true"]{background:#636366}
 .sh-cap{margin:14px 18px 6px;font-size:13px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.02em}
@@ -302,7 +302,23 @@ body.bb-on{padding-bottom:96px}
 .sh-tile.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
 .sh-note{margin:16px 18px 0;font-size:12.5px;color:var(--c-muted)}
 @media (max-width:420px){.sh-grid{grid-template-columns:repeat(3,1fr)}.sh-tile>svg{height:50px}}
-.sh-tabs.pal{margin:2px 16px 10px}
+.sh-tabs.pal{margin:2px 16px 10px;--tabs:4}
+.bc-case{margin:4px 16px 12px;border-radius:20px;padding:14px 14px 16px;background:linear-gradient(160deg,#c62828,#8e1b1b);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 6px 18px rgba(142,27,27,.3);color:#fff}
+.bc-top{display:flex;align-items:center;justify-content:space-between;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;margin:0 4px 10px;letter-spacing:.02em}
+.bc-top small{font:600 12.5px -apple-system,sans-serif;opacity:.85}
+.bc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#1d1d1f;border-radius:14px;padding:10px;box-shadow:inset 0 3px 8px rgba(0,0,0,.6)}
+.bc-slot{aspect-ratio:1;border:0;border-radius:12px;background:radial-gradient(circle at 50% 40%,#3a3a3c,#2c2c2e);display:grid;place-items:center;cursor:pointer;padding:6px;position:relative}
+.bc-slot svg{width:100%;height:100%;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.bc-slot.lock svg{filter:brightness(0) opacity(.35)}.bc-slot.lock::after{content:"?";position:absolute;color:#8e8e93;font:700 18px -apple-system,sans-serif}
+.bc-slot.sel{outline:3px solid #ffd60a;outline-offset:1px}.bc-slot.worn::before{content:"📌";position:absolute;top:-4px;right:-2px;font-size:13px}
+.bc-detail{margin:0 16px 14px;background:var(--c-fill);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.bc-detail svg{width:58px;height:58px;flex:none}.bc-detail b{display:block;font-size:16px}.bc-detail span{font-size:13.5px;opacity:.75}
+.bc-detail .sh-act{margin-top:8px}.bc-detail .bc-txt{flex:1}
+.bb-badge-won{position:fixed;inset:0;z-index:125;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(circle at 50% 42%,#4a1414 0%,#0b0f1e 72%);color:#fff;text-align:center;padding:24px;animation:bbFade .3s ease}
+.bb-badge-won svg.big{width:150px;height:150px;animation:bcSpin 1.1s cubic-bezier(.2,.9,.3,1.2) both;filter:drop-shadow(0 0 22px rgba(255,214,10,.55))}
+.bb-badge-won h3{margin:0;font:800 26px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.bb-badge-won p{margin:0;opacity:.85;font-size:15px;max-width:340px}
+.bb-badge-won .row{display:flex;gap:10px;margin-top:6px}.bb-badge-won button{border:0;border-radius:980px;padding:11px 20px;font:600 16px -apple-system,sans-serif;cursor:pointer;background:#fff;color:#0b0f1e}.bb-badge-won button.ghost{background:rgba(255,255,255,.16);color:#fff}
+@keyframes bcSpin{from{transform:rotateY(540deg) scale(.2);opacity:0}to{transform:none;opacity:1}}
 .sh-tabs.sub{margin-top:4px}
 .sh-tile .cl-ic{display:grid;place-items:center;height:58px;color:var(--c-muted)} .sh-tile .cl-ic svg{width:30px;height:30px}
 .sh-tile.cl.on{border-color:#34c759;background:color-mix(in srgb,#34c759 12%,var(--c-fill))}
@@ -674,9 +690,21 @@ body.bb-on{padding-bottom:96px}
         <span class="tag">${esc(it.set)}</span><span class="pr">${on ? "Wearing" : own ? "Owned" : `${COIN}${it.price}`}</span></button>`;
     }
     // Closet: every slot lets you pick one of your items, Dexter's own gear for this form, or nothing at all
+    // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
+    function badgesHTML(s) {
+      const B = W.ITEMS.filter(i => i.slot === "badge"), got = B.filter(i => s.owned.includes(i.id));
+      if (!st.bsel || !W.byId[st.bsel]) st.bsel = (s.equip.badge && W.byId[s.equip.badge] ? s.equip.badge : (got[0] || B[0]).id);
+      const it = W.byId[st.bsel], own = s.owned.includes(it.id), worn = s.equip.badge === it.id;
+      return `<div class="bc-case"><div class="bc-top"><span>BADGE CASE</span><small>${got.length} of ${B.length} earned</small></div>
+        <div class="bc-grid">${B.map(i => `<button type="button" class="bc-slot${s.owned.includes(i.id) ? "" : " lock"}${i.id === st.bsel ? " sel" : ""}${s.equip.badge === i.id ? " worn" : ""}" data-id="${i.id}" aria-label="${esc(s.owned.includes(i.id) ? i.name : "Locked badge: " + i.chapter)}"><svg viewBox="-11 -11 22 22">${i.big}</svg></button>`).join("")}</div></div>
+        <div class="bc-detail"><svg viewBox="-11 -11 22 22" style="${own ? "" : "filter:brightness(0) opacity(.3)"}">${it.big}</svg><div class="bc-txt">
+          <b>${own ? esc(it.name) : "??? Badge"}</b><span>${own ? `Earned by finishing “${esc(it.chapter)}” in Read & Learn.` : `Finish the “${esc(it.chapter)}” chapter in Read & Learn to earn it.`}</span><br>
+          ${own ? (worn ? `<button type="button" class="sh-act ghost" id="bcOff">Take it off</button>` : `<button type="button" class="sh-act" id="bcPin">Pin it on ${esc(name(s))}</button>`) : `<a class="sh-act" style="display:inline-block;text-decoration:none" href="/read/index.html#${it.earn}">Read the chapter</a>`}
+        </div></div>`;
+    }
     function closetHTML(s, k) {
       const g = FORM_GEAR[k], cur = s.equip;
-      const rows = W.SLOTS.map(sl => {
+      const rows = W.SLOTS.filter(sl => sl.key !== "badge" || s.owned.some(id => id.startsWith("badge-"))).map(sl => {
         const mine = W.ITEMS.filter(i => i.slot === sl.key && s.owned.includes(i.id));
         const hasOwn = sl.key === "face" ? !!g.glasses : !!g[sl.key];
         const opt = (val, label, icon, extra = "") => `<button type="button" class="sh-tile cl${(cur[sl.key] === val || (val === undefined && cur[sl.key] === undefined)) ? " on" : ""}" data-slot="${sl.key}" data-val="${val === undefined ? "" : val}" aria-pressed="${cur[sl.key] === val}">${icon}<b>${label}</b>${extra}</button>`;
@@ -706,10 +734,11 @@ body.bb-on{padding-bottom:96px}
     }
     function paint() {
       const s = load(), k = stageOf(s.pts);
-      const body = st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : closetHTML(s, k);
+      syncBadges();
+      const body = st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(s, k);
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
-        <div class="sh-tabs pal" role="tablist">${[["closet", "Closet"], ["shop", "Shop"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
+        <div class="sh-tabs pal" role="tablist">${[["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
         ${st.tab === "progress" ? "" : `<div class="sh-stage">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
         ${body}
       </div>`;
@@ -720,6 +749,12 @@ body.bb-on{padding-bottom:96px}
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
         if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
+        return;
+      }
+      if (st.tab === "badges") {
+        shop.querySelectorAll(".bc-slot").forEach(b => b.onclick = () => keepScroll(() => { st.bsel = b.dataset.id; paint() }));
+        if ($("bcPin")) $("bcPin").onclick = () => keepScroll(() => { const t = load(); t.equip.badge = st.bsel; save(t); paint(); paintDock() });
+        if ($("bcOff")) $("bcOff").onclick = () => keepScroll(() => { const t = load(); delete t.equip.badge; save(t); paint(); paintDock() });
         return;
       }
       if (st.tab === "closet") {
@@ -745,6 +780,26 @@ body.bb-on{padding-bottom:96px}
     paint(); st.opened = true; $("shDone").focus();   // the panel animates in once; later repaints don't replay it
   }
   const openShop = sub => openPal("shop", sub), openCard = () => openPal("closet");
+  // ===== Reading badges: every finished Read & Learn chapter (saved by read/index.html) earns its badge
+  const READ_KEY = KEY.split("-")[0] + "-read-v1";
+  function syncBadges() {
+    const W = window.BioWardrobe; if (!W) return [];
+    let r = {}; try { r = JSON.parse(localStorage.getItem(READ_KEY) || "{}") || {} } catch (e) { }
+    const s = load(), add = W.ITEMS.filter(i => i.earn && r[i.earn] && r[i.earn].finished && !s.owned.includes(i.id));
+    if (add.length) { add.forEach(i => s.owned.push(i.id)); save(s) }
+    return add;
+  }
+  function badgeWon(item) {
+    const s = load(), el = document.createElement("div"); el.className = "bb-badge-won"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "New badge");
+    el.innerHTML = `<svg class="big" viewBox="-11 -11 22 22" aria-hidden="true">${item.big}</svg><h3>You earned the ${esc(item.name)}!</h3><p>For finishing “${esc(item.chapter)}”. It's in ${esc(name(s))}'s Badge Case.</p>
+      <div class="row"><button type="button" class="pin">Pin it on ${esc(name(s))}</button><button type="button" class="ghost later">Later</button></div>`;
+    document.body.appendChild(el);
+    el.querySelector(".pin").onclick = () => { const t = load(); t.equip.badge = item.id; save(t); el.remove(); paintDock(); openPal("badges") };
+    el.querySelector(".later").onclick = () => el.remove();
+    try { meowSound(stageOf(s.pts)) } catch (e) { }
+  }
+  window.addEventListener("bio:badge", () => { syncBadges().forEach((i, n) => setTimeout(() => badgeWon(i), n * 300)); paintDock() });
+  const openBadges = () => openPal("badges");
   function closeShop() { if (shop) { shop.remove(); shop = null } }
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeShop() });
 
@@ -910,7 +965,7 @@ body.bb-on{padding-bottom:96px}
   window.addEventListener("bio:correct", gain);
   window.addEventListener("bio:wrong", miss);
 
-  function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); paintDock(); greet() }
+  function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); syncBadges(); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
+  window.BioBuddy = { enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
 })();

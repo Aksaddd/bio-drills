@@ -145,11 +145,29 @@
     { id: "held-clipboard", slot: "held", set: "Doctor", name: "Clipboard", price: 70,
       svg: `<rect x="8" y="80" width="22" height="28" rx="2.4" fill="#b8783a" ${ln(1.8)}/><rect x="11" y="85" width="16" height="20" fill="#fff" ${ln(1)}/><rect x="15" y="77.6" width="8" height="4.4" rx="1.4" fill="#9aa3ad" ${ln(1.2)}/><path d="M13.6 90 h10.8 M13.6 94 h10.8 M13.6 98 h7" stroke="#9aa3ad" stroke-width="1.2"/>` }
   ];
+  // ===== Reading badges: earned (never bought) by finishing a Read & Learn chapter, pinned on Dexter's chest.
+  // Each is an original badge shape drawn in a 20 × 20 box around (0, 0); badge() places and scales it.
+  const BADGE_ART = {
+    land: `<path d="M0 -10 L8.7 -5 L8.7 5 L0 10 L-8.7 5 L-8.7 -5Z" fill="#4caf50" ${ln(1.4)}/><path d="M0 -7.4 L6.4 -3.7 L6.4 3.7 L0 7.4 L-6.4 3.7 L-6.4 -3.7Z" fill="#8fd16a"/><path d="M0 5.6 C-5.6 2.4 -4.8 -4.4 0 -6.6 C4.8 -4.4 5.6 2.4 0 5.6Z" fill="#2e7d32" ${ln(1)}/><path d="M0 5 V-5.4 M0 -1 l-2.4 -1.8 M0 1.8 l2.4 -1.8" stroke="#bfe8a4" stroke-width=".8" fill="none"/>`,
+    vascular: `<path d="M-8.4 -9 H8.4 V0 Q8.4 7.4 0 10 Q-8.4 7.4 -8.4 0Z" fill="#1f9e8f" ${ln(1.4)}/><path d="M-6 -6.6 H6 V0 Q6 5 0 7.2 Q-6 5 -6 0Z" fill="#5fd3c4"/><path d="M0 6.4 Q1.4 0 0 -6.4" stroke="#1b5e20" stroke-width="1.2" fill="none"/>${[-4.6, -2.2, 0.2, 2.6].map((y, i) => `<path d="M0.4 ${y} q-3.8 -0.8 -${4.2 - i * .5} 1.4 M0.4 ${y} q3.8 -0.8 ${4.2 - i * .5} 1.4" stroke="#1b5e20" stroke-width="1" fill="none" stroke-linecap="round"/>`).join("")}`,
+    seed: [0, 72, 144, 216, 288].map(a => `<circle cx="0" cy="-5.4" r="4.6" fill="#ff7aa8" ${ln(1.2)} transform="rotate(${a})"/>`).join("") + [0, 72, 144, 216, 288].map(a => `<circle cx="0" cy="-5.4" r="3.4" fill="#ffb3cc" transform="rotate(${a})"/>`).join("") + `<circle r="3.4" fill="#ffd84a" ${ln(1.1)}/>`,
+    signals: `<circle r="9.6" fill="#ffd84a" ${ln(1.4)}/><circle r="7" fill="#fff3b0"/><path d="M0 6 V-1" stroke="#2e7d32" stroke-width="1.6" stroke-linecap="round"/><path d="M0 0 C-1 -4 -5 -5 -6 -2 C-4 0 -1 0 0 0Z M0 -1 C1 -5 5 -6 6 -3 C4 -1 1 -1 0 -1Z" fill="#4caf50" ${ln(.9)}/><path d="M-4 6 H4" stroke="#8b5a2b" stroke-width="1.6" stroke-linecap="round"/>`,
+    hormones: `<circle cy="1" r="9" fill="#e53935" ${ln(1.4)}/><circle cx="-3" cy="-1.6" r="2.4" fill="#ff8a80" opacity=".8"/><path d="M0 -7.6 l1.6 -2.4 1 2.8 3 -.6 -2 2.4 2.4 1.8 -3 .4 -.6 2.8 -2.4 -1.8 -2.4 1.8 -.6 -2.8 -3 -.4 2.4 -1.8 -2 -2.4 3 .6 1 -2.8Z" fill="#43a047" ${ln(.9)}/>`,
+    light: `<circle r="9.6" fill="#26365e" ${ln(1.4)}/><path d="M2 -7.2 A7.4 7.4 0 1 0 2 7.2 A5.8 5.8 0 1 1 2 -7.2Z" fill="#ffe9a8" ${ln(.9)}/><path d="M5.2 -3.4 l.7 1.6 1.6 .7 -1.6 .7 -.7 1.6 -.7 -1.6 -1.6 -.7 1.6 -.7Z" fill="#fff"/>`,
+    stress: `<path d="M0 -10.4 L2.6 -6.2 L7.4 -7.4 L6.2 -2.6 L10.4 0 L6.2 2.6 L7.4 7.4 L2.6 6.2 L0 10.4 L-2.6 6.2 L-7.4 7.4 L-6.2 2.6 L-10.4 0 L-6.2 -2.6 L-7.4 -7.4 L-2.6 -6.2Z" fill="#ff9f0a" ${ln(1.3)}/><circle r="5.4" fill="#ffd166" ${ln(1)}/><path d="M0 4 V-3 M0 -.4 q-2.4 0 -2.4 -2.2 M0 .6 q2.4 0 2.4 -2.2" stroke="#2e7d32" stroke-width="1.5" fill="none" stroke-linecap="round"/>`,
+    fungi: `<path d="M-9.4 1.4 Q-9.4 -9.4 0 -9.4 Q9.4 -9.4 9.4 1.4Z" fill="#9b59d0" ${ln(1.4)}/><path d="M-3.4 1.4 h6.8 v6.4 q0 2.2 -3.4 2.2 q-3.4 0 -3.4 -2.2Z" fill="#f1e3c8" ${ln(1.2)}/><circle cx="-4.4" cy="-3.4" r="1.6" fill="#fff"/><circle cx="1.4" cy="-6" r="1.4" fill="#fff"/><circle cx="4.6" cy="-1.8" r="1.2" fill="#fff"/>`
+  };
+  const shine = `<ellipse cx="-3.6" cy="-5.4" rx="3.4" ry="1.6" fill="#fff" opacity=".35" transform="rotate(-30 -3.6 -5.4)"/>`;
+  const badge = (k, x, y, r) => `<g transform="translate(${x} ${y}) scale(${r / 10})">${BADGE_ART[k]}${shine}</g>`;
+  const BADGES = [["land", "Moss Badge", "Plants move to land"], ["vascular", "Frond Badge", "Seedless vascular plants"], ["seed", "Bloom Badge", "Seed plants"], ["signals", "Sprout Badge", "Signals and tropisms"],
+    ["hormones", "Ripening Badge", "Plant hormones"], ["light", "Moonlight Badge", "Light, clocks and seasons"], ["stress", "Thorn Badge", "Stress, touch and defense"], ["fungi", "Spore Badge", "Fungi"]];
+  for (const [k, name, ch] of BADGES) ITEMS.push({ id: "badge-" + k, slot: "badge", set: "Badge", name, price: 0, earn: k, chapter: ch, svg: badge(k, 69, 88, 6.4), big: badge(k, 0, 0, 10) });
   const SLOTS = [
     { key: "hat", name: "Hats" }, { key: "outfit", name: "Outfits" },
-    { key: "face", name: "Glasses", group: "Accessories" }, { key: "neck", name: "Neckwear", group: "Accessories" }, { key: "held", name: "Things to hold", group: "Accessories" }
+    { key: "face", name: "Glasses", group: "Accessories" }, { key: "neck", name: "Neckwear", group: "Accessories" }, { key: "held", name: "Things to hold", group: "Accessories" },
+    { key: "badge", name: "Badges", group: "Badges" }
   ];
   // Tile crops of kitten space, for showing an item on its own
-  const VIEW = { hat: "24 2 72 48", outfit: "34 70 52 42", face: "34 44 52 30", neck: "36 73 48 33", held: "2 66 46 44" };
+  const VIEW = { hat: "24 2 72 48", outfit: "34 70 52 42", face: "34 44 52 30", neck: "36 73 48 33", held: "2 66 46 44", badge: "61.6 80.6 14.8 14.8" };
   window.BioWardrobe = { ITEMS, SLOTS, VIEW, byId: Object.fromEntries(ITEMS.map(i => [i.id, i])) };
 })();

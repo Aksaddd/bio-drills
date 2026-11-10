@@ -145,7 +145,7 @@
   // ----- press and hold
   let press = null, fired = 0;
   addEventListener("pointerdown", e => {
-    if (e.button || card && card.contains(e.target)) return;
+    if (e.button || card && card.contains(e.target) || document.body.classList.contains("an-mode")) return;   // Highlight mode: holding selects text instead
     if (card) close();
     if (e.target.closest("input,textarea,select,.lk-card,#bbPal,#bbDock,.bb-shop,.bb-greet,.pl-pin,.pl-cell,[contenteditable]")) return;
     const x = e.clientX, y = e.clientY;

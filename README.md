@@ -30,6 +30,29 @@ The first module on the home page: the whole unit as reading comprehension. Eigh
 - **Content:** `read/chapters.js` (`window.READ`). Each section is `{ h, html, qs }`, where `qs` lists question ids from the drill bank (`drill/questions.js`), so there's one source of truth for questions, answers and explanations. 159 of the bank's questions appear in the reading (all but a few figure-only and duplicate ones; Bio-pardy clues stay on the board).
 - **Progress:** saved per device as `bio-read-v1` (`{ chapterId: { at, finished, a: { questionId: { ok, p, o } } } }`); a finished chapter shows every passage and answer. Each answer is also written into the drill's progress (`bio-u3-progress-v1`: history, stats, Missed list, today's count), so the drill knows what you've learned and a miss shows up in its Missed tab. Answers fire `bio:correct` / `bio:wrong` like the drill, so Dexter follows along and earns XP and gold.
 
+## Highlights and notes (Read & Learn)
+
+To highlight, select text in any passage. A toolbar offers four colors (yellow, green, blue, pink) and ✎ Note. Tap a highlight to edit its note, change its color or delete it; highlights with a note show a small ✎.
+
+- **On touch screens:** turn on ✏️ Highlight in the chapter's top bar first. Otherwise press-and-hold looks words up.
+- **Notebook:** 🗒 Notes lists the chapter's highlights and notes. *My notebook* on the chapter list collects all of them. Tap any item to jump to it.
+- **Storage:** saved per device as `bio-notes-v1`, by passage and character offsets (`read/notes.js`).
+
+## Try again
+
+Every answered question can be tried again:
+- **Drill and HW 3:** the *Try this question again* button reshuffles the options. The new answer replaces the old one in the round's score, and the question's history keeps both.
+- **Read & Learn:** *↻ Try again* under any answered question. A right answer after a retry shows "Correct on try 2!".
+
+## Reading badges and the Badge Case
+
+Finishing a Read & Learn chapter earns that chapter's badge:
+- **The badges:** Moss, Frond, Bloom, Sprout, Ripening, Moonlight, Thorn and Spore. They're original SVG badges in `assets/wardrobe.js`, in a new `badge` wardrobe slot that can't be bought.
+- **Earning one:** a celebration screen offers *Pin it on Dexter*, and the badge is then worn on his chest in every form.
+- **Badge Case:** Dexter's panel has a new **Badges** tab, a trainer-style red case with 8 slots. Locked slots show only the badge's silhouette and which chapter earns it. Tap a badge to pin it on Dexter or take it off. Earned badges also appear in the Closet.
+- **Elsewhere in Read & Learn:** the chapter list shows the case as a strip, and finished chapters show their badge.
+- **Syncing:** badges sync from `bio-read-v1` whenever a page loads (`syncBadges()` in `assets/buddy.js`), so chapters finished earlier count too.
+
 ## Press and hold a word
 
 On every page, press and hold any word for about half a second (finger, mouse or pen) to get a card with its definition, its word parts (each root's meaning and Greek or Latin origin, linked to the Word Roots page) and its literal meaning. The word is highlighted while the card is open; tap anywhere to close it. A hold never counts as a tap, so holding an answer option doesn't pick it. Plurals and Latin plurals work (sporangia, hyphae, sori, stomata), as do multi-word terms (abscisic acid, alternation of generations, systemic acquired resistance).
