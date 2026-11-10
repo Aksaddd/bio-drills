@@ -134,7 +134,8 @@
       <ellipse cx="${f1(60 - hx - 4 * w)}" cy="106.4" rx="6.4" ry="3.6" fill="${FUR_L}" ${ln}/><ellipse cx="${f1(60 + hx + 4 * w)}" cy="106.4" rx="6.4" ry="3.6" fill="${FUR_L}" ${ln}/>
       <path d="M${f1(60 - hx - 8 * w)} 95 q3 -3 7 -3 M${f1(60 + hx + 8 * w)} 95 q-3 -3 -7 -3" stroke="${FUR_D}" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>`;
     const legs = leg(f1(60 - lx), 84, 107.6, lw, "dx-pawl") + leg(f1(60 + lx), 84, 107.6, lw, "dx-pawr");
-    return { back, body, legs, head: "translate(60 12) scale(.9) translate(-60 -12)", shadow: 26 * w, outfitMap: "" };
+    return { back, body, legs, head: "translate(60 12) scale(.9) translate(-60 -12)", shadow: 26 * w, outfitMap: "",
+      tail: o.tail === "down" ? { d: tail, base: [60 + 16 * w, 105], tip: [56 - 6 * w, 110] } : { d: tail, base: [60 + 17 * w, 102], tip: [77 + 13 * w, 70] } };
   }
   function standBody(o, w, u) {
     const T = f1(73.5 - 3 * (w - 1)), Bm = f1(99 + 9 * (w - 1)), Rr = f1(99 + 2 * (w - 1)), lw = 7 * (.8 + .2 * w);
@@ -148,7 +149,7 @@
       <path d="M49 82 Q50 92 57 96 Q53 88 55 80Z" fill="${FUR_L}"/>
       <g class="dx-outfit" clip-path="url(#${u}bc)"></g></g>`;
     const legs = leg(54, 90, 107.6, lw, "dx-pawl") + leg(92, 95, 107.6, lw + 1, "dx-hindl");
-    return { back, body, legs, head: "translate(47 87) scale(.82) translate(-60 -86)", shadow: 30 * w, outfitMap: `translate(48 ${T}) scale(${f1(50 / 38 * 100) / 100} ${f1((+Bm - +T) / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
+    return { tail: { d: tail, base: [97, 85], tip: o.tail === "down" ? [104, 106] : [101, 58] }, back, body, legs, head: "translate(47 87) scale(.82) translate(-60 -86)", shadow: 30 * w, outfitMap: `translate(48 ${T}) scale(${f1(50 / 38 * 100) / 100} ${f1((+Bm - +T) / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
   }
   function lieBody(o, w, u) {
     const rx = f1(34 * (.85 + .15 * w)), ry = f1(12 * (.8 + .25 * w)), cy = f1(108.6 - +ry);
@@ -159,7 +160,55 @@
       <g class="dx-outfit" clip-path="url(#${u}bc)"></g></g>
       <g class="dx-tail">${furTail(`M${f1(66 + +rx - 2)} 106 C${f1(66 + +rx + 4)} 112 60 112.4 40 110`, 5.4)}</g>`;
     const legs = `<g class="dx-pawl"><ellipse cx="38" cy="106.6" rx="6.6" ry="3.6" fill="${FUR_L}" ${ln}/></g><g class="dx-pawr"><ellipse cx="50" cy="107.4" rx="6.6" ry="3.4" fill="${FUR_L}" ${ln}/></g>`;
-    return { back, body, legs, head: "translate(44 106) scale(.78) translate(-60 -86)", shadow: +rx + 4, outfitMap: `translate(${f1(66 - +rx * .7)} ${f1(+cy - +ry)}) scale(${f1(+rx * 1.6 / 38 * 100) / 100} ${f1(+ry * 2 / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
+    return { tail: { d: `M${f1(66 + +rx - 2)} 106 C${f1(66 + +rx + 4)} 112 60 112.4 40 110`, base: [66 + +rx - 2, 106], tip: [40, 110] }, back, body, legs, head: "translate(44 106) scale(.78) translate(-60 -86)", shadow: +rx + 4, outfitMap: `translate(${f1(66 - +rx * .7)} ${f1(+cy - +ry)}) scale(${f1(+rx * 1.6 / 38 * 100) / 100} ${f1(+ry * 2 / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
+  }
+  // ===== Mystic Dexter. Every form is a little magical, and more so as he evolves (like a legendary's final form):
+  //   aura    a soft glow behind him that grows and shifts color
+  //   motes   floating sparks of light
+  //   gem     a glowing crystal on his forehead (every form)
+  //   marks   luminous stripes on his cheeks (Pouncer and up)
+  //   wisp    a spirit flame on the tip of his tail (Kitten and up)
+  //   spirits ghostly extra tails that sway beside his real one (Fighter: 1, Lab Cat: 2, Professor: 3)
+  //   runes   a slowly turning rune circle behind him (Lab Cat: half ring, Professor: full ring of glyphs)
+  // All drawn with SVG <animate>, so they move wherever he appears.
+  const MYST = [
+    { c: "#c4b5fd", c2: "#f5f3ff", aura: .5, r: 38, motes: 4, gem: "#c4b5fd" },
+    { c: "#7dd3fc", c2: "#e0f2fe", aura: .5, r: 41, motes: 5, gem: "#67e8f9", wisp: true },
+    { c: "#a78bfa", c2: "#ede9fe", aura: .5, r: 44, motes: 6, gem: "#a78bfa", wisp: true, marks: true },
+    { c: "#f0abfc", c2: "#fdf4ff", aura: .52, r: 47, motes: 7, gem: "#e879f9", wisp: true, marks: true, spirits: 1 },
+    { c: "#60a5fa", c2: "#e0f2fe", aura: .55, r: 50, motes: 8, gem: "#38bdf8", wisp: true, marks: true, spirits: 2, runes: 1 },
+    { c: "#fbbf24", c2: "#fef3c7", aura: .6, r: 55, motes: 9, gem: "#fde047", wisp: true, marks: true, spirits: 3, runes: 2 }
+  ];
+  const MOTES = [[22, 40], [98, 34], [14, 78], [104, 72], [34, 18], [88, 14], [8, 56], [112, 96], [26, 100]];
+  function mystic(u, k, P, w) {
+    const M = MYST[k]; if (!M) return null;
+    const anim = (attr, vals, dur, begin = 0) => `<animate attributeName="${attr}" values="${vals}" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>`;
+    const aura = `<defs><radialGradient id="${u}aura"><stop offset="0" stop-color="${M.c}" stop-opacity="${M.aura}"/><stop offset=".6" stop-color="${M.c}" stop-opacity="${M.aura * .45}"/><stop offset="1" stop-color="${M.c}" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="60" cy="74" rx="${M.r}" ry="${M.r * 1.02}" fill="url(#${u}aura)">${anim("opacity", ".75;1;.75", 3.2)}</ellipse>`;
+    let runes = "";
+    if (M.runes) {
+      const n = M.runes > 1 ? 8 : 4, R = 46, glyph = (i) => ["M-2 1.6 L0 -2 L2 1.6Z", "M-1.8 -1.8 L1.8 1.8 M1.8 -1.8 L-1.8 1.8", "M0 -2.2 V2.2 M-2 0 H2", "M-2 0 A2 2 0 1 0 2 0 A2 2 0 1 0 -2 0"][i % 4];
+      runes = `<g opacity=".75"><animateTransform attributeName="transform" type="rotate" from="0 60 66" to="360 60 66" dur="40s" repeatCount="indefinite"/>
+        <circle cx="60" cy="66" r="${R}" fill="none" stroke="${M.c}" stroke-width=".8" stroke-dasharray="${M.runes > 1 ? "3 2.4" : "3 2.4 3 60"}" opacity=".9"/>${M.runes > 1 ? `<circle cx="60" cy="66" r="${R - 4}" fill="none" stroke="${M.c}" stroke-width=".5" opacity=".6"/>` : ""}
+        ${Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 - (M.runes > 1 ? 0 : Math.PI / 2), x = 60 + Math.cos(a) * R, y = 66 + Math.sin(a) * R; return `<g transform="translate(${f1(x)} ${f1(y)})"><circle r="3.4" fill="${M.c2}" stroke="${M.c}" stroke-width=".7"/><path d="${glyph(i)}" stroke="${M.c}" stroke-width=".9" fill="none" stroke-linecap="round"/></g>` }).join("")}</g>`;
+    }
+    let spirits = "";
+    if (M.spirits && P.tail) {
+      const [bx, by] = P.tail.base, ang = [-24, 22, -46];
+      for (let i = 0; i < M.spirits; i++) spirits += `<g opacity=".55"><animateTransform attributeName="transform" type="rotate" values="${ang[i]} ${f1(bx)} ${f1(by)};${ang[i] + (i % 2 ? -8 : 8)} ${f1(bx)} ${f1(by)};${ang[i]} ${f1(bx)} ${f1(by)}" dur="${2.6 + i * .5}s" repeatCount="indefinite"/>
+        <path d="${P.tail.d}" stroke="${M.c}" stroke-width="9" fill="none" stroke-linecap="round" opacity=".55"/><path d="${P.tail.d}" stroke="${M.c2}" stroke-width="4.4" fill="none" stroke-linecap="round"/></g>`;
+    }
+    const wisp = M.wisp && P.tail ? (() => { const [x, y] = P.tail.tip; return `<g transform="translate(${f1(x)} ${f1(y)})"><circle r="5.4" fill="${M.c}" opacity=".35">${anim("r", "4.6;6.4;4.6", 1.6)}</circle>
+      <path d="M0 2.6 C-3.2 1 -2.6 -3 0 -6.4 C0.6 -3.4 3.4 -2.4 2.6 0.6 C2.2 2.2 1 2.8 0 2.6Z" fill="${M.c2}" stroke="${M.c}" stroke-width=".8">${anim("opacity", ".7;1;.7", .9)}</path></g>` })() : "";
+    const motes = MOTES.slice(0, M.motes).map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.6 : 2.2}" fill="${M.c2}" stroke="${M.c}" stroke-width=".6" opacity="0">${anim("opacity", "0;1;0", 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}${anim("cy", `${y};${y - 7};${y}`, 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}</circle>`).join("");
+    const gem = `<g transform="translate(60 46.6)"><circle r="4.6" fill="${M.gem}" opacity=".35">${anim("r", "3.6;5.4;3.6", 2.2)}</circle><path d="M0 -3.4 L2.4 0 L0 3.4 L-2.4 0Z" fill="${M.gem}" stroke="${OL}" stroke-width=".9" stroke-linejoin="round"/><path d="M0 -2.4 L1 -.4 L0 0Z" fill="#fff" opacity=".85"/></g>`;
+    const marks = M.marks ? `<g opacity=".9">${anim("opacity", ".55;1;.55", 2.4)}<path d="M33.6 61 l5.6 1.2 M33.4 65 l5 .2 M86.4 61 l-5.6 1.2 M86.6 65 l-5 .2" stroke="${M.c}" stroke-width="2.2" stroke-linecap="round"/><path d="M33.6 61 l5.6 1.2 M33.4 65 l5 .2 M86.4 61 l-5.6 1.2 M86.6 65 l-5 .2" stroke="#fff" stroke-width=".8" stroke-linecap="round"/></g>` : "";
+    return { back: aura + runes, spirits, wisp, front: motes, head: marks + gem };
+  }
+  function addToTail(str, before, after) {   // put spirit tails behind, and the wisp on the tip of, the dx-tail group (the last group in str)
+    const i = str.lastIndexOf('<g class="dx-tail">'); if (i < 0 || (!before && !after)) return str;
+    const j = str.lastIndexOf("</g>"), open = '<g class="dx-tail">';
+    return str.slice(0, i) + open + before + str.slice(i + open.length, j) + after + str.slice(j);
   }
   function drawHead(u, o) {
     return `
@@ -186,10 +235,12 @@
     let body = P.body;
     if (pose === "sit") body += o.outfit || "";
     else if (o.outfit) body = body.replace('<g class="dx-outfit" clip-path="url(#' + P.clip + ')"></g>', `<g class="dx-outfit" clip-path="url(#${P.clip})"><g transform="${P.outfitMap}">${o.outfit}</g></g>`);
+    const MY = o.myst != null ? mystic(u, o.myst, P, w) : null;
+    if (MY) { if (pose === "lie") body = addToTail(body, MY.spirits, MY.wisp); else P.back = addToTail(P.back, MY.spirits, MY.wisp) }
     const neck = o.neck || "", headT = P.head ? ` transform="${P.head}"` : "";
-    const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${glasses}${o.front || ""}</g></g></g>`;
-    const inner = o.boxed ? headG : `<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
-      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}`;
+    const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${MY ? MY.head : ""}${glasses}${o.front || ""}</g></g></g>`;
+    const inner = o.boxed ? (MY ? MY.back : "") + headG + (MY ? MY.front : "") : `${MY ? MY.back : ""}<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
+      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}${MY ? MY.front : ""}`;
     return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
       ${o.flip ? `<g transform="translate(120 0) scale(-1 1)">${inner}</g>` : inner}`;
   }
@@ -227,7 +278,7 @@
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
     const L = look || {};
-    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, w: L.w || load().weight || 1,
+    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
       outfit: pick("outfit"), neck: pick("neck") + pinnedBadge(E), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
@@ -278,7 +329,7 @@ body.bb-on{padding-bottom:96px}
 .bb-fact b{display:block;font-size:12px;color:var(--c-muted);font-weight:600;margin-bottom:2px}
 .bb-line{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:0 0 14px}
 .bb-line div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--c-muted)}
-.bb-line svg{width:46px;height:46px}
+.bb-line svg{width:var(--lz,46px);height:var(--lz,46px)}.bb-line div{justify-content:flex-end}
 .bb-line .lock svg{filter:brightness(0);opacity:.18}
 [data-theme="dark"] .bb-line .lock svg{filter:brightness(0) invert(1);opacity:.18}
 .bb-line .cur{color:var(--c-ink);font-weight:600}
@@ -338,9 +389,9 @@ body.bb-on{padding-bottom:96px}
 .sh-gold{display:inline-flex;align-items:center;gap:3px;font:700 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:#fff4d6;color:#8a5a00;border-radius:980px;padding:5px 11px;font-variant-numeric:tabular-nums}
 [data-theme="dark"] .sh-gold{background:#3a2f12;color:#ffcf33}
 .sh-done{border:0;background:none;color:var(--c-acc);font:600 17px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
-.sh-stage{height:190px;display:grid;place-items:center;background:radial-gradient(circle at 50% 60%,#fff6dc 0%,var(--c-fill) 70%);margin:0 16px;border-radius:18px}
+.sh-stage{height:214px;display:grid;place-items:center;background:radial-gradient(circle at 50% 60%,#fff6dc 0%,var(--c-fill) 70%);margin:0 16px;border-radius:18px}
 [data-theme="dark"] .sh-stage{background:radial-gradient(circle at 50% 60%,#3a3420 0%,var(--c-fill) 70%)}
-.sh-stage svg{width:180px;height:180px}
+.sh-stage svg{width:calc(170px * var(--dz,1));height:calc(170px * var(--dz,1))}
 .sh-bar{display:flex;align-items:center;gap:10px;min-height:56px;margin:10px 16px 4px}
 .sh-sel{flex:1;min-width:0;display:flex;flex-direction:column} .sh-sel b{font-size:16px} .sh-sel span{font-size:13px;color:var(--c-muted);display:flex;align-items:center;gap:2px}
 .sh-hint{flex:1;margin:0;color:var(--c-muted);font-size:14px;text-align:center}
@@ -614,7 +665,7 @@ body.bb-on{padding-bottom:96px}
       <p class="bb-next">${nx === null ? (L >= MAX_LV ? "Fully grown and Level 100. You've mastered it all!" : `Fully grown! ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1} of ${MAX_LV}.`) : `Evolves at Lv ${level(nx)} · ${fmt(nx - s.pts)} XP to go · ${fmt(lvXP(L + 1) - s.pts)} XP to level ${L + 1}`}</p>
       ${up ? `<p class="bb-next" style="margin-top:-8px">${s.streak ? `${up.at - s.streak} more right in a row for` : `Get ${up.at} right in a row for`} ×${up.mult} XP</p>` : ""}
       <div class="bb-fact"><b>The biology</b>${esc(st.fact)}</div>
-      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}">${art(i)}<span>${i > k ? `Lv ${level(x.at)}` : esc(x.name)}</span></div>`).join("")}</div>
+      <div class="bb-line" aria-label="Evolution line">${STAGES.map((x, i) => `<div class="${i > k ? "lock" : ""}${i === k ? " cur" : ""}" style="--lz:${(34 + 4.4 * i).toFixed(1)}px">${art(i)}<span>${i > k ? `Lv ${level(x.at)}` : esc(x.name)}</span></div>`).join("")}</div>
       <details class="bb-how"><summary>How XP and gold work</summary>
         <p>Every question is rated by how hard it is. Harder questions earn more XP and gold:</p>
         <ul class="bb-tiers">${X ? X.TIERS.map(t => `<li><span class="xpb t-${t.key}">${t.name}</span>${t.xp} XP · ${GOLD_PER[t.key]} gold</li>`).join("") : ""}</ul>
@@ -826,7 +877,7 @@ body.bb-on{padding-bottom:96px}
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
         <div class="sh-tabs pal" role="tablist">${[["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
-        ${st.tab === "progress" ? "" : `<div class="sh-stage">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
+        ${st.tab === "progress" ? "" : `<div class="sh-stage" style="--dz:${(.84 + .07 * k).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -946,7 +997,8 @@ body.bb-on{padding-bottom:96px}
   }, 15000);
   ["pointerdown", "keydown", "scroll", "touchstart"].forEach(t => addEventListener(t, () => { lastMove = Date.now(); if (act === "nap") nextAct() }, { passive: true, capture: true }));
   const shown = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
-  const palSize = () => innerWidth >= 900 ? 96 : 72;
+  const sizeK = () => .84 + .07 * stageOf(load().pts);   // he grows with each evolution: 84% as a newborn → 119% as the Professor
+  const palSize = () => Math.round((innerWidth >= 900 ? 96 : 72) * sizeK());
   function anchor() { const p = $("bbPal"); return palOn && p ? p : $("bbDock") }
   function anchorRect(d) {   // where Dexter is headed (he may still be moving)
     if (d && d.id === "bbPal" && palAt) { const S = palSize(); return { left: palAt.x, top: palAt.y, right: palAt.x + S, bottom: palAt.y + S, width: S, height: S } }
@@ -1068,7 +1120,7 @@ body.bb-on{padding-bottom:96px}
       line = `${hello} Welcome back. ${tip}`;
     }
     const g = document.createElement("div"); g.className = "bb-greet"; g.setAttribute("role", "status");
-    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" aria-label="Close the greeting">${art(k, null, { eyes: k === 0 ? "closed" : "happy" })}</button></div>`;
+    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" style="transform-origin:50% 100%;scale:${(.84 + .07 * k).toFixed(2)}" aria-label="Close the greeting">${art(k, null, { eyes: k === 0 ? "closed" : "happy" })}</button></div>`;
     document.body.appendChild(g); document.body.classList.add("bb-greeting");
     let gone = false;
     const leave = () => { if (gone) return; gone = true; g.classList.add("leave"); setTimeout(() => { g.remove(); document.body.classList.remove("bb-greeting") }, 600) };

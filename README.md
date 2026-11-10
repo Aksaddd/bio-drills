@@ -101,6 +101,13 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Lying:** a curled loaf for naps, paws tucked and tail wrapped around.
   - Hats, glasses, neckwear and badges move with his head. Outfits are mapped onto the side of his standing or lying body.
 - **Weight:** a slider in the Closet goes from Slim through Just right, Well fed and Chubby to Absolute chonk (0.75–1.5, saved as `weight` in his state). It widens his body, belly, haunches and legs in every pose.
+- **Mystic Dexter:** every form is a little magical, and more so as he evolves. He also grows bigger with each evolution: the study pal goes from 84% size as a newborn to 119% as the Professor, as do the Closet stage, the greeting and the evolution line. The layers are drawn with SVG `<animate>`, so they move everywhere he appears (`MYST` and `mystic()` in `assets/buddy.js`):
+  - **Every form:** a glowing forehead gem, a soft pulsing aura that grows and changes color, and floating sparks of light.
+  - **Kitten and up:** a spirit flame on his tail tip.
+  - **Pouncer and up:** luminous cheek marks.
+  - **Fighter, Lab Cat, Professor:** 1, 2 and 3 ghostly spirit tails that sway beside his real one.
+  - **Lab Cat:** a turning half ring of runes.
+  - **Professor:** a full golden rune circle of glyphs.
 - **Expressions:** Dexter's eyes (and mouth) show his mood. Everyday eyes for the yarn; wide, sparkly wonder eyes with raised brows and a little "o" mouth for the butterfly and the leaf; big dilated pupils while hunting the laser, feather and his tail; lowered, focused lids and angled brows while stalking the mouse; heavy content lids in the box; relaxed closed eyes when napping. A right answer gives happy ^ ^ eyes and an open smile; a wrong one gives droopy eyes, worried brows, a tear and a wobbly frown. He greets you with happy eyes and looks sparkly-eyed at himself in the Closet and Shop. The newborn keeps his eyes shut except to react. The code is `eye()`, `mouth()` and `ACT_EYES` in `assets/buddy.js`.
 - Both respect *Reduce motion* and switch off with *Show study buddy* in Settings. The code is in `assets/buddy.js` (search for "Study pal" and "Greeting").
 
