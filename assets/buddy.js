@@ -595,6 +595,15 @@ body.bb-on{padding-bottom:96px}
 @keyframes bcSpin{from{transform:rotateY(540deg) scale(.2);opacity:0}to{transform:none;opacity:1}}
 .sh-tabs.sub{margin-top:4px}
 .sh-tile .cl-ic{display:grid;place-items:center;height:58px;color:var(--c-muted)} .sh-tile .cl-ic svg{width:30px;height:30px}
+.cl-cats{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.cl-cats::-webkit-scrollbar{display:none}
+.cl-cat{flex:none;width:68px;border:2px solid transparent;border-radius:14px;background:var(--c-fill);padding:4px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;font:inherit;color:inherit}
+.cl-cat svg{width:46px;height:46px}.cl-cat b{font-size:11.5px;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cl-cat small{font-size:9.5px;color:#248a3d;font-weight:700}
+.cl-cat.on{border-color:#34c759;background:color-mix(in srgb,#34c759 12%,var(--c-fill))}
+.cl-stage{position:relative}.cl-who{display:grid;place-items:center}
+.cl-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.15);font:600 26px/1 -apple-system,sans-serif;color:#3a3a3c;cursor:pointer;display:grid;place-items:center;padding:0 0 3px}
+.cl-arrow.l{left:10px}.cl-arrow.r{right:10px}
+.cl-name{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:12.5px;background:rgba(255,255,255,.88);color:#3a3a3c;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.ct-dress{border:0;background:var(--c-fill);color:var(--c-acc);border-radius:999px;padding:6px 11px;font:600 13px -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer}
 .sh-tile.clb>svg{height:56px;width:56px;margin:2px auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}.sh-tile.clb.lock{opacity:.75}.sh-cap .cl-bcount{font-weight:500;color:var(--c-muted);margin-left:6px;font-size:.85em;text-transform:none;letter-spacing:0}
 .sh-tile.cl.on{border-color:#34c759;background:color-mix(in srgb,#34c759 12%,var(--c-fill))}
 .sh-tile.cl.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
@@ -1037,6 +1046,27 @@ body.bb-on{padding-bottom:96px}
     const SUBS = [["hat", "Hats"], ["outfit", "Outfits"], ["acc", "Accessories"]];
     const slotsFor = key => !W ? [] : key === "acc" ? W.SLOTS.filter(x => x.group === "Accessories") : W.SLOTS.filter(x => x.key === key);
     const keepScroll = fn => { const c = shop.querySelector(".bb-shop"), y = c ? c.scrollTop : 0; fn(); const n = shop.querySelector(".bb-shop"); if (n) n.scrollTop = y };
+    // ===== Dressing any cat: the Closet works on st.dress (default: the cat in training). The cat in training's look lives
+    // in KEY; the others' looks (equip with pinned badges, collar, weight) live in the household. Items and gold are shared.
+    const dressId = () => { const H = household(); return st.dress && H.cats[st.dress] ? st.dress : H.active };
+    function dressGet() {
+      const s = load(), H = household(), id = dressId();
+      if (id === H.active) return Object.assign(s, { _id: id });
+      const c = H.cats[id];
+      return Object.assign({}, s, { equip: Object.assign({ badges: [] }, c.equip), collar: c.collar || "navy", weight: c.weight || 1, pts: c.pts | 0, nick: c.nick || "", breed: c.breed, color: c.color, _id: id, _other: true });
+    }
+    function dressSet(fn) {
+      const H = household(), id = dressId();
+      if (id === H.active) { const t = load(); fn(t); save(t); return t }
+      const c = H.cats[id], t = { equip: Object.assign({ badges: [] }, c.equip), collar: c.collar || "navy", weight: c.weight || 1, pts: c.pts | 0 };
+      fn(t); c.equip = t.equip; c.collar = t.collar; c.weight = t.weight; saveHouse(H); refreshMates(); return Object.assign({}, c, t);
+    }
+    const dressArt = (d, eyes) => d._other ? art(stageOf(d.pts), d.equip, { breed: d.breed, color: d.color, collar: d.collar, w: d.weight, eyes }) : art(stageOf(d.pts), d.equip, { eyes });
+    function dressPicker() {   // flip through your cats: arrows on the stage, plus a strip of all of them
+      const { list } = catList(); if (list.length < 2) return "";
+      const id = dressId();
+      return `<div class="cl-cats" role="tablist" aria-label="Which cat to dress">${list.map(c => `<button type="button" role="tab" class="cl-cat${c.id === id ? " on" : ""}" data-dress="${c.id}" aria-selected="${c.id === id}">${art(stageOf(c.pts | 0), c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: "happy", plain: true })}<b>${esc(c.nick || "Dexter")}</b>${c.active ? `<small>Training</small>` : ""}</button>`).join("")}</div>`;
+    }
     function shopTile(it, s) {
       const own = s.owned.includes(it.id), on = s.equip[it.slot] === it.id;
       return `<button type="button" class="sh-tile${st.sel === it.id ? " sel" : ""}${on ? " on" : ""}" data-id="${it.id}" aria-pressed="${st.sel === it.id}">
@@ -1051,7 +1081,7 @@ body.bb-on{padding-bottom:96px}
         <div class="ct-list">${list.map(c => { const k2 = stageOf(c.pts | 0); return `<div class="ct-cat${c.active ? " on" : ""}">
           ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: "happy", plain: true })}
           <span><b>${esc(c.nick || "Dexter")}</b><small>${esc(breedName(c.breed, c.color))} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
-          <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>${H.co.length ? `<span class="ct-split">XP split ${H.co.length + 1} ways</span>` : ""}` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
+          <span class="ct-btns"><button type="button" class="ct-dress" data-dressgo="${c.id}" aria-label="Dress ${esc(c.nick || "Dexter")}">👗 Dress</button>${c.active ? `<span class="ct-tag">✓ Training</span>${H.co.length ? `<span class="ct-split">XP split ${H.co.length + 1} ways</span>` : ""}` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
             <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>
             <label class="ct-along ct-co"><input type="checkbox" data-co="${c.id}"${c.co ? " checked" : ""}${c.along ? "" : " disabled"}> 📚 Co-train</label>${c.along && H.spots && H.spots[c.id] ? `<button type="button" class="ct-unpin" data-unpin="${c.id}">↺ Back beside him</button>` : ""}`}</span></div>` }).join("")}</div>
         <button type="button" class="ct-cafe" id="ctCafe"><span class="ic" aria-hidden="true">☕</span><span><b>Visit the Cat Café</b><small>${full ? `Your home is full (${MAX_CATS} cats), but your cats love to hang out here.` : "Meet cats of every breed, pick a coat color, and bring one home to study."}</small></span><i aria-hidden="true">›</i></button>`;
@@ -1086,7 +1116,7 @@ body.bb-on{padding-bottom:96px}
         const hasOwn = sl.key === "face" ? !!g.glasses : !!g[sl.key];
         const opt = (val, label, icon, extra = "") => `<button type="button" class="sh-tile cl${(cur[sl.key] === val || (val === undefined && cur[sl.key] === undefined)) ? " on" : ""}" data-slot="${sl.key}" data-val="${val === undefined ? "" : val}" aria-pressed="${cur[sl.key] === val}">${icon}<b>${label}</b>${extra}</button>`;
         return `<p class="sh-cap">${esc(sl.name)}</p><div class="sh-grid">
-          ${hasOwn ? opt(undefined, "Dexter's own", `<span class="cl-ic">${OWN_ICON}</span>`, `<span class="tag">This form's gear</span>`) : ""}
+          ${hasOwn ? opt(undefined, `${esc(name(s))}'s own`, `<span class="cl-ic">${OWN_ICON}</span>`, `<span class="tag">This form's gear</span>`) : ""}
           ${opt("none", "None", `<span class="cl-ic">${NONE_ICON}</span>`, `<span class="tag">${sl.key === "neck" ? "Just his collar" : hasOwn ? "Take it off" : "Nothing here"}</span>`)}
           ${mine.map(it => opt(it.id, esc(it.name), `<svg viewBox="${W.VIEW[it.slot]}" aria-hidden="true">${it.svg}</svg>`, `<span class="tag">${esc(it.set)}</span>`)).join("")}
         </div>${sl.key === "held" ? badgeRow() : ""}`;
@@ -1101,7 +1131,7 @@ body.bb-on{padding-bottom:96px}
         <div class="sh-bar"><p class="sh-hint">Tap to dress Dexter. Mix any items you own, keep his own gear, or take it all off.</p></div>
         ${s.owned.length ? "" : `<div class="cl-empty"><b>Your closet is empty</b><span>Earn gold with right answers and buy hats, outfits and accessories in the Shop.</span><button type="button" class="sh-act" id="goShop">Visit the Shop</button></div>`}
         ${rows}
-        <div class="cl-reset"><button type="button" class="sh-act ghost" id="clDefault">Dexter's own look</button><button type="button" class="sh-act ghost" id="clBare">Take everything off</button></div>`;
+        <div class="cl-reset"><button type="button" class="sh-act ghost" id="clDefault">${esc(name(s))}'s own look</button><button type="button" class="sh-act ghost" id="clBare">Take everything off</button></div>`;
     }
     function shopHTML(s) {
       const it = st.sel ? W.byId[st.sel] : null, own = it && s.owned.includes(it.id), on = it && s.equip[it.slot] === it.id;
@@ -1119,11 +1149,13 @@ body.bb-on{padding-bottom:96px}
     function paint() {
       const s = load(), k = stageOf(s.pts);
       syncBadges();
-      const body = st.tab === "cats" ? catsHTML() : st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(s, k);
+      const d = st.tab === "closet" && W ? dressGet() : null, many = d && catList().list.length > 1;
+      const body = st.tab === "cats" ? catsHTML() : st.tab === "progress" || !W ? progressHTML(s) : st.tab === "shop" ? shopHTML(s) : st.tab === "badges" ? badgesHTML(load()) : closetHTML(d, stageOf(d.pts));
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
         <div class="sh-tabs pal" role="tablist">${[["cats", "Cats"], ["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
-        ${st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${sizeFor(s.pts).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: "wide" })}</div>`}
+        ${d ? `${dressPicker()}<div class="sh-stage cl-stage" style="--dz:${sizeFor(d.pts).toFixed(2)}">${many ? `<button type="button" class="cl-arrow l" data-step="-1" aria-label="Previous cat">‹</button>` : ""}<span class="cl-who">${dressArt(d, "wide")}</span>${many ? `<span class="cl-name">Dressing <b>${esc(name(d))}</b></span><button type="button" class="cl-arrow r" data-step="1" aria-label="Next cat">›</button>` : ""}</div>`
+          : st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${sizeFor(s.pts).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: "wide" })}</div>`}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -1136,6 +1168,7 @@ body.bb-on{padding-bottom:96px}
         return;
       }
       if (st.tab === "cats") {
+        shop.querySelectorAll("[data-dressgo]").forEach(b => b.onclick = () => { st.dress = b.dataset.dressgo; st.tab = "closet"; paint(); shop.querySelector(".bb-shop").scrollTop = 0 });
         shop.querySelectorAll("[data-train]").forEach(b => b.onclick = () => keepScroll(() => { trainCat(b.dataset.train); paint(); paintDock(); refreshMates() }));
         shop.querySelectorAll("[data-unpin]").forEach(b => b.onclick = () => keepScroll(() => { setMateSpot(b.dataset.unpin, null); paint(); placeMates() }));
         shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); H.co = H.co.filter(x => H.along.includes(x)); saveHouse(H); paint(); refreshMates() }));
@@ -1153,9 +1186,11 @@ body.bb-on{padding-bottom:96px}
         return;
       }
       if (st.tab === "closet") {
-        const set = fn => keepScroll(() => { const t = load(); fn(t); save(t); paint(); paintDock() });
+        const set = fn => keepScroll(() => { dressSet(fn); paint(); paintDock() });
+        shop.querySelectorAll("[data-dress]").forEach(b => b.onclick = () => keepScroll(() => { st.dress = b.dataset.dress; paint() }));
+        shop.querySelectorAll("[data-step]").forEach(b => b.onclick = () => keepScroll(() => { const L = catList().list, i = L.findIndex(c => c.id === dressId()); st.dress = L[(i + +b.dataset.step + L.length) % L.length].id; paint() }));
         // weight: the stage updates live while dragging; the rest of the page when you let go
-        const setW = (v, done) => { const t = load(); t.weight = Math.min(1.5, Math.max(.75, v / 100)); save(t); $("clWLabel").textContent = weightLabel(t.weight); $("clWeight").value = Math.round(t.weight * 100); const stg = shop.querySelector(".sh-stage"); if (stg) stg.innerHTML = art(stageOf(t.pts), t.equip, { eyes: stageOf(t.pts) === 0 ? "closed" : "wide" }); if (done) paintDock() };
+        const setW = (v, done) => { const t = dressSet(t => { t.weight = Math.min(1.5, Math.max(.75, v / 100)) }); $("clWLabel").textContent = weightLabel(t.weight); $("clWeight").value = Math.round(t.weight * 100); const stg = shop.querySelector(".cl-who"); if (stg) stg.innerHTML = dressArt(dressGet(), "wide"); if (done) paintDock() };
         $("clWeight").oninput = e => setW(+e.target.value); $("clWeight").onchange = e => setW(+e.target.value, true);
         shop.querySelectorAll("[data-w]").forEach(b => b.onclick = () => setW(+b.dataset.w, true));
         shop.querySelectorAll(".sh-tile.cl").forEach(b => b.onclick = () => set(t => { if (b.dataset.val === "") delete t.equip[b.dataset.slot]; else t.equip[b.dataset.slot] = b.dataset.val }));
