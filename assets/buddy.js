@@ -563,7 +563,8 @@ body.bb-on{padding-bottom:96px}
 .ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
 .ct-unpin{border:0;background:none;color:var(--c-acc);font:600 12px -apple-system,sans-serif;cursor:pointer;padding:0}
 .ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}.ct-co input:disabled+*,.ct-along:has(input:disabled){opacity:.45;cursor:default}
-.ct-split{font-size:11.5px;color:var(--c-muted);font-weight:600}.xsplit{font-size:.8em;opacity:.85}.bb-mate.co .bb-mname{background:#fff4c2}.bb-pal.bb-inway,.bb-mate.bb-inway{opacity:.45}.bb-crowd .bb-mate .bb-mname{font-size:8.5px;padding:1px 4px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
+.ct-split{font-size:11.5px;color:var(--c-muted);font-weight:600}.xsplit{font-size:.8em;opacity:.85}.bb-mate.co .bb-mname{background:#fff4c2}.bb-pal.bb-inway,.bb-mate.bb-inway{opacity:.45}
+.bb-mate.stk .bb-mname{display:none}.bb-mate.stk.co::after{content:"📚";position:absolute;right:2%;top:30%;font-size:11px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}.bb-crowd .bb-mate .bb-mname{font-size:8.5px;padding:1px 4px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
 .ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
 .ct-cafe{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:calc(100% - 32px);margin:4px 16px 14px;border:0;border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:#4a2f1d;background:linear-gradient(135deg,#ffe8c7,#f9c99a);box-shadow:0 6px 18px rgba(201,120,40,.25)}
 .ct-cafe .ic{font-size:30px}.ct-cafe b{display:block;font-size:17px}.ct-cafe small{display:block;font-size:13px;opacity:.85}.ct-cafe i{font-style:normal;font-size:24px}
@@ -1533,14 +1534,14 @@ body.bb-on{padding-bottom:96px}
   }
   function avTake(G, x, y, S) { const [l, t, r, b] = body(x, y, S); const W = G.W; for (let yy = Math.max(0, Math.floor(t / CELL)); yy < Math.min(G.H, Math.ceil(b / CELL)); yy++) G.g.fill(1, yy * W + Math.max(0, Math.floor(l / CELL)), yy * W + Math.min(W, Math.ceil(r / CELL))) }
   // the best spot for a cat of size S that wants to be at pref; keep = its current spot (kept while it's still clear)
-  function avFind(G, S, pref, keep) {
+  function avFind(G, S, pref, keep, up = 0) {   // up = room needed above him (for the cats stacked on his head)
     const cost = (x, y) => {
-      const [l, t, r, b] = body(x, y, S), vis = Math.max(0, Math.min(r, innerWidth) - Math.max(l, 0)) / (r - l);
+      const [l, t0, r, b] = body(x, y, S), t = t0 - up, vis = Math.max(0, Math.min(r, innerWidth) - Math.max(l, 0)) / (r - l);
       return { ov: avCount(G, Math.max(l, 0), t, Math.min(r, innerWidth), b), off: 1 - vis };
     };
-    if (keep) { const c = cost(keep.x, keep.y); if (!c.ov && !c.off && keep.x >= 0 && keep.x <= innerWidth - S && keep.y >= 4 && keep.y <= innerHeight - S - 4) return { x: keep.x, y: keep.y, ov: 0 } }
+    if (keep) { const c = cost(keep.x, keep.y); if (!c.ov && !c.off && keep.x >= 0 && keep.x <= innerWidth - S && keep.y >= 4 + up && keep.y <= innerHeight - S - 4) return { x: keep.x, y: keep.y, ov: 0 } }
     let best = null; const step = CELL * 2;
-    for (let y = 4; y <= innerHeight - S - 4; y += step) for (let x = -S * .5; x <= innerWidth - S * .5; x += step) {
+    for (let y = 4 + up; y <= innerHeight - S - 4; y += step) for (let x = -S * .5; x <= innerWidth - S * .5; x += step) {
       const c = cost(x, y), k = c.ov * 220 + c.off * 700 + Math.hypot(x - pref.x, y - pref.y);
       if (!best || k < best.k) best = { x, y, k, ov: c.ov };
     }
@@ -1554,10 +1555,22 @@ body.bb-on{padding-bottom:96px}
     if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
     return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
   }
+  // By default the companions stack up on his head in a little cat tower (cats you've dragged somewhere stay there).
+  // The tower needs a clear column; if the whole tower doesn't fit, as many as fit stack and the rest find their own spots.
+  const stackers = () => mates.filter(m => !mateSpot(m.c.id));
+  let stackN = 0;
+  function fitPal(G, S, pref, keep) {
+    const st = stackers();
+    for (let n = st.length; n > 0; n--) {
+      const up = st.slice(0, n).reduce((h, m) => h + mateSize(m.c) * .8, 0); if (up + S + 8 > innerHeight) continue;
+      const f = avFind(G, S, pref, keep, up); if (!f.ov) { stackN = n; return f }
+    }
+    stackN = 0; return avFind(G, S, pref, keep);
+  }
   function home() {
     if (treeOn() && palOn && layoutTree()) return slotPos(palSlot, palSize());
-    const want = wantHome(); if (avOff()) return want;
-    const q = avFind(avMap(), palSize(), want, palAt); avSet($("bbPal"), q.ov); return { x: q.x, y: q.y };
+    const want = wantHome(); if (avOff()) { stackN = stackers().length; return want }
+    const q = fitPal(avMap(), palSize(), want, palAt); avSet($("bbPal"), q.ov); return { x: q.x, y: q.y };
   }
   function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)`; placeMates() }
   // ===== Companion cats: up to two other cats from the household come along on screen. They sit beside the cat in
@@ -1623,8 +1636,14 @@ body.bb-on{padding-bottom:96px}
   function placeMates(at) {
     const A = at || palAt, G = !avOff() && A && mates.length ? avCopy(avMap()) : null;
     if (G) { avTake(G, A.x, A.y, palSize()); mates.forEach(m => { if (m.busy === "chase" && m.at) avTake(G, m.at.x, m.at.y, mateSize(m.c)) }) }
-    mates.forEach(m => { if (m.busy === "chase") return; let q = matePos(m, at);
-      if (q && G && !m.busy) { avSum(G); const sz = mateSize(m.c), f = avFind(G, sz, q, at ? null : m.at); q = { x: f.x, y: f.y }; avTake(G, q.x, q.y, sz); avSet(m.el, f.ov); m.side = A.x >= q.x ? 1 : -1 } else if (q && !G) avSet(m.el, 0);
+    // the tower: each cat sits on the head of the one below, a little off-center either way so it looks piled up
+    const S = palSize(), tower = A ? stackers().slice(0, stackN) : []; let top = A ? A.y : 0;
+    tower.forEach((m, i) => { const sz = mateSize(m.c); top -= sz * .8; m.tower = { x: A.x + (S - sz) / 2 + (i % 2 ? 4 : -4), y: top, z: 59 + i } });
+    mates.forEach(m => { if (!tower.includes(m)) m.tower = null; m.el.style.zIndex = m.tower ? m.tower.z : ""; m.el.classList.toggle("stk", !!m.tower) });
+    if (G) tower.forEach(m => avTake(G, m.tower.x, m.tower.y, mateSize(m.c)));
+    mates.forEach(m => { if (m.busy === "chase") return; let q = m.tower ? { x: m.tower.x, y: m.tower.y } : matePos(m, at);
+      if (m.tower) { avSet(m.el, 0); m.side = q.x > A.x + (S - mateSize(m.c)) / 2 ? -1 : 1 }
+      else if (q && G && !m.busy) { avSum(G); const sz = mateSize(m.c), f = avFind(G, sz, q, at ? null : m.at); q = { x: f.x, y: f.y }; avTake(G, q.x, q.y, sz); avSet(m.el, f.ov); m.side = A.x >= q.x ? 1 : -1 } else if (q && !G) avSet(m.el, 0);
       if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
   function matesMove(to) {   // trot after the cat in training (on the tree they stay home and watch)
     if (treeBox) return;
@@ -1712,7 +1731,8 @@ body.bb-on{padding-bottom:96px}
       const rg = document.createRange(), tw = document.createTreeWalker(lastOpt, NodeFilter.SHOW_TEXT); let t;
       while ((t = tw.nextNode())) { if (!/\S/.test(t.data)) continue; rg.selectNodeContents(t); for (const q of rg.getClientRects()) for (let y = Math.max(0, Math.floor((q.top - 3) / CELL)); y <= Math.min(G.H - 1, Math.floor((q.bottom + 3) / CELL)); y++) G.g.fill(1, y * W + Math.max(0, Math.floor((q.left - 3) / CELL)), y * W + Math.min(W, Math.floor((q.right + 3) / CELL) + 1)) }
       lastOpt.querySelectorAll("svg,img").forEach(e => { const q = e.getBoundingClientRect(); for (let y = Math.max(0, Math.floor(q.top / CELL)); y <= Math.min(G.H - 1, Math.floor(q.bottom / CELL)); y++) G.g.fill(1, y * W + Math.max(0, Math.floor(q.left / CELL)), y * W + Math.min(W, Math.floor(q.right / CELL) + 1)) });
-      const f = avFind(avSum(G), S, pos, null); pos.x = f.x; pos.y = f.y; avSet(p, f.ov);
+      // he dashes over on his own; the tower hops down and waits beside him, then stacks back up when he's home
+      const f = avFind(avSum(G), S, pos, null); stackN = 0; pos.x = f.x; pos.y = f.y; avSet(p, f.ov);
     }
     clearTimeout(visiting); p.classList.remove("run"); void p.offsetWidth; p.classList.add("run");
     moving = true; facing = palAt && pos.x > palAt.x + 2 ? 1 : -1; paintPal(); matesMove(pos); place(pos);
