@@ -1,6 +1,6 @@
 // Read & Learn highlights and notes. Select text in a passage to highlight it in one of four colors and/or attach a
-// note; tap a highlight to edit or delete it. On touch screens, turn on Highlight mode first (the ✏️ button):
-// otherwise press-and-hold looks words up (assets/lookup.js). Saved per device as bio-notes-v1:
+// note; tap a highlight to edit or delete it. On phones, press and hold to select (double-tap is the word lookup in
+// assets/lookup.js). Saved per device as bio-notes-v1:
 //   { "chapterId:passageIndex": [{ id, s, e, text, color, note, t }] }  where s/e are character offsets in the passage text.
 (() => {
   const KEY = "bio-notes-v1", COLORS = ["yellow", "green", "blue", "pink"];
@@ -91,9 +91,13 @@
     pop.querySelector(".an-ok").onclick = () => { closePop(); rerender() };
     if (focus) ta.focus();
   }
+  let tapT = 0;
   document.addEventListener("click", e => {
     const m = e.target.closest && e.target.closest("mark.an");
-    if (m && !getSelection().toString()) { e.preventDefault(); openPop(m.dataset.an); return }
+    if (m && !getSelection().toString()) {   // wait a beat: a second tap means "look the word up", not "edit"
+      e.preventDefault(); clearTimeout(tapT); const id = m.dataset.an;
+      tapT = setTimeout(() => { if (!document.querySelector(".lk-card")) openPop(id) }, 400); return;
+    }
     if (pop && !pop.contains(e.target)) { closePop(); rerender() }
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closePop(); closeBar() } });
@@ -108,7 +112,7 @@
       return items.length ? `<h4>${esc(c.title)}</h4>${items.map(({ x, i, s }) => `<button type="button" class="an-item" data-ch="${c.id}" data-id="${x.id}"><span class="an-q an-${x.color}">“${esc(x.text.length > 220 ? x.text.slice(0, 220) + "…" : x.text)}”</span>${x.note ? `<span class="an-n">✎ ${esc(x.note)}</span>` : ""}<small>Passage ${i + 1}: ${esc(s.h)}</small></button>`).join("")}` : "";
     }).join("");
     sheet.innerHTML = `<div class="an-sheet" role="dialog" aria-modal="true" aria-label="My notebook"><div class="an-head"><b>🗒 ${onlyChapter ? "Notes in this chapter" : "My notebook"}</b><button type="button" class="an-x">Done</button></div>
-      <div class="an-body">${rows || `<p class="an-empty">No highlights yet. Select any text in a passage to highlight it or add a note${matchMedia("(pointer:coarse)").matches ? " (turn on ✏️ Highlight first)" : ""}.</p>`}</div></div>`;
+      <div class="an-body">${rows || `<p class="an-empty">No highlights yet. Press and hold (or drag across) any text in a passage to highlight it or add a note.</p>`}</div></div>`;
     document.body.appendChild(sheet);
     const shut = () => sheet.remove();
     sheet.onclick = e => { if (e.target === sheet) shut() };

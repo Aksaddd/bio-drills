@@ -66,8 +66,6 @@ mark.an{color:inherit;border-radius:3px;padding:0 1px;cursor:pointer;-webkit-box
 .an-yellow{background:rgba(255,214,10,.45)}.an-green{background:rgba(52,199,89,.32)}.an-blue{background:rgba(10,132,255,.25)}.an-pink{background:rgba(255,55,95,.25)}
 mark.an.has-note.an-last::after{content:"✎";font-size:.72em;vertical-align:super;margin-left:1px;color:var(--accent)}
 mark.an.an-flash{outline:2px solid var(--accent);animation:pop .5s 2}
-body.an-mode .rd-prose{cursor:text;-webkit-user-select:text;user-select:text}
-body.an-mode .rd-sec .rd-prose{box-shadow:inset 3px 0 0 #ffd60a;padding-left:10px;margin-left:-10px}
 .an-bar{position:fixed;z-index:310;display:flex;gap:6px;align-items:center;background:#1d1d1f;border-radius:999px;padding:6px 8px;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:rise .15s}
 .an-dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.85);cursor:pointer;padding:0}.an-dot.an-yellow{background:#ffd60a}.an-dot.an-green{background:#34c759}.an-dot.an-blue{background:#0a84ff}.an-dot.an-pink{background:#ff375f}
 .an-note{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:6px 12px;font:600 13.5px var(--body);cursor:pointer}
@@ -237,7 +235,7 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
     $("view").innerHTML = `<p class="rd-lead">Read the course one short passage at a time. After each passage, answer a few questions about what you just read, then keep reading. Start here, before the drills.</p>
       ${badgeStrip()}
       <button type="button" class="rd-book" id="openBook"><span>🗒</span><span><b>My notebook</b><small>${window.ReadNotes && window.ReadNotes.countAll() ? window.ReadNotes.countAll() + " highlights and notes" : "Select text in any passage to highlight it or add a note"}</small></span><i>›</i></button>
-      <div class="rd-how"><b>How it works:</b> the figures come straight from the lecture slides, and every passage has something to do: label a diagram, put steps in order, match, sort, or run one of the lecture's experiments yourself. A perfect first try earns Dexter XP. <b>Press and hold any science word</b> to see what it means and its Greek and Latin roots. Then answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
+      <div class="rd-how"><b>How it works:</b> the figures come straight from the lecture slides, and every passage has something to do: label a diagram, put steps in order, match, sort, or run one of the lecture's experiments yourself. A perfect first try earns Dexter XP. <b>Double-tap any science word</b> to see what it means and its Greek and Latin roots, and <b>press and hold</b> (or drag across) text to highlight it or add a note. Then answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
       <div class="rd-list">${R.map((c, i) => {
         const p = chProgress(c), S = chState(c), mins = Math.max(2, Math.round(words(c) / 200));
         const go = S.finished ? "Read again" : p.answered || S.at ? "Continue" : c === next ? "Start" : "Read";
@@ -284,15 +282,13 @@ figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:v
     const p = chProgress(c), shown = c.sections.slice(0, S.finished ? c.sections.length : S.at + 1);
     const nextC = R[ci + 1];
     $("view").innerHTML = `<div class="rd-head"><p class="rd-kicker">${c.ch} · Chapter ${ci + 1} of ${R.length}</p><p class="rd-lead">${c.intro}</p></div>
-      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool" id="anMode" aria-pressed="${document.body.classList.contains("an-mode")}" title="Highlight mode: select text to highlight it or add a note">✏️<span>Highlight</span></button><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
+      <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span class="rd-score-mini">${p.right}/${p.answered} right</span><button type="button" class="rd-tool" id="anBook" title="Your highlights and notes in this chapter">🗒<span>Notes</span><b id="anCount"></b></button></div>
       ${shown.map((s, i) => `<section class="rd-sec" id="sec${i}"><p class="rd-step">Passage ${i + 1}</p><h2>${s.h}</h2><div class="rd-prose">${s.html}</div>${(s.play || []).map((b, j) => window.ReadPlay.html(b, i + "-" + j, (S.w || {})[i + "-" + j])).join("")}${checkHTML(c, s, i)}</section>`).join("")}
       ${S.finished ? endHTML(c, nextC, ci) : S.at + 1 < c.sections.length ? `<div class="rd-locked">🔒 ${c.sections.length - S.at - 1} more passage${c.sections.length - S.at - 1 > 1 ? "s" : ""}: answer the questions above to keep reading</div>` : ""}`;
     wire(c);
     if (window.ReadNotes) {
       window.ReadNotes.apply(c);
-      $("anMode").onclick = () => window.ReadNotes.setMode(!document.body.classList.contains("an-mode"));
       $("anBook").onclick = () => window.ReadNotes.notebook(c.id);
-      window.ReadNotes.setMode(document.body.classList.contains("an-mode"));
     }
   }
   function endHTML(c, nextC, ci) {

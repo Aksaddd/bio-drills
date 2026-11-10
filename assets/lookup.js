@@ -1,11 +1,10 @@
-// Press and hold any word (about half a second) to see what it means and how it breaks into roots.
+// Double-tap (or double-click) any word to see what it means and how it breaks into roots.
 // Sources, in order: the course dictionary (assets/lexicon.js), the Word Roots list (roots/roots.js: example terms
 // and their roots), and the drill glossary (assets/glossary.js). Unknown words still get a root breakdown when they
-// contain known roots. Works with touch, mouse and pen; a hold never counts as a tap, so holding an answer
-// option doesn't pick it. The data files are loaded on the first hold.
+// contain known roots. Works with touch, mouse and pen. The data files are loaded on the first lookup.
 (() => {
   const BASE = (document.currentScript && document.currentScript.src || "").replace(/assets\/lookup\.js.*$/, "");
-  const HOLD = 450, TIP_KEY = "bio-lookup-tip";
+  const TIP_KEY = "bio-lookup-tip";
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   let ready = null, IDX = null;
 
@@ -142,28 +141,25 @@
     if (navigator.vibrate) try { navigator.vibrate(12) } catch (e) { }
   }
 
-  // ----- press and hold
-  let press = null, fired = 0;
-  addEventListener("pointerdown", e => {
-    if (e.button || card && card.contains(e.target) || document.body.classList.contains("an-mode")) return;   // Highlight mode: holding selects text instead
-    if (card) close();
-    if (e.target.closest("input,textarea,select,.lk-card,#bbPal,#bbDock,.bb-shop,.bb-greet,.pl-pin,.pl-cell,[contenteditable]")) return;
-    const x = e.clientX, y = e.clientY;
-    press = { x, y, id: e.pointerId, t: setTimeout(async () => {
-      if (!press) return;
-      const hit = wordAt(x, y); press = null; if (!hit) return;
-      fired = Date.now(); try { getSelection().removeAllRanges() } catch (err) { }
-      await data(); show(hit, lookup(hit));
-      try { localStorage.setItem(TIP_KEY, "1") } catch (err) { }
-    }, HOLD) };
+  // ----- double-tap (or double-click) a word. Holding is left to the device, so press-and-hold or dragging selects text
+  // for highlights and notes in the reading (read/notes.js).
+  let last = null;
+  addEventListener("pointerdown", e => { if (card && !card.contains(e.target)) close() }, true);
+  addEventListener("pointerup", async e => {
+    if (e.button || card && card.contains(e.target)) return;
+    // links, enabled buttons and form fields keep their own taps (an answered option is disabled, so it can be looked up)
+    if (e.target.closest("a,button:not(:disabled),input,textarea,select,label,.lk-card,#bbPal,#bbDock,.bb-shop,.bb-greet,.pl-pin,.pl-cell,.pl-chip,[contenteditable]")) { last = null; return }
+    const now = Date.now(), x = e.clientX, y = e.clientY;
+    if (!last || now - last.t > 380 || Math.hypot(x - last.x, y - last.y) > 28) { last = { t: now, x, y }; return }
+    last = null;
+    const hit = wordAt(x, y); if (!hit) return;
+    try { getSelection().removeAllRanges() } catch (err) { }   // a double-click also selects the word; don't leave it selected
+    await data(); show(hit, lookup(hit));
+    try { getSelection().removeAllRanges() } catch (err) { }
+    try { localStorage.setItem(TIP_KEY, "1") } catch (err) { }
   }, true);
-  const cancel = e => { if (press && (!e || e.type !== "pointermove" || Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10)) { clearTimeout(press.t); press = null } };
-  addEventListener("pointermove", cancel, true); addEventListener("pointerup", () => cancel(), true); addEventListener("pointercancel", () => cancel(), true);
-  addEventListener("scroll", () => { cancel(); if (card) close() }, { passive: true, capture: true });
-  // a hold is not a tap: swallow the click (so holding an answer doesn't pick it) and the long-press menu
-  addEventListener("click", e => { if (Date.now() - fired < 700 && !(card && card.contains(e.target))) { e.stopPropagation(); e.preventDefault() } }, true);
-  addEventListener("contextmenu", e => { if (press || Date.now() - fired < 900) e.preventDefault() }, true);
-  addEventListener("selectstart", e => { if (Date.now() - fired < 900) e.preventDefault() }, true);
+  addEventListener("dblclick", e => { if (card) { e.preventDefault(); try { getSelection().removeAllRanges() } catch (err) { } } }, true);
+  addEventListener("scroll", () => { if (card) close() }, { passive: true, capture: true });
   addEventListener("keydown", e => { if (e.key === "Escape" && card) close() });
   addEventListener("resize", close);
 
@@ -182,7 +178,8 @@
 .lk-hl{position:fixed;z-index:299;border-radius:6px;background:rgba(255,214,10,.35);pointer-events:none;animation:lkIn .15s ease}
 .lk-tip{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:120;background:#1d1d1f;color:#fff;border-radius:14px;padding:10px 14px;font:500 14px/1.35 -apple-system,sans-serif;max-width:min(92vw,420px);box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:center;animation:lkIn .25s ease}
 .lk-tip button{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:5px 11px;font:600 13px -apple-system,sans-serif;cursor:pointer;flex:none}
-.rd-prose,.q,.opt,.explain,.clue,.rd-lead{-webkit-touch-callout:none}
+html{touch-action:manipulation}   /* no double-tap zoom, so a double-tap looks a word up */
+.rd-prose{-webkit-touch-callout:none}   /* the highlight bar replaces the phone's own copy menu */
 @keyframes lkIn{from{opacity:0;transform:translateY(4px)}}`;
   document.head.appendChild(css);
 
@@ -190,7 +187,7 @@
   setTimeout(() => {
     try { if (localStorage.getItem(TIP_KEY)) return } catch (e) { return }
     if (!document.querySelector(".rd-prose,.q")) return;
-    const t = document.createElement("div"); t.className = "lk-tip"; t.innerHTML = `<span>💡 Press and hold any science word to see what it means and its Greek and Latin roots.</span><button type="button">Got it</button>`;
+    const t = document.createElement("div"); t.className = "lk-tip"; t.innerHTML = `<span>💡 Double-tap any science word to see what it means and its Greek and Latin roots. Press and hold (or drag) to highlight text and add notes.</span><button type="button">Got it</button>`;
     document.body.appendChild(t); t.querySelector("button").onclick = () => { t.remove(); try { localStorage.setItem(TIP_KEY, "1") } catch (e) { } };
     setTimeout(() => t.remove(), 9000);
   }, 2500);

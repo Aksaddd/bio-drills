@@ -34,7 +34,7 @@ The first module on the home page: the whole unit as reading comprehension. Eigh
 
 To highlight, select text in any passage. A toolbar offers four colors (yellow, green, blue, pink) and ✎ Note. Tap a highlight to edit its note, change its color or delete it; highlights with a note show a small ✎.
 
-- **On touch screens:** turn on ✏️ Highlight in the chapter's top bar first. Otherwise press-and-hold looks words up.
+- **On touch screens:** press and hold a word to start a selection, then drag the handles. Double-tap is the word lookup.
 - **Notebook:** 🗒 Notes lists the chapter's highlights and notes. *My notebook* on the chapter list collects all of them. Tap any item to jump to it.
 - **Storage:** saved per device as `bio-notes-v1`, by passage and character offsets (`read/notes.js`).
 
@@ -53,9 +53,9 @@ Finishing a Read & Learn chapter earns that chapter's badge:
 - **Elsewhere in Read & Learn:** the chapter list shows the case as a strip, and finished chapters show their badge.
 - **Syncing:** badges sync from `bio-read-v1` whenever a page loads (`syncBadges()` in `assets/buddy.js`), so chapters finished earlier count too.
 
-## Press and hold a word
+## Double-tap a word
 
-On every page, press and hold any word for about half a second (finger, mouse or pen) to get a card with its definition, its word parts (each root's meaning and Greek or Latin origin, linked to the Word Roots page) and its literal meaning. The word is highlighted while the card is open; tap anywhere to close it. A hold never counts as a tap, so holding an answer option doesn't pick it. Plurals and Latin plurals work (sporangia, hyphae, sori, stomata), as do multi-word terms (abscisic acid, alternation of generations, systemic acquired resistance).
+On every page, double-tap any word (double-click on a computer) to get a card with its definition, its word parts (each root's meaning and Greek or Latin origin, linked to the Word Roots page) and its literal meaning. The word is highlighted while the card is open; tap anywhere to close it. Links and buttons keep their normal taps, but the words of an answered question can be looked up. Plurals and Latin plurals work (sporangia, hyphae, sori, stomata), as do multi-word terms (abscisic acid, alternation of generations, systemic acquired resistance).
 
 - `assets/lexicon.js`: the course dictionary, about 160 terms with definitions and word parts.
 - `assets/lookup.js`: the engine. When a word isn't in the dictionary, it uses the Word Roots list (`roots/roots.js` example terms), then the glossary, then finds known roots inside the word. The data loads on the first hold. A one-time tip (`bio-lookup-tip`) points the feature out.
