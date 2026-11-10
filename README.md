@@ -138,6 +138,9 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Answers:** they hop with happy eyes on a right answer. After a miss, one comes over for a comforting nuzzle.
   - **Interactions:** about every 13 seconds one interacts with him: a nuzzle with hearts, grooming his head (he closes his eyes happily), a crouch-and-pounce game (he hops), or a chase lap around him while he watches.
   - **Tapping one** opens the Cats tab.
+- **Tiny kittens you raise:** every cat starts at Level 1 as a tiny kitten (`baby` form in `FORM_GEAR[0]`).
+  - **Look:** a small body, big sparkly eyes (16% larger), smaller ears, rosy cheeks, no grown-up brows and a stubby tail. Awake and curious; asleep only for naps.
+  - **Growth:** cats grow with every bit of XP, not just at evolutions (`sizeFor()`): 62% size at 0 XP, a little bigger after each right answer, then a jump at each evolution, up to 126% at Level 100. The study pal, companions, the Closet preview and the greeting all use it.
 - **Mystic Dexter:** every form is a little magical, and more so as he evolves. He also grows bigger with each evolution: the study pal goes from 84% size as a freshman to 119% as the Professor, as do the Closet stage, the greeting and the evolution line. The layers are drawn with SVG `<animate>`, so they move everywhere he appears (`MYST` and `mystic()` in `assets/buddy.js`):
   - **Every form:** a glowing forehead gem, a soft pulsing aura that grows and changes color, and floating sparks of light.
   - **Sophomore and up:** a spirit flame on his tail tip.

@@ -11,8 +11,8 @@
   // Dexter: an original blonde kitten (anime/chibi style) who grows up as the student answers correctly.
   // Six forms at the same XP thresholds as before. Each form's card fact ties Dexter to this course: plants, fungi and plant signals.
   const STAGES = [
-    { at: 0, name: "Freshman Dexter", form: "Sleepy freshman", color: "#e2aa4a",
-      fact: "Freshman Dexter sleeps through most of his 8 a.m. lectures, a bit like a dormant seed. Abscisic acid (ABA) keeps a seed dormant until heavy rain, light or a long cold spell signals that it's safe to grow." },
+    { at: 0, name: "Freshman Dexter", form: "Tiny kitten", color: "#e2aa4a",
+      fact: "A tiny kitten grows the way a seedling does: from its tips. Apical meristems at the ends of shoots and roots keep dividing, and every right answer helps your kitten grow a little bigger." },
     { at: 100, name: "Sophomore Dexter", form: "Curious sophomore", color: "#26365e",
       fact: "Sophomore Dexter's favorite study snack is cat grass: wheat or oat seedlings. They're monocots, with one cotyledon, parallel leaf veins, scattered vascular bundles and fibrous roots." },
     { at: 350, name: "Junior Dexter", form: "Playful junior", color: "#4f8dff",
@@ -231,8 +231,8 @@
   }
   function sitBody(o, w) {
     const hx = 16 * w, lw = 7.8 * (.75 + .25 * w), lx = 7.4 * (.75 + .25 * w);
-    const tail = o.tail === "down" ? `M${f1(60 + 16 * w)} 105 C${f1(78 + 18 * w)} 111 ${f1(70 + 10 * w)} 112 ${f1(56 - 6 * w)} 110` : `M${f1(60 + 17 * w)} 102 C${f1(74 + 22 * w)} 104 ${f1(84 + 16 * w)} 92 ${f1(82 + 14 * w)} 76 C${f1(81 + 14 * w)} 68 ${f1(76 + 13 * w)} 66 ${f1(77 + 13 * w)} 71`;
-    const back = `<g class="dx-tail">${furTail(tail, 5.8)}${o.tail === "down" ? "" : `<path d="M${f1(81 + 14 * w)} 74 C${f1(80 + 14 * w)} 69 ${f1(77 + 13 * w)} 67 ${f1(77 + 13 * w)} 70" stroke="${FUR_L}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`}</g>`;
+    const tail = o.tail === "kitten" ? `M${f1(60 + 15 * w)} 103 C${f1(72 + 17 * w)} 104 ${f1(76 + 15 * w)} 96 ${f1(71 + 14 * w)} 90` : o.tail === "down" ? `M${f1(60 + 16 * w)} 105 C${f1(78 + 18 * w)} 111 ${f1(70 + 10 * w)} 112 ${f1(56 - 6 * w)} 110` : `M${f1(60 + 17 * w)} 102 C${f1(74 + 22 * w)} 104 ${f1(84 + 16 * w)} 92 ${f1(82 + 14 * w)} 76 C${f1(81 + 14 * w)} 68 ${f1(76 + 13 * w)} 66 ${f1(77 + 13 * w)} 71`;
+    const back = `<g class="dx-tail">${furTail(tail, 5.8)}${o.tail === "down" || o.tail === "kitten" ? "" : `<path d="M${f1(81 + 14 * w)} 74 C${f1(80 + 14 * w)} 69 ${f1(77 + 13 * w)} 67 ${f1(77 + 13 * w)} 70" stroke="${FUR_L}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`}</g>`;
     const body = `<g class="dx-torso">
       <ellipse cx="${f1(60 - hx)}" cy="99.5" rx="${f1(9.6 * w)}" ry="${f1(8.8 + w)}" fill="${FUR}" ${ln}/><ellipse cx="${f1(60 + hx)}" cy="99.5" rx="${f1(9.6 * w)}" ry="${f1(8.8 + w)}" fill="${FUR}" ${ln}/>
       <path d="M${f1(60 - 12 * w)} 78 Q60 71 ${f1(60 + 12 * w)} 78 C${f1(60 + 17 * w)} 87 ${f1(60 + 19 * w)} 97 ${f1(60 + 16.5 * w)} 104 Q${f1(60 + 13 * w)} 109 60 109 Q${f1(60 - 13 * w)} 109 ${f1(60 - 16.5 * w)} 104 C${f1(60 - 19 * w)} 97 ${f1(60 - 17 * w)} 87 ${f1(60 - 12 * w)} 78Z" fill="${FUR}" ${ln}/>
@@ -319,7 +319,7 @@
     return str.slice(0, i) + open + before + str.slice(i + open.length, j) + after + str.slice(j);
   }
   function drawHead(u, o) {
-    const S = SHAPE, ex = S.ex || 1, ey = S.ey || 1;
+    const S = SHAPE, ex = (S.ex || 1) * (o.baby ? .82 : 1), ey = (S.ey || 1) * (o.baby ? .76 : 1);
     const earT = (x, y) => ex !== 1 || ey !== 1 ? ` transform="translate(${x} ${y}) scale(${ex} ${ey}) translate(${-x} ${-y})"` : "";
     const ruff = S.ruff ? `<path d="M30 70 Q24 80 33 84 Q34 92 44 90 Q48 97 56 93 Q60 99 64 93 Q72 97 76 90 Q86 92 87 84 Q96 80 90 70Z" fill="${FUR_L}" ${ln}/>` : "";
     const head = `<g class="dx-earl"><g${earT(45, 38)}>${S.tufts ? `<path d="M36.5 15 l-1.4 -6.4 M36.5 15 l2 -5.6" stroke="${FUR_D}" stroke-width="1.8" stroke-linecap="round"/>` : ""}<path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/></g></g>
@@ -328,6 +328,8 @@
     const hx = S.hx || 1, hy = S.hy || 1;
     return hx !== 1 || hy !== 1 ? `<g transform="translate(60 84) scale(${hx} ${hy}) translate(-60 -84)">${head}</g>` : head;
   }
+  // kittens have soft, browless faces (the grown-up brows come with the Sophomore form)
+  const noBrows = svg => svg.replace(/<path [^>]*stroke="#6b3f17"[^>]*\/>/g, "");
   function drawHeadBase(u, o) {
     return `
       <path d="M32.5 58 L25 61 L31.5 65 L24.5 69.5 L32 71.5 L28.5 76 L37 75.5 Q43 85 60 85.5 Q77 85 83 75.5 L91.5 76 L88 71.5 L95.5 69.5 L88.5 65 L95 61 L87.5 58 Q88 33 60 32 Q32 33 32.5 58Z" fill="${FUR}" ${ln}/>
@@ -335,7 +337,8 @@
       <path d="M41 45 L42 27 L50 39 L53 21 L60 37 L66 20.5 L69.5 37 L78 25 L79 45 Q60 39 41 45Z" fill="${FUR_L}" ${ln}/>
       <path d="M50 39 L52 31 M60 37 L64 28 M69.5 37 L74 31" stroke="${FUR_D}" stroke-width="1.4" stroke-linecap="round"/>
       ${o.headPat || ""}
-      <g class="dx-eyes"><g class="dx-blink">${eye(u, 48.5, 60, o.eyes)}${eye(u, 71.5, 60, o.eyes)}</g></g>
+      <g class="dx-eyes"><g class="dx-blink">${o.baby ? `<g transform="translate(60 62) scale(1.16) translate(-60 -62)">` : ""}${o.baby ? noBrows(eye(u, 48.5, 60, o.eyes) + eye(u, 71.5, 60, o.eyes)) : eye(u, 48.5, 60, o.eyes) + eye(u, 71.5, 60, o.eyes)}${o.baby ? "</g>" : ""}</g></g>
+      ${o.baby ? `<ellipse cx="40" cy="72.5" rx="5.4" ry="3" fill="#ff9fb0" opacity=".55"/><ellipse cx="80" cy="72.5" rx="5.4" ry="3" fill="#ff9fb0" opacity=".55"/><path d="M37.4 72 l1.4 -1.6 M40 72 l1.4 -1.6 M77.4 72 l1.4 -1.6 M80 72 l1.4 -1.6" stroke="#e46f86" stroke-width=".9" stroke-linecap="round"/>` : ""}
       
       <path d="M58.2 67.6 L61.8 67.6 L60 69.8Z" fill="${PINK_D}" stroke="${OL}" stroke-width="1" stroke-linejoin="round"/>
       ${mouth(o.eyes)}
@@ -382,7 +385,7 @@
   // Each form's own gear, by wardrobe slot. Anything bought in the shop and worn replaces the gear in that slot.
   const zzz = `<text x="86" y="40" font-family="sans-serif" font-weight="800" font-size="11" fill="#7a8bd8">z</text><text x="94" y="30" font-family="sans-serif" font-weight="800" font-size="8" fill="#7a8bd8">z</text>`;
   const FORM_GEAR = [
-    { sc: .74, eyes: "closed", tail: "down", over: zzz },
+    { sc: .64, eyes: "wide", tail: "kitten", baby: true },
     { sc: .8, },
     { sc: .86, held: () => yarn },
     { sc: .92, hat: () => headband, extra: () => bandage },
@@ -412,7 +415,7 @@
     const face = worn("face");
     const L = look || {};
     const S0 = L.breed ? null : load(), coat = setCoat(L.breed || S0.breed, L.breed ? L.color : S0.color);
-    const svg = kitty(u, { headPat: coat.head || "", bodyPat: coat.body || null, sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
+    const svg = kitty(u, { baby: !!g.baby, headPat: coat.head || "", bodyPat: coat.body || null, sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
       outfit: pick("outfit"), neck: neckLayer(E, L.collar || load().collar), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     setCoat("golden");
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
@@ -1028,7 +1031,7 @@ body.bb-on{padding-bottom:96px}
       const { H, list } = catList(), n = list.length, full = n >= MAX_CATS;
       return `<p class="ct-h">Your cats<small>The cat in training earns XP from your answers. Up to ${MAX_ALONG} others can come along on screen and play.</small></p>
         <div class="ct-list">${list.map(c => { const k2 = stageOf(c.pts | 0); return `<div class="ct-cat${c.active ? " on" : ""}">
-          ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: k2 ? "happy" : "closed", plain: true })}
+          ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: "happy", plain: true })}
           <span><b>${esc(c.nick || "Dexter")}</b><small>${esc(breedName(c.breed, c.color))} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
           <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
             <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>`}</span></div>` }).join("")}</div>
@@ -1093,7 +1096,7 @@ body.bb-on{padding-bottom:96px}
       shop.innerHTML = `<div class="bb-card bb-shop${st.opened ? " still" : ""}" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <div class="sh-head"><h3 id="shTitle">${esc(name(s))}</h3><span class="sh-gold" aria-label="${s.gold} gold">${COIN}${fmt(s.gold)}</span><button type="button" class="sh-done" id="shDone">Done</button></div>
         <div class="sh-tabs pal" role="tablist">${[["cats", "Cats"], ["closet", "Closet"], ["shop", "Shop"], ["badges", "Badges"], ["progress", "Progress"]].map(([key, label]) => `<button type="button" role="tab" aria-selected="${st.tab === key}" data-tab="${key}">${label}</button>`).join("")}</div>
-        ${st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${(.84 + .07 * k).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: k === 0 ? "closed" : "wide" })}</div>`}
+        ${st.tab === "progress" || st.tab === "cats" ? "" : `<div class="sh-stage" style="--dz:${sizeFor(s.pts).toFixed(2)}">${art(k, st.tab === "shop" ? st.tryEq : s.equip, { eyes: "wide" })}</div>`}
         ${body}
       </div>`;
       $("shDone").onclick = closeShop;
@@ -1340,7 +1343,7 @@ body.bb-on{padding-bottom:96px}
   }
   const ACT_EYES = { yarn: "open", butterfly: "wide", mouse: "focus", laser: "dilated", feather: "dilated", leaf: "wide", box: "sleepy", tail: "dilated", nap: "sleep" };
   function eyesNow(k) {
-    if (k === 0) return mood || (act === "nap" ? "sleep" : "closed");   // the sleepy freshman's eyes stay shut unless he's reacting
+    if (k === 0) return mood || (act === "nap" ? "sleep" : act === "box" ? "open" : ACT_EYES[act] === "sleepy" ? "open" : ACT_EYES[act] || "wide");   // the kitten: big curious eyes
     return mood || ACT_EYES[act] || "open";
   }
   function setMood(m, ms) { mood = m; clearTimeout(moodT); paintPal(); moodT = setTimeout(() => { mood = null; paintPal() }, ms) }
@@ -1352,7 +1355,15 @@ body.bb-on{padding-bottom:96px}
   }, 15000);
   ["pointerdown", "keydown", "scroll", "touchstart"].forEach(t => addEventListener(t, () => { lastMove = Date.now(); if (act === "nap") nextAct() }, { passive: true, capture: true }));
   const shown = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
-  const sizeK = () => .84 + .07 * stageOf(load().pts);   // he grows with each evolution: 84% as a freshman → 119% as the Professor
+  // size grows with XP: a tiny kitten (62%) that gets a little bigger with every answer, with a jump at each evolution,
+  // up to 126% for a Level 100 Professor
+  const SIZE_AT = [.62, .84, .91, .98, 1.05, 1.12];
+  function sizeFor(pts) {
+    pts = Math.max(0, pts | 0); const k = stageOf(pts), next = k + 1 < STAGES.length ? STAGES[k + 1].at : MAX_XP, base = SIZE_AT[k];
+    const frac = Math.min(1, (pts - STAGES[k].at) / Math.max(1, next - STAGES[k].at)), top = k + 1 < STAGES.length ? SIZE_AT[k + 1] - .04 : 1.26;
+    return base + (top - base) * frac;
+  }
+  const sizeK = () => sizeFor(load().pts);   // he grows with each evolution: 84% as a freshman → 119% as the Professor
   const palSize = () => Math.round((innerWidth >= 900 ? 96 : 72) * sizeK());
   function anchor() { const p = $("bbPal"); return palOn && p ? p : $("bbDock") }
   function anchorRect(d) {   // where Dexter is headed (he may still be moving)
@@ -1389,7 +1400,7 @@ body.bb-on{padding-bottom:96px}
     <g transform="translate(176 233)"><circle r="7" fill="#ffd84a" stroke="#3a2a1e" stroke-width="1.8"/><path d="M-6 -3 Q0 1 6 -3 M-6 3 Q0 7 6 3" stroke="#e85d75" stroke-width="1.6" fill="none"/></g>
   </svg>`;
   function treeLayout() {
-    const S0 = Math.round((innerWidth >= 900 ? 96 : 72) * sizeK()), TW = Math.min(Math.round(S0 * 2.25), innerWidth - 12), TH = Math.round(TW * 1.31), k = TW / 200;
+    const S0 = Math.round((innerWidth >= 900 ? 96 : 72) * Math.max(.9, sizeK())), TW = Math.min(Math.round(S0 * 2.25), innerWidth - 12), TH = Math.round(TW * 1.31), k = TW / 200;
     const sp = getSpot(), card = questionCard(), r = card && card.getBoundingClientRect();
     const x = sp ? PAD + sp.fx * Math.max(0, innerWidth - TW - 2 * PAD) : r && r.right + 12 + TW <= innerWidth - 6 ? r.right + 12 : innerWidth - TW - 6;
     return { x, y: innerHeight - TH - 4, TW, TH, k };
@@ -1419,7 +1430,7 @@ body.bb-on{padding-bottom:96px}
   // so often interact with him: a nuzzle, a chase around him, grooming, or a play-pounce. Tap one to open the Cats tab.
   const MATE_ACTS = ["yarn", "feather", "leaf", "tail", "butterfly"];
   let mates = [], mateT = 0, playT = 0;
-  const mateSize = c => Math.round((innerWidth >= 900 ? 96 : 72) * (.84 + .07 * stageOf(c.pts | 0)) * .86);
+  const mateSize = c => Math.round((innerWidth >= 900 ? 96 : 72) * sizeFor(c.pts) * .9);
   function clearMates() { mates.forEach(m => m.el.remove()); mates = []; clearInterval(mateT); clearInterval(playT); mateT = playT = 0 }
   function refreshMates() {
     clearMates();
@@ -1445,7 +1456,7 @@ body.bb-on{padding-bottom:96px}
     ACTS.concat("nap").forEach(x => m.el.classList.toggle("act-" + x, x === a && !m.moving && !m.busy));
     m.el.classList.toggle("moving", m.moving);
     const eyes = m.eyes || (m.moving ? "open" : a === "nap" ? "sleep" : ACT_EYES[a] || "open");
-    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: k ? eyes : (eyes === "happy" ? "happy" : "closed"), pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
+    m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
   }
   function matePos(m, at) {
     if (treeBox && m.slot != null) { const q = slotPos(m.slot, mateSize(m.c)), P = slotPos(palSlot, palSize()); m.side = P.x >= q.x ? 1 : -1; return q }
@@ -1528,7 +1539,7 @@ body.bb-on{padding-bottom:96px}
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
     const pose = moving ? "stand" : treeBox && T_SLOTS[palSlot].pose === "lie" && act !== "box" ? "lie" : ACT_POSE[act] || "sit";
     ["sit", "stand", "lie"].forEach(x => p.classList.toggle("pose-" + x, x === pose)); p.classList.toggle("moving", moving);
-    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? (k ? "open" : "closed") : eyesNow(k), pose, flip: pose === "stand" && facing > 0, boxed: act === "box" && !moving })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? "open" : eyesNow(k), pose, flip: pose === "stand" && facing > 0, boxed: act === "box" && !moving })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
   function visit() {
@@ -1614,7 +1625,7 @@ body.bb-on{padding-bottom:96px}
       line = `${hello} Welcome back. ${tip}`;
     }
     const g = document.createElement("div"); g.className = "bb-greet"; g.setAttribute("role", "status");
-    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" style="transform-origin:50% 100%;scale:${(.84 + .07 * k).toFixed(2)}" aria-label="Close the greeting">${art(k, null, { eyes: k === 0 ? "closed" : "happy" })}</button></div>`;
+    g.innerHTML = `<div class="gwrap"><div class="gbubble"><b>${esc(nm)}</b><span>${esc(line)}</span><button type="button" class="gbtn">Let's study!</button></div><button type="button" class="gdex" style="transform-origin:50% 100%;scale:${sizeFor(s.pts).toFixed(2)}" aria-label="Close the greeting">${art(k, null, { eyes: "happy" })}</button></div>`;
     document.body.appendChild(g); document.body.classList.add("bb-greeting");
     let gone = false;
     const leave = () => { if (gone) return; gone = true; g.classList.add("leave"); setTimeout(() => { g.remove(); document.body.classList.remove("bb-greeting") }, 600) };
