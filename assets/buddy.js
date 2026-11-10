@@ -1241,7 +1241,7 @@ body.bb-on{padding-bottom:96px}
     });
     // life in the café: cats wander between spots, blink, and chirp
     const free = () => CAFE_SPOTS.map((_, i) => i).filter(i => !R.some(r => r.spot === i));
-    const bubble = (r, text) => { const sp = CAFE_SPOTS[r.spot], t = document.createElementNS("http://www.w3.org/2000/svg", "g"); t.setAttribute("class", "cf-bub"); t.innerHTML = `<rect x="${sp.x - 22}" y="${sp.y - sp.z - 18}" width="44" height="16" rx="8" fill="#fff" stroke="#3a2a1e" stroke-width="1.2"/><text x="${sp.x}" y="${sp.y - sp.z - 7}" font-size="9" font-weight="700" text-anchor="middle" font-family="-apple-system,sans-serif" fill="#3a2a1e">${text}</text>`; cafe.querySelector(".cf-fx").appendChild(t); setTimeout(() => t.remove(), 2200) };
+    const bubble = (r, text) => { if (!cafe) return; const sp = CAFE_SPOTS[r.spot], t = document.createElementNS("http://www.w3.org/2000/svg", "g"); t.setAttribute("class", "cf-bub"); t.innerHTML = `<rect x="${sp.x - 22}" y="${sp.y - sp.z - 18}" width="44" height="16" rx="8" fill="#fff" stroke="#3a2a1e" stroke-width="1.2"/><text x="${sp.x}" y="${sp.y - sp.z - 7}" font-size="9" font-weight="700" text-anchor="middle" font-family="-apple-system,sans-serif" fill="#3a2a1e">${text}</text>`; cafe.querySelector(".cf-fx").appendChild(t); setTimeout(() => t.remove(), 2200) };
     const life = setInterval(() => {
       if (!cafe || !document.body.contains(cafe)) { clearInterval(life); return }
       if (!sheet.hidden) return;
