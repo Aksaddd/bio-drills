@@ -1,6 +1,6 @@
 # Google sign-in: plan for later
 
-**Status:** not live. A full working version was built and tested, then taken out until we're ready. It's saved in git: commit `a7fca43` ("Settings: Sign in with Google to save progress to your account"). The commit that removed it carries this document.
+**Status:** the code is live with the Firebase project **MeowStudy** (`meowstudy-5750f`) configured in `assets/account.js`. Sign-in works once that project has Google sign-in enabled, `bio-drills.vercel.app` authorized, and the Firestore database and rules created (setup steps 3–5 below). The first version was built in commit `a7fca43`, set aside in `8d243b5`, and restored with this config.
 
 ## Why
 

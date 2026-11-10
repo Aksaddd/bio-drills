@@ -239,6 +239,6 @@ Vercel Web Analytics is wired in with the plain-HTML snippet. Turn on **Analytic
 
 The question figures are cropped from course slides. They're shared here as a study aid and aren't official course material.
 
-## Planned: Google sign-in
+## Google sign-in
 
-Not live yet. The plan, the Firebase setup steps and how to turn the already-built version back on are in [docs/google-sign-in.md](docs/google-sign-in.md).
+Settings → **Account** → *Sign in with Google* saves everything (progress, cats, gold, badges, notes, settings) to the person's Google account and syncs it across devices. It uses Firebase Authentication and Firestore (project `meowstudy-5750f`, config in `assets/account.js`), with no server of our own. How it works, sync rules, limits and the console setup are in [docs/google-sign-in.md](docs/google-sign-in.md).
