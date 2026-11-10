@@ -563,7 +563,7 @@ body.bb-on{padding-bottom:96px}
 .ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
 .ct-unpin{border:0;background:none;color:var(--c-acc);font:600 12px -apple-system,sans-serif;cursor:pointer;padding:0}
 .ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}.ct-co input:disabled+*,.ct-along:has(input:disabled){opacity:.45;cursor:default}
-.ct-split{font-size:11.5px;color:var(--c-muted);font-weight:600}.xsplit{font-size:.8em;opacity:.85}.bb-mate.co .bb-mname{background:#fff4c2}.bb-crowd .bb-mate .bb-mname{font-size:8.5px;padding:1px 4px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
+.ct-split{font-size:11.5px;color:var(--c-muted);font-weight:600}.xsplit{font-size:.8em;opacity:.85}.bb-mate.co .bb-mname{background:#fff4c2}.bb-pal.bb-inway,.bb-mate.bb-inway{opacity:.45}.bb-crowd .bb-mate .bb-mname{font-size:8.5px;padding:1px 4px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
 .ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
 .ct-cafe{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:calc(100% - 32px);margin:4px 16px 14px;border:0;border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:#4a2f1d;background:linear-gradient(135deg,#ffe8c7,#f9c99a);box-shadow:0 6px 18px rgba(201,120,40,.25)}
 .ct-cafe .ic{font-size:30px}.ct-cafe b{display:block;font-size:17px}.ct-cafe small{display:block;font-size:13px;opacity:.85}.ct-cafe i{font-style:normal;font-size:24px}
@@ -1478,12 +1478,86 @@ body.bb-on{padding-bottom:96px}
   }
   function slotPos(i, size) { const b = treeBox, sl = T_SLOTS[i]; return { x: b.x + sl.x * b.k - size / 2, y: b.y + sl.y * b.k - size * .9 } }
   const takenSlots = () => new Set([palSlot, ...mates.map(m => m.slot)]);
-  function home() {
-    if (treeOn() && palOn && layoutTree()) return slotPos(palSlot, palSize());
+  // ===== Staying out of the way: the cats never sit on text, questions or answers. A coarse map of the screen marks
+  // every line of text (its own line boxes, so the empty end of a short line or the space between cards is fair game) and
+  // every button, link, input, image and answer choice. Each cat picks the free spot nearest to where it wants to be
+  // (its saved spot, beside the cat in training, the answer she just picked), staying put while its spot stays clear.
+  // When the screen is completely full it peeks in from the edge, and if it still has to overlap it goes see-through.
+  const AV_OWN = ".bb-pal,.bb-mate,.bb-dock,.bb-say,.bb-pop,.bb-fx,.bb-yarn,.bb-tree,.bb-greet,.bb-veil,.lk-card,.an-bar,.an-pop,script,style,noscript,template";
+  const AV_HARD = "button,a,input,textarea,select,label,img,video,canvas,iframe,table,summary,[role=button],.opt,svg";
+  const CELL = 6;
+  let avGrid = null, avAt = 0;
+  const overlayOpen = () => !!document.querySelector(".bb-veil,.cf-veil,.st-veil,.an-veil");
+  function avBuild() {
+    const W = Math.ceil(innerWidth / CELL) + 1, Hh = Math.ceil(innerHeight / CELL) + 1, g = new Uint8Array(W * Hh);
+    const mark = (l, t, r, b) => {
+      const x0 = Math.max(0, Math.floor((l - 3) / CELL)), x1 = Math.min(W - 1, Math.floor((r + 3) / CELL)), y0 = Math.max(0, Math.floor((t - 3) / CELL)), y1 = Math.min(Hh - 1, Math.floor((b + 3) / CELL));
+      for (let y = y0; y <= y1; y++) g.fill(1, y * W + x0, y * W + x1 + 1);
+    };
+    const rg = document.createRange(), H = innerHeight, Wd = innerWidth;
+    const walk = el => {
+      for (let n = el.firstChild; n; n = n.nextSibling) {
+        if (n.nodeType === 3) {
+          if (!/\S/.test(n.data)) continue;
+          rg.selectNodeContents(n); for (const r of rg.getClientRects()) if (r.width && r.bottom > 0 && r.top < H) mark(r.left, r.top, r.right, r.bottom);
+          continue;
+        }
+        if (n.nodeType !== 1 || n.matches(AV_OWN)) continue;
+        const r = n.getBoundingClientRect();
+        const pos = r.width || r.height ? null : getComputedStyle(n).display;
+        if (pos === "none") continue;
+        // skip whole subtrees that are off screen (unless they're empty boxes that may hold positioned children)
+        if ((r.width || r.height) && (r.bottom < 0 || r.top > H || r.right < 0 || r.left > Wd) && getComputedStyle(n).position === "static") continue;
+        if (n.matches(AV_HARD)) { if (r.width && r.height && r.width < Wd * 1.2) { const cs = getComputedStyle(n); if (cs.visibility !== "hidden" && cs.opacity !== "0") mark(r.left, r.top, r.right, r.bottom) } continue }
+        walk(n);
+      }
+    };
+    walk(document.body);
+    return { W, H: Hh, g };
+  }
+  function avSum(G) {   // 2-D prefix sums so any box can be checked in O(1)
+    const { W, H, g } = G, P = new Int32Array((W + 1) * (H + 1));
+    for (let y = 0; y < H; y++) { let row = 0; for (let x = 0; x < W; x++) { row += g[y * W + x]; P[(y + 1) * (W + 1) + x + 1] = P[y * (W + 1) + x + 1] + row } }
+    G.P = P; return G;
+  }
+  function avMap(fresh) {
+    if (fresh || !avGrid || Date.now() - avAt > 160) { avGrid = avSum(avBuild()); avAt = Date.now() }
+    return avGrid;
+  }
+  const avCopy = G => ({ W: G.W, H: G.H, g: G.g.slice() });
+  const body = (x, y, S) => [x + S * .16, y + S * .14, x + S * .84, y + S * .98];   // where the cat's drawing actually is
+  function avCount(G, l, t, r, b) {
+    const W = G.W, x0 = Math.max(0, Math.floor(l / CELL)), x1 = Math.min(G.W, Math.ceil(r / CELL)), y0 = Math.max(0, Math.floor(t / CELL)), y1 = Math.min(G.H, Math.ceil(b / CELL));
+    if (x1 <= x0 || y1 <= y0) return 0; const P = G.P, w = W + 1;
+    return P[y1 * w + x1] - P[y0 * w + x1] - P[y1 * w + x0] + P[y0 * w + x0];
+  }
+  function avTake(G, x, y, S) { const [l, t, r, b] = body(x, y, S); const W = G.W; for (let yy = Math.max(0, Math.floor(t / CELL)); yy < Math.min(G.H, Math.ceil(b / CELL)); yy++) G.g.fill(1, yy * W + Math.max(0, Math.floor(l / CELL)), yy * W + Math.min(W, Math.ceil(r / CELL))) }
+  // the best spot for a cat of size S that wants to be at pref; keep = its current spot (kept while it's still clear)
+  function avFind(G, S, pref, keep) {
+    const cost = (x, y) => {
+      const [l, t, r, b] = body(x, y, S), vis = Math.max(0, Math.min(r, innerWidth) - Math.max(l, 0)) / (r - l);
+      return { ov: avCount(G, Math.max(l, 0), t, Math.min(r, innerWidth), b), off: 1 - vis };
+    };
+    if (keep) { const c = cost(keep.x, keep.y); if (!c.ov && !c.off && keep.x >= 0 && keep.x <= innerWidth - S && keep.y >= 4 && keep.y <= innerHeight - S - 4) return { x: keep.x, y: keep.y, ov: 0 } }
+    let best = null; const step = CELL * 2;
+    for (let y = 4; y <= innerHeight - S - 4; y += step) for (let x = -S * .5; x <= innerWidth - S * .5; x += step) {
+      const c = cost(x, y), k = c.ov * 220 + c.off * 700 + Math.hypot(x - pref.x, y - pref.y);
+      if (!best || k < best.k) best = { x, y, k, ov: c.ov };
+    }
+    return best ? { x: Math.round(best.x), y: Math.round(best.y), ov: best.ov } : { x: pref.x, y: pref.y, ov: 1 };
+  }
+  const avOff = () => treeBox || overlayOpen() || document.querySelector(".bb-pal.drag,.bb-mate.drag");
+  function avSet(el, ov) { if (el) el.classList.toggle("bb-inway", ov > 0) }
+  function wantHome() {
     const S = palSize(), sp = getSpot(), card = questionCard();
     if (sp) return spotXY(sp, S);
     if (card) { const r = card.getBoundingClientRect(); if (r.right + S + 28 <= innerWidth) return { x: r.right + 16, y: Math.min(Math.max(r.top + 30, 70), innerHeight - S - 24) } }
     return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
+  }
+  function home() {
+    if (treeOn() && palOn && layoutTree()) return slotPos(palSlot, palSize());
+    const want = wantHome(); if (avOff()) return want;
+    const q = avFind(avMap(), palSize(), want, palAt); avSet($("bbPal"), q.ov); return { x: q.x, y: q.y };
   }
   function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)`; placeMates() }
   // ===== Companion cats: up to two other cats from the household come along on screen. They sit beside the cat in
@@ -1546,10 +1620,16 @@ body.bb-on{padding-bottom:96px}
     const x = side < 0 ? A.x - sz * .78 - col * gap : A.x + S * .78 + col * gap;
     return { x: Math.min(Math.max(x, 4), innerWidth - sz - 4), y: Math.max(4, Math.min(A.y + S - sz + 2, innerHeight - sz - 4) - row * (sz + 10)) };
   }
-  function placeMates(at) { mates.forEach(m => { if (m.busy === "chase") return; const q = matePos(m, at); if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
+  function placeMates(at) {
+    const A = at || palAt, G = !avOff() && A && mates.length ? avCopy(avMap()) : null;
+    if (G) { avTake(G, A.x, A.y, palSize()); mates.forEach(m => { if (m.busy === "chase" && m.at) avTake(G, m.at.x, m.at.y, mateSize(m.c)) }) }
+    mates.forEach(m => { if (m.busy === "chase") return; let q = matePos(m, at);
+      if (q && G && !m.busy) { avSum(G); const sz = mateSize(m.c), f = avFind(G, sz, q, at ? null : m.at); q = { x: f.x, y: f.y }; avTake(G, q.x, q.y, sz); avSet(m.el, f.ov); m.side = A.x >= q.x ? 1 : -1 } else if (q && !G) avSet(m.el, 0);
+      if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
   function matesMove(to) {   // trot after the cat in training (on the tree they stay home and watch)
     if (treeBox) return;
-    mates.forEach(m => { if (mateSpot(m.c.id)) return; const q = matePos(m, to); if (!q || !m.at || Math.hypot(q.x - m.at.x, q.y - m.at.y) < 14) return; m.moving = true; m.face = q.x > m.at.x ? 1 : -1; paintMate(m);
+    const was = new Map(mates.map(m => [m, m.at])); placeMates(to);
+    mates.forEach(m => { const a = was.get(m), q = m.at; if (!q || !a || Math.hypot(q.x - a.x, q.y - a.y) < 14) return; m.moving = true; m.face = q.x > a.x ? 1 : -1; paintMate(m);
       clearTimeout(m.walkT); m.walkT = setTimeout(() => { m.moving = false; paintMate(m) }, 1000 + m.i * 150) });
   }
   const fx = (el, chars, n = 3) => { const r = el.getBoundingClientRect(); for (let i = 0; i < n; i++) { const f = document.createElement("span"); f.className = "bb-fx"; f.textContent = chars[i % chars.length]; f.style.left = (r.left + r.width * (.3 + Math.random() * .4)) + "px"; f.style.top = (r.top + r.height * .15) + "px"; f.style.animationDelay = (i * .25) + "s"; document.body.appendChild(f); setTimeout(() => f.remove(), 2200) } };
@@ -1626,6 +1706,14 @@ body.bb-on{padding-bottom:96px}
     const S = palSize(), r = lastOpt.getBoundingClientRect(), card = questionCard(), cr = card ? card.getBoundingClientRect() : null;
     const pos = cr && cr.right + S + 28 <= innerWidth ? { x: cr.right + 16, y: r.top + r.height / 2 - S * .6 } : { x: Math.min(r.right - S * .8, innerWidth - S - 6), y: r.top + r.height / 2 - S * .85 };
     pos.y = Math.min(Math.max(pos.y, 8), innerHeight - S - 8);
+    if (!avOff()) {   // the answer's own empty space is fine to perch on, just not its words
+      const G = avCopy(avMap(true)), W = G.W, y0 = Math.max(0, Math.floor(r.top / CELL)), y1 = Math.min(G.H, Math.ceil(r.bottom / CELL)), x0 = Math.max(0, Math.floor(r.left / CELL)), x1 = Math.min(W, Math.ceil(r.right / CELL));
+      for (let y = y0; y < y1; y++) G.g.fill(0, y * W + x0, y * W + x1);
+      const rg = document.createRange(), tw = document.createTreeWalker(lastOpt, NodeFilter.SHOW_TEXT); let t;
+      while ((t = tw.nextNode())) { if (!/\S/.test(t.data)) continue; rg.selectNodeContents(t); for (const q of rg.getClientRects()) for (let y = Math.max(0, Math.floor((q.top - 3) / CELL)); y <= Math.min(G.H - 1, Math.floor((q.bottom + 3) / CELL)); y++) G.g.fill(1, y * W + Math.max(0, Math.floor((q.left - 3) / CELL)), y * W + Math.min(W, Math.floor((q.right + 3) / CELL) + 1)) }
+      lastOpt.querySelectorAll("svg,img").forEach(e => { const q = e.getBoundingClientRect(); for (let y = Math.max(0, Math.floor(q.top / CELL)); y <= Math.min(G.H - 1, Math.floor(q.bottom / CELL)); y++) G.g.fill(1, y * W + Math.max(0, Math.floor(q.left / CELL)), y * W + Math.min(W, Math.floor(q.right / CELL) + 1)) });
+      const f = avFind(avSum(G), S, pos, null); pos.x = f.x; pos.y = f.y; avSet(p, f.ov);
+    }
     clearTimeout(visiting); p.classList.remove("run"); void p.offsetWidth; p.classList.add("run");
     moving = true; facing = palAt && pos.x > palAt.x + 2 ? 1 : -1; paintPal(); matesMove(pos); place(pos);
     setTimeout(() => { if (visiting) { moving = false; paintPal() } }, 650);   // arrives: back to his game's pose to react
@@ -1681,7 +1769,9 @@ body.bb-on{padding-bottom:96px}
       const q = clampXY(o.x + k[0] * step, o.y + k[1] * step, S); moveTo(q.x, q.y); (opts.drop ? opts.drop(q.x, q.y) : setSpot(xySpot(q.x, q.y, S)));
     });
   }
-  const queue = () => { if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; checkPal(); settle() }) };
+  let lastQ = 0, qT = 0;
+  const queue = () => { if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; const now = Date.now(); clearTimeout(qT);
+    if (now - lastQ < 180) { qT = setTimeout(queue, 190 - (now - lastQ)); return } lastQ = now; checkPal(); settle(); if (palOn && !visiting) placeMates() }) };
   document.addEventListener("click", e => { const o = e.target.closest && e.target.closest(".opt"); if (o) { lastOpt = o; lastOptAt = Date.now() } }, true);
   addEventListener("scroll", queue, { passive: true }); addEventListener("resize", () => { paintPal(); const d = $("bbDock"); if (d) dockSpot(d); queue() });
   new MutationObserver(queue).observe(document.documentElement, { childList: true, subtree: true });
