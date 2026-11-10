@@ -51,6 +51,11 @@ Finishing a Read & Learn chapter earns that chapter's badge:
 - **Earning one:** a celebration screen offers *Pin it on Dexter*, and the badge is then worn on his chest in every form.
 - **Badge Case:** Dexter's panel has a new **Badges** tab, a trainer-style red case with 8 slots. Locked slots show only the badge's silhouette and which chapter earns it. Tap a badge to pin it on Dexter or take it off. Earned badges also appear in the Closet.
 - **Elsewhere in Read & Learn:** the chapter list shows the case as a strip, and finished chapters show their badge.
+- **Collar and pinned badges:** every Dexter wears a collar in every form, starting navy. The Closet has 12 collar colors (saved as `collar` in his state). Any number of earned badges can be pinned on it at once: *📌 Pin on his collar*, *Unpin* and *Pin all* in the Badge Case (`equip.badges`; older saves with one pinned badge carry over).
+  - Badges spread along the band in chapter order, keeping their sparkle, and shrink a little when there are many.
+  - A collar-like neck accessory (bell collar, bandana, scarf; marked with `collar` in `assets/wardrobe.js`) replaces the base collar, and the badges move onto it.
+  - Other neckwear (bow tie, stethoscope, whistle, medal) is worn over the collar, with the badges to either side.
+  - The Closet's resets keep the collar and the pinned badges.
 - **Restart and sparkle:** ↺ Restart in a chapter's top bar (or *↺ Restart chapter* at its end) starts it over from passage 1. Answers are cleared; notes, XP and the badge stay, and activities don't pay XP twice. Each finish adds to the chapter's count (`done` in `bio-read-v1`), and the badge levels up:
   - **2 Shiny:** a glint sweeps across it.
   - **3 Sparkling:** twinkling stars.

@@ -43,7 +43,9 @@
     // Gold wallet + wardrobe. First time: a 50-gold welcome gift plus gold for the XP already earned (about 1 gold per 4 XP).
     if (s.gold === undefined) s.gold = 50 + Math.round((s.pts | 0) * .24);
     s.weight = Math.min(1.5, Math.max(.75, +s.weight || 1));
-    s.owned = Array.isArray(s.owned) ? s.owned : []; s.equip = s.equip && typeof s.equip === "object" ? s.equip : {};
+    s.owned = Array.isArray(s.owned) ? s.owned : [];
+    s.collar = typeof s.collar === "string" ? s.collar : "navy"; s.equip = s.equip && typeof s.equip === "object" ? s.equip : {};
+    if (!Array.isArray(s.equip.badges)) { s.equip.badges = s.equip.badge && s.equip.badge !== "none" ? [s.equip.badge] : [] } delete s.equip.badge;
     return s;
   }
   const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch (e) { } };
@@ -239,13 +241,18 @@
     const MY = o.myst != null ? mystic(u, o.myst, P, w) : null;
     if (MY) { if (pose === "lie") body = addToTail(body, MY.spirits, MY.wisp); else P.back = addToTail(P.back, MY.spirits, MY.wisp) }
     const neck = o.neck || "", headT = P.head ? ` transform="${P.head}"` : "";
-    const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${MY ? MY.head : ""}${glasses}${o.front || ""}</g></g></g>`;
+    const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck" transform="translate(60 ${pose === "sit" ? 7.5 : 4}) scale(.9 1) translate(-60 0)">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${MY ? MY.head : ""}${glasses}${o.front || ""}</g></g></g>`;
     const inner = o.boxed ? (MY ? MY.back : "") + headG + (MY ? MY.front : "") : `${MY ? MY.back : ""}<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
       <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}${MY ? MY.front : ""}`;
     return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
       ${o.flip ? `<g transform="translate(120 0) scale(-1 1)">${inner}</g>` : inner}`;
   }
-  const collar = () => `<path d="M43 80.5 Q60 89 77 80.5" stroke="${OL}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M43 80.5 Q60 89 77 80.5" stroke="#26365e" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  // ===== The collar: every Dexter wears one (in every form), in the color the student picks; badges pin onto it
+  const COLLARS = [["navy", "#26365e", "Navy"], ["red", "#e63946", "Red"], ["pink", "#ff6fa5", "Pink"], ["purple", "#8b5cf6", "Purple"], ["blue", "#3b82f6", "Blue"], ["teal", "#14b8a6", "Teal"],
+    ["green", "#22a35a", "Green"], ["gold", "#f2b705", "Gold"], ["orange", "#ff8a00", "Orange"], ["brown", "#8b5a2b", "Brown"], ["black", "#2b2b2e", "Black"], ["white", "#f4f4f6", "White"]];
+  const collarHex = key => (COLLARS.find(c => c[0] === key) || COLLARS[0])[1];
+  const BASE_COLLAR = [43, 80.5, 60, 89, 77, 80.5];
+  const collar = (hex = "#26365e") => `<path d="M43 80.5 Q60 89 77 80.5" stroke="${OL}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M43 80.5 Q60 89 77 80.5" stroke="${hex}" stroke-width="3.6" fill="none" stroke-linecap="round"/>
     <path d="M60 85 v1.6" stroke="${OL}" stroke-width="1.2"/><rect x="56.4" y="86.4" width="7.2" height="9" rx="2.6" fill="#c9d1db" stroke="${OL}" stroke-width="1.3"/><path d="M58.4 89.6 h3.2 M58.4 92.2 h3.2" stroke="#7d8794" stroke-width=".9"/><path d="M57.6 88 l1.4 -.6" stroke="#fff" stroke-width=".9" stroke-linecap="round"/>`;
   const scarf = `<path d="M41 79 Q60 91 79 79 L80 85 Q60 96 40 85Z" fill="#4f8dff" ${ln}/><path d="M70 88 L76 103 L68 101 L65 90Z" fill="#4f8dff" ${ln}/><path d="M45 84 Q60 92 75 84" stroke="#a9c8ff" stroke-width="1.4" fill="none"/>`;
   const headband = `<path d="M33.5 49 Q60 41 86.5 49 L86 55 Q60 47 34 55Z" fill="#c0392b" ${ln}/><path d="M85 50 Q95 47 101 53 Q94 54 91 52 Q97 58 99 64 Q91 59 85 54Z" fill="#c0392b" ${ln}/><circle cx="60" cy="47.6" r="3" fill="#fff" stroke="${OL}" stroke-width="1.2"/>`;
@@ -261,16 +268,26 @@
   const zzz = `<text x="86" y="40" font-family="sans-serif" font-weight="800" font-size="11" fill="#7a8bd8">z</text><text x="94" y="30" font-family="sans-serif" font-weight="800" font-size="8" fill="#7a8bd8">z</text>`;
   const FORM_GEAR = [
     { sc: .74, eyes: "closed", tail: "down", over: zzz },
-    { sc: .8, neck: () => collar() },
-    { sc: .86, neck: () => collar(), held: () => yarn },
-    { sc: .92, neck: () => collar(), hat: () => headband, extra: () => bandage },
-    { sc: .96, neck: () => collar(), hat: () => goggles, extra: () => bandage, held: () => flask },
+    { sc: .8, },
+    { sc: .86, held: () => yarn },
+    { sc: .92, hat: () => headband, extra: () => bandage },
+    { sc: .96, hat: () => goggles, extra: () => bandage, held: () => flask },
     { sc: 1, glasses: true, outfit: () => coat, hat: () => cap, held: () => book }
   ];
   // eq: { hat, outfit, face, neck, held } item ids; defaults to what's saved as worn
-  function pinnedBadge(E) {   // the badge on his chest, with its sparkle
-    const W = window.BioWardrobe, it = W && E.badge && E.badge !== "none" && W.byId[E.badge];
-    return it && W.badgeArt ? `<g transform="translate(69 88) scale(.64)">${W.badgeArt(it, completions(it.earn))}</g>` : "";
+  // pinned badges: a list (older saves had one badge in equip.badge)
+  const pinnedList = E => { const W = window.BioWardrobe; const l = Array.isArray(E.badges) ? E.badges : E.badge && E.badge !== "none" ? [E.badge] : []; return W ? l.filter(id => W.byId[id]) : [] };
+  function neckLayer(E, collarKey) {
+    const W = window.BioWardrobe, it = W && E.neck && E.neck !== "none" && W.byId[E.neck], band = it && it.collar ? it.collar : BASE_COLLAR;
+    let out = (it && it.collar ? "" : collar(collarHex(collarKey))) + (it ? it.svg : "");
+    const ids = pinnedList(E); if (!ids.length || !W || !W.badgeArt) return out;
+    // spread the badges along the band (a quadratic curve); a bow tie, medal etc. in the middle pushes them to the sides
+    const n = ids.length, r = n <= 3 ? 3.7 : n <= 5 ? 3.2 : 2.7, mid = it && !it.collar;
+    const ts = n === 1 ? (mid ? [.22] : [.5]) : Array.from({ length: n }, (_, i) => { const t = .16 + .68 * i / (n - 1); return mid && Math.abs(t - .5) < .14 ? (t < .5 ? .34 : .66) : t });
+    const [x0, y0, cx, cy, x1, y1] = band;
+    out += ids.map((id, i) => { const t = ts[i], x = (1 - t) * (1 - t) * x0 + 2 * (1 - t) * t * cx + t * t * x1, y = (1 - t) * (1 - t) * y0 + 2 * (1 - t) * t * cy + t * t * y1, b = W.byId[id];
+      return `<g transform="translate(${f1(x)} ${f1(y + .6)}) scale(${f1(r * 10) / 100})">${W.badgeArt(b, completions(b.earn))}</g>` }).join("");
+    return out;
   }
   function art(k, eq, look) {
     const u = "dx" + (++uidN), g = FORM_GEAR[k], W = window.BioWardrobe, E = eq || load().equip || {};
@@ -280,7 +297,7 @@
     const face = worn("face");
     const L = look || {};
     const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, myst: L.plain ? null : k, w: L.w || load().weight || 1,
-      outfit: pick("outfit"), neck: pick("neck") + pinnedBadge(E), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
+      outfit: pick("outfit"), neck: neckLayer(E, L.collar || load().collar), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -439,6 +456,11 @@ body.bb-on{padding-bottom:96px}
 .sh-tile.cl.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
 .cl-empty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--c-fill);border-radius:16px;padding:16px;margin:6px 16px 4px}
 .cl-empty span{font-size:13.5px;color:var(--c-muted)}
+.cl-collar{margin:4px 16px 10px;background:var(--c-fill);border-radius:16px;padding:12px 14px;text-align:left}
+.cl-swatches{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px}
+.cl-sw{width:32px;height:32px;border-radius:50%;border:3px solid var(--c-bg,#fff);background:var(--sw);box-shadow:0 0 0 1.5px rgba(0,0,0,.18);cursor:pointer;padding:0}
+.cl-sw.on{box-shadow:0 0 0 3px var(--c-acc);transform:scale(1.08)}
+.cl-cnote{margin:4px 0 0;font-size:13px;color:var(--c-muted)}.cl-link{border:0;background:none;color:var(--c-acc);font:600 13px -apple-system,sans-serif;cursor:pointer;padding:0}
 .cl-weight{margin:4px 16px 10px;background:var(--c-fill);border-radius:16px;padding:12px 14px}
 .cl-wtop{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}.cl-wtop span{color:var(--c-acc);font-weight:600}
 .cl-wrow{display:flex;align-items:center;gap:10px;margin:8px 0 6px;font-size:20px}.cl-wrow input{flex:1;accent-color:var(--c-acc)}
@@ -826,26 +848,27 @@ body.bb-on{padding-bottom:96px}
     // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
     function badgesHTML(s) {
       const B = W.ITEMS.filter(i => i.slot === "badge"), got = B.filter(i => s.owned.includes(i.id));
-      if (!st.bsel || !W.byId[st.bsel]) st.bsel = (s.equip.badge && W.byId[s.equip.badge] ? s.equip.badge : (got[0] || B[0]).id);
-      const it = W.byId[st.bsel], own = s.owned.includes(it.id), worn = s.equip.badge === it.id;
-      return `<div class="bc-case"><div class="bc-top"><span>BADGE CASE</span><small>${got.length} of ${B.length} earned</small></div>
-        <div class="bc-grid">${B.map(i => `<button type="button" class="bc-slot${s.owned.includes(i.id) ? "" : " lock"}${i.id === st.bsel ? " sel" : ""}${s.equip.badge === i.id ? " worn" : ""}" data-id="${i.id}" aria-label="${esc(s.owned.includes(i.id) ? i.name + ", " + W.tier(completions(i.earn)).name : "Locked badge: " + i.chapter)}">${badgeSVG(i, s.owned.includes(i.id) ? completions(i.earn) : 0)}${s.owned.includes(i.id) && completions(i.earn) > 1 ? `<i class="bc-n">×${completions(i.earn)}</i>` : ""}</button>`).join("")}</div></div>
+      const pins = s.equip.badges || [];
+      if (!st.bsel || !W.byId[st.bsel]) st.bsel = (pins[0] || (got[0] || B[0]).id);
+      const it = W.byId[st.bsel], own = s.owned.includes(it.id), worn = pins.includes(it.id);
+      return `<div class="bc-case"><div class="bc-top"><span>BADGE CASE</span><small>${got.length} of ${B.length} earned · ${pins.length} on his collar</small></div>
+        <div class="bc-grid">${B.map(i => `<button type="button" class="bc-slot${s.owned.includes(i.id) ? "" : " lock"}${i.id === st.bsel ? " sel" : ""}${pins.includes(i.id) ? " worn" : ""}" data-id="${i.id}" aria-label="${esc(s.owned.includes(i.id) ? i.name + ", " + W.tier(completions(i.earn)).name : "Locked badge: " + i.chapter)}">${badgeSVG(i, s.owned.includes(i.id) ? completions(i.earn) : 0)}${s.owned.includes(i.id) && completions(i.earn) > 1 ? `<i class="bc-n">×${completions(i.earn)}</i>` : ""}</button>`).join("")}</div></div>
         <div class="bc-detail">${own ? badgeSVG(it, completions(it.earn)) : `<svg viewBox="-13.5 -13.5 27 27" style="filter:brightness(0) opacity(.3)">${it.big}</svg>`}<div class="bc-txt">
           <b>${own ? esc(it.name) : "??? Badge"}${own ? ` <em class="bc-tier t${W.tier(completions(it.earn)).lv}">${W.tier(completions(it.earn)).name}</em>` : ""}</b>
           <span>${own ? (() => { const t = W.tier(completions(it.earn)); return `Finished “${esc(it.chapter)}” ${t.count === 1 ? "once" : t.count + " times"}. ${t.next ? `Finish it ${t.next.at - t.count} more time${t.next.at - t.count > 1 ? "s" : ""} (↺ Restart in the chapter) to make it ${t.next.name}.` : "It can't shine any brighter!"}` })() : `Finish the “${esc(it.chapter)}” chapter in Read & Learn to earn it.`}</span><br>
-          ${own ? (worn ? `<button type="button" class="sh-act ghost" id="bcOff">Take it off</button>` : `<button type="button" class="sh-act" id="bcPin">Pin it on ${esc(name(s))}</button>`) : `<a class="sh-act" style="display:inline-block;text-decoration:none" href="/read/index.html#${it.earn}">Read the chapter</a>`}
+          ${own ? (worn ? `<button type="button" class="sh-act ghost" id="bcOff">Unpin from his collar</button>` : `<button type="button" class="sh-act" id="bcPin">📌 Pin on ${esc(name(s))}'s collar</button>`) + (got.length > 1 ? ` <button type="button" class="sh-act ghost" id="bcAll">${pins.length === got.length ? "Unpin all" : "Pin all " + got.length}</button>` : "") : `<a class="sh-act" style="display:inline-block;text-decoration:none" href="/read/index.html#${it.earn}">Read the chapter</a>`}
         </div></div>`;
     }
     const weightLabel = w => w <= .86 ? "Slim" : w <= 1.06 ? "Just right" : w <= 1.21 ? "Well fed" : w <= 1.36 ? "Chubby" : "Absolute chonk";
     function closetHTML(s, k) {
       const g = FORM_GEAR[k], cur = s.equip;
-      const rows = W.SLOTS.filter(sl => sl.key !== "badge" || s.owned.some(id => id.startsWith("badge-"))).map(sl => {
+      const rows = W.SLOTS.filter(sl => sl.key !== "badge").map(sl => {   // badges are pinned from the Badges tab
         const mine = W.ITEMS.filter(i => i.slot === sl.key && s.owned.includes(i.id));
         const hasOwn = sl.key === "face" ? !!g.glasses : !!g[sl.key];
         const opt = (val, label, icon, extra = "") => `<button type="button" class="sh-tile cl${(cur[sl.key] === val || (val === undefined && cur[sl.key] === undefined)) ? " on" : ""}" data-slot="${sl.key}" data-val="${val === undefined ? "" : val}" aria-pressed="${cur[sl.key] === val}">${icon}<b>${label}</b>${extra}</button>`;
         return `<p class="sh-cap">${esc(sl.name)}</p><div class="sh-grid">
           ${hasOwn ? opt(undefined, "Dexter's own", `<span class="cl-ic">${OWN_ICON}</span>`, `<span class="tag">This form's gear</span>`) : ""}
-          ${opt("none", "None", `<span class="cl-ic">${NONE_ICON}</span>`, `<span class="tag">${hasOwn ? "Take it off" : "Nothing here"}</span>`)}
+          ${opt("none", "None", `<span class="cl-ic">${NONE_ICON}</span>`, `<span class="tag">${sl.key === "neck" ? "Just his collar" : hasOwn ? "Take it off" : "Nothing here"}</span>`)}
           ${mine.map(it => opt(it.id, esc(it.name), `<svg viewBox="${W.VIEW[it.slot]}" aria-hidden="true">${it.svg}</svg>`, `<span class="tag">${esc(it.set)}</span>`)).join("")}
         </div>`;
       }).join("");
@@ -853,6 +876,9 @@ body.bb-on{padding-bottom:96px}
       return `<div class="cl-weight"><div class="cl-wtop"><b>Weight</b><span id="clWLabel">${weightLabel(wt)}</span></div>
           <div class="cl-wrow"><span aria-hidden="true">🐈</span><input type="range" id="clWeight" min="75" max="150" step="5" value="${Math.round(wt * 100)}" aria-label="${esc(name(s))}'s weight"><span aria-hidden="true">🍙</span></div>
           <div class="cl-wbtns"><button type="button" data-w="85">Slim</button><button type="button" data-w="100">Just right</button><button type="button" data-w="125">Chubby</button><button type="button" data-w="150">Chonk</button></div></div>
+        <div class="cl-collar"><div class="cl-wtop"><b>Collar color</b><span id="clCLabel">${(COLLARS.find(c => c[0] === s.collar) || COLLARS[0])[2]}</span></div>
+          <div class="cl-swatches" role="radiogroup" aria-label="Collar color">${COLLARS.map(([key, hex, label]) => `<button type="button" class="cl-sw${s.collar === key ? " on" : ""}" data-collar="${key}" style="--sw:${hex}" role="radio" aria-checked="${s.collar === key}" aria-label="${label}"></button>`).join("")}</div>
+          <p class="cl-cnote">Every Dexter wears a collar. ${(s.equip.badges || []).length ? `${(s.equip.badges || []).length} badge${(s.equip.badges || []).length > 1 ? "s" : ""} pinned on it.` : "Pin your reading badges on it."} <button type="button" class="cl-link" id="clBadges">Badge Case ›</button></p></div>
         <div class="sh-bar"><p class="sh-hint">Tap to dress Dexter. Mix any items you own, keep his own gear, or take it all off.</p></div>
         ${s.owned.length ? "" : `<div class="cl-empty"><b>Your closet is empty</b><span>Earn gold with right answers and buy hats, outfits and accessories in the Shop.</span><button type="button" class="sh-act" id="goShop">Visit the Shop</button></div>`}
         ${rows}
@@ -892,8 +918,11 @@ body.bb-on{padding-bottom:96px}
       }
       if (st.tab === "badges") {
         shop.querySelectorAll(".bc-slot").forEach(b => b.onclick = () => keepScroll(() => { st.bsel = b.dataset.id; paint() }));
-        if ($("bcPin")) $("bcPin").onclick = () => keepScroll(() => { const t = load(); t.equip.badge = st.bsel; save(t); paint(); paintDock() });
-        if ($("bcOff")) $("bcOff").onclick = () => keepScroll(() => { const t = load(); delete t.equip.badge; save(t); paint(); paintDock() });
+        const setPins = fn => keepScroll(() => { const t = load(); t.equip.badges = fn(t.equip.badges || []); save(t); paint(); paintDock() });
+        const order = l => W.ITEMS.filter(i => i.slot === "badge" && l.includes(i.id)).map(i => i.id);   // keep chapter order along the collar
+        if ($("bcPin")) $("bcPin").onclick = () => setPins(l => order(l.concat(st.bsel)));
+        if ($("bcOff")) $("bcOff").onclick = () => setPins(l => l.filter(x => x !== st.bsel));
+        if ($("bcAll")) $("bcAll").onclick = () => setPins(l => { const got = load().owned.filter(id => id.startsWith("badge-")); return l.length === got.length ? [] : order(got) });
         return;
       }
       if (st.tab === "closet") {
@@ -904,8 +933,11 @@ body.bb-on{padding-bottom:96px}
         shop.querySelectorAll("[data-w]").forEach(b => b.onclick = () => setW(+b.dataset.w, true));
         shop.querySelectorAll(".sh-tile.cl").forEach(b => b.onclick = () => set(t => { if (b.dataset.val === "") delete t.equip[b.dataset.slot]; else t.equip[b.dataset.slot] = b.dataset.val }));
         if ($("goShop")) $("goShop").onclick = () => { st.tab = "shop"; paint() };
-        $("clDefault").onclick = () => set(t => { t.equip = {} });
-        $("clBare").onclick = () => set(t => { t.equip = Object.fromEntries(W.SLOTS.map(x => [x.key, "none"])) });
+        // outfit resets keep the collar and the badges pinned on it
+        $("clDefault").onclick = () => set(t => { t.equip = { badges: t.equip.badges || [] } });
+        $("clBare").onclick = () => set(t => { t.equip = Object.assign(Object.fromEntries(W.SLOTS.filter(x => x.key !== "badge").map(x => [x.key, "none"])), { badges: t.equip.badges || [] }) });
+        shop.querySelectorAll("[data-collar]").forEach(b => b.onclick = () => set(t => { t.collar = b.dataset.collar }));
+        $("clBadges").onclick = () => { st.tab = "badges"; paint() };
         return;
       }
       const it = st.sel ? W.byId[st.sel] : null;
@@ -937,9 +969,9 @@ body.bb-on{padding-bottom:96px}
   function badgeWon(item, up) {
     const s = load(), el = document.createElement("div"), n = completions(item.earn), t = window.BioWardrobe.tier(n); el.className = "bb-badge-won"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", up ? "Badge upgraded" : "New badge");
     el.innerHTML = `${badgeSVG(item, n, "big")}${up ? `<h3>Your ${esc(item.name)} is now ${t.name}!</h3><p>You've finished “${esc(item.chapter)}” ${n} times.${t.next ? ` ${t.next.at - n} more to make it ${t.next.name}.` : " It's as legendary as a badge gets."}</p>` : `<h3>You earned the ${esc(item.name)}!</h3><p>For finishing “${esc(item.chapter)}”. It's in ${esc(name(s))}'s Badge Case. Finish the chapter again to make it sparkle.</p>`}
-      <div class="row"><button type="button" class="pin">Pin it on ${esc(name(s))}</button><button type="button" class="ghost later">Later</button></div>`;
+      <div class="row"><button type="button" class="pin">📌 Pin it on ${esc(name(s))}'s collar</button><button type="button" class="ghost later">Later</button></div>`;
     document.body.appendChild(el);
-    el.querySelector(".pin").onclick = () => { const t = load(); t.equip.badge = item.id; save(t); el.remove(); paintDock(); openPal("badges") };
+    el.querySelector(".pin").onclick = () => { const t = load(); const l = t.equip.badges || []; if (!l.includes(item.id)) l.push(item.id); t.equip.badges = window.BioWardrobe.ITEMS.filter(i => i.slot === "badge" && l.includes(i.id)).map(i => i.id); save(t); el.remove(); paintDock(); openPal("badges") };
     el.querySelector(".later").onclick = () => el.remove();
     try { meowSound(stageOf(s.pts)) } catch (e) { }
   }

@@ -110,10 +110,10 @@
     // ===== Accessories: neck
     { id: "neck-bow", slot: "neck", set: "Formal", name: "Bow tie", price: 60,
       svg: `<path d="M60 84 L49 78 L49 90Z M60 84 L71 78 L71 90Z" fill="#e63946" ${ln(1.6)}/><rect x="57" y="81" width="6" height="6" rx="2" fill="#c92d3a" ${ln(1.4)}/>` },
-    { id: "neck-bell", slot: "neck", set: "Cozy", name: "Bell collar", price: 80,
+    { id: "neck-bell", slot: "neck", set: "Cozy", name: "Bell collar", price: 80, collar: [43, 80.5, 60, 89, 77, 80.5],
       svg: `<path d="M43 80.5 Q60 89 77 80.5" stroke="${OL}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M43 80.5 Q60 89 77 80.5" stroke="#e63946" stroke-width="3.6" fill="none" stroke-linecap="round"/>
         <circle cx="60" cy="90" r="4.6" fill="${GOLD}" ${ln(1.4)}/><path d="M56 89.4 h8" stroke="${OL}" stroke-width="1"/><circle cx="60" cy="92.4" r="1" fill="${OL}"/><circle cx="58.4" cy="88.4" r="1" fill="#fff"/>` },
-    { id: "neck-bandana", slot: "neck", set: "Ranch", name: "Bandana", price: 70,
+    { id: "neck-bandana", slot: "neck", set: "Ranch", name: "Bandana", price: 70, collar: [43.5, 80.6, 60, 89, 76.5, 80.6],
       svg: `<path d="M43 79.5 Q60 88 77 79.5 L60 98Z" fill="#d6453a" ${ln(1.6)}/>` + [[52, 85], [60, 88], [68, 85], [56, 91], [64, 91], [60, 94]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".9" fill="#fff"/>`).join("") },
     { id: "neck-steth", slot: "neck", set: "Doctor", name: "Stethoscope", price: 120,
       svg: `<path d="M45 79 Q44 93 54 96 M75 79 Q76 90 68 94 Q64 97 66 101" stroke="${OL}" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M45 79 Q44 93 54 96 M75 79 Q76 90 68 94 Q64 97 66 101" stroke="#6b7280" stroke-width="2.2" fill="none" stroke-linecap="round"/>
@@ -122,7 +122,7 @@
       svg: `<path d="M46 79 L60 94 L74 79" stroke="#2563eb" stroke-width="2" fill="none"/><path d="M57 93 h9 q3 0 3 3 v1 q0 3 -3 3 h-5 q-4 0 -4 -4Z" fill="#d6dbe1" ${ln(1.3)}/><circle cx="64" cy="96.6" r="1.4" fill="#6b7280"/>` },
     { id: "neck-medal", slot: "neck", set: "Royal", name: "Gold medal", price: 250,
       svg: `<path d="M48 79 L57 95 M72 79 L63 95" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="98" r="5.6" fill="${GOLD}" ${ln(1.5)}/>${star(60, 98, 3, "#fff2b3")}` },
-    { id: "neck-scarf", slot: "neck", set: "Cozy", name: "Blue scarf", price: 90,
+    { id: "neck-scarf", slot: "neck", set: "Cozy", name: "Blue scarf", price: 90, collar: [41, 82, 60, 93.4, 79, 82],
       svg: `<path d="M41 79 Q60 91 79 79 L80 85 Q60 96 40 85Z" fill="#4f8dff" ${ln()}/><path d="M70 88 L76 103 L68 101 L65 90Z" fill="#4f8dff" ${ln()}/><path d="M45 84 Q60 92 75 84" stroke="#a9c8ff" stroke-width="1.4" fill="none"/>` },
 
     // ===== Accessories: held (beside him, unscaled)
