@@ -64,7 +64,7 @@
     if (repeat) why.push("Already right 3+ times: half XP");
     return { tier, score: sc, xp, why, repeat };
   }
-  const multiplier = streak => STREAKS.find(([n]) => streak >= n)[1];
+  const multiplier = streak => (STREAKS.find(([n]) => (streak | 0) >= n) || STREAKS[STREAKS.length - 1])[1];
   const nextStreak = streak => { const up = STREAKS.slice().reverse().find(([n]) => n > streak); return up ? { at: up[0], mult: up[1] } : null };
 
   root.BioXP = { rate, multiplier, nextStreak, TIERS, STREAKS };

@@ -238,3 +238,37 @@ Vercel Web Analytics is wired in with the plain-HTML snippet. Turn on **Analytic
 ## A note on content
 
 The question figures are cropped from course slides. They're shared here as a study aid and aren't official course material.
+
+## Google sign-in (save progress to a Google account)
+
+Settings has an **Account** section at the top with a *Sign in with Google* button. Once she's signed in, everything the site saves on the device is kept in her Google account and comes back on any other phone, tablet or computer where she signs in. That includes drill progress, Read & Learn, notes and highlights, Bio-pardy, mock exams, the review list, all her cats, gold, items, badges and settings (every `bio-*` localStorage key).
+
+- **How it works:** `assets/account.js`, loaded by `assets/settings.js` on every page, uses Firebase Authentication (Google provider) and one Cloud Firestore document per person, `progress/{uid}` = `{ data, savedAt, device }`. There's no server of our own, and Firebase keeps her signed in until she signs out.
+- **Saving:** any change to a `bio-*` key is saved about 4 seconds later, and again when the page is hidden or closed. The card shows "Saved to your account · just now", with *Sync now* and *Sign out*.
+- **Loading:** on every visit (and when the tab comes back into view) the page checks the account. If another device saved more recently, this device takes that progress and reloads once. If this device changed more recently, it saves over the account.
+- **First sign-in on a device that already has progress:** she chooses *Use my account's progress* or *Keep this device's progress*. A device with no progress just takes the account's.
+- **Signing out** keeps the progress on the device.
+- **Limits:** the latest save wins. Answering questions on two devices at the same moment keeps whichever saved last. The document limit is 900 KB, far above what the site stores.
+
+### One-time setup (site owner)
+
+Until this is done, the button shows as "not set up yet" and progress stays on each device.
+
+1. Go to <https://console.firebase.google.com> → **Add project** (Google Analytics can be off).
+2. In the project, **Add app → Web**. Copy the `firebaseConfig` object it shows and paste it into `SITE_CONFIG` at the top of `assets/account.js`, e.g. `const SITE_CONFIG = { apiKey: "…", authDomain: "….firebaseapp.com", projectId: "…", appId: "…" };`. These values are public by design; the security rules below protect the data.
+3. **Build → Authentication → Get started → Sign-in method → Google → Enable** (pick a support email). Under **Settings → Authorized domains**, add `bio-drills.vercel.app`.
+4. **Build → Firestore Database → Create database** (production mode, any region). Under **Rules**, publish:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{db}/documents {
+       match /progress/{uid} {
+         allow read, write: if request.auth != null && request.auth.uid == uid;
+       }
+     }
+   }
+   ```
+5. Commit and push. Vercel redeploys, and *Sign in with Google* works.
+
+For local testing, `window.BIO_FIREBASE_CONFIG` (set before the page loads) overrides `SITE_CONFIG`.
+
