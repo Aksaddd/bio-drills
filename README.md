@@ -118,7 +118,8 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Maine Coon**: lynx tufts, a lion's ruff and a huge tail: brown tabby, red, silver
 
   Older saved coats map to breed + color (`LEGACY`).
-- **The Cat Café** (Cats tab → *Visit the Cat Café*): a cozy illustrated café where cats lounge.
+- **The Cat Café** (the café storefront on the landing page, or Cats tab → *Visit the Cat Café*): a cozy illustrated café where cats lounge.
+  - **Landing-page entrance:** a storefront card above the exam panel (`#cafeDoor`). It has a striped awning, twinkling string lights, a sign, and a door with a swinging OPEN sign that swings open on hover. The windows show who's inside today (your chilling cats first, marked ♥, then today's guests), drawn by `BioBuddy.cafeWindow()`, with a live count. Tap anywhere on it to go in; the windows refresh when you come back out.
   - **The room:** an arched sunset window with drifting clouds, twinkling string lights, swaying lamps, a chalkboard menu, shelves with books and plants, a coffee counter with a steaming espresso machine, a sofa, a rug, a basket and a little cat tree.
   - **Who's there:** two cats of every breed in different coats (colors rotate daily), plus your own cats who aren't studying, so the café is packed (about 19 cats), with a few spots left free for wandering.
   - **Wall climbing:** a rope bridge from the window sill to the shelves and two wooden wall steps, each with cats lounging on them (`CAFE_WALL`).

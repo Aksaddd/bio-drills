@@ -1830,5 +1830,12 @@ body.bb-on{padding-bottom:96px}
 
   function mount() { const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st); syncBadges(); paintDock(); greet() }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-  window.BioBuddy = { openCafe: () => openCafe(), enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
+  // who's in the café right now, drawn for the storefront windows on the landing page
+  function cafeWindow(n = 6) {
+    const R = cafeResidents(), mine = R.filter(r => r.mine), g = R.filter(r => !r.mine), d = Math.floor(Date.now() / 864e5) % Math.max(1, g.length);
+    const pick = mine.concat(g.slice(d), g.slice(0, d)).slice(0, n), eyes = ["happy", "open", "wide", "sleepy", "happy", "open"];
+    return { count: R.length, cats: pick.map((r, i) => ({ mine: !!r.mine, nick: r.nick || "", name: breedName(r.breed, r.color),
+      svg: art(stageOf(r.pts | 0), r.equip || { badges: [] }, { breed: r.breed, color: r.color, collar: r.collar || "navy", w: r.weight || 1, eyes: eyes[i % eyes.length], pose: i === 2 ? "lie" : "sit", plain: !r.mine }) })) };
+  }
+  window.BioBuddy = { openCafe: () => openCafe(), cafeWindow, enabled: () => !off(), setEnabled, soundOn, setSound, open: openCard, openShop, openBadges, syncBadges, play: a => setAct(a), activity: () => act, art, STAGES, state: load, level };
 })();
