@@ -42,7 +42,6 @@
     if (s.streak && Date.now() - (s.last || 0) > STREAK_TTL) s.streak = 0;
     // Gold wallet + wardrobe. First time: a 50-gold welcome gift plus gold for the XP already earned (about 1 gold per 4 XP).
     if (s.gold === undefined) s.gold = 50 + Math.round((s.pts | 0) * .24);
-    s.weight = Math.min(1.5, Math.max(.75, +s.weight || 1));
     s.owned = Array.isArray(s.owned) ? s.owned : []; s.equip = s.equip && typeof s.equip === "object" ? s.equip : {};
     return s;
   }
@@ -108,61 +107,21 @@
     return `<path d="M54.6 71.4 Q57.4 74.2 60 71.4 Q63.4 74.6 66.8 69.6" stroke="${OL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
   }
 
-  // ===== Dexter's body. A real cat body in three poses, with his big chibi head (face, expressions, hats) on top:
-  //   sit   front-facing, sitting up: haunches, two front legs, hind feet, tail around the side (the closet, the dock, most games)
-  //   stand side view, on four legs (walk cycle when he trots over to an answer, crouches when hunting)
-  //   lie   a curled loaf with paws tucked in (cat naps)
-  // o.w is his weight (0.75 slim … 1.5 chonky): it widens the body, belly and legs in every pose.
-  // Parts keep their class names (dx-torso, dx-tail, dx-pawl, dx-pawr, dx-hindl, dx-hindr, dx-head …) so the study pal can animate them.
-  const f1 = n => Math.round(n * 10) / 10;
-  function furTail(d, w2) { return `<path d="${d}" stroke="${OL}" stroke-width="${w2 + 4.4}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="${FUR}" stroke-width="${w2}" fill="none" stroke-linecap="round"/>` }
-  function leg(x, top, bot, wd, cls, far) {   // a leg column (open at the top so it blends into the body) with a paw
-    const h = wd / 2, c = far ? FUR_D : FUR;
-    return `<g class="${cls}"><path d="M${f1(x - h)} ${top} L${f1(x - h - .3)} ${bot - 4} Q${f1(x - h - 1.4)} ${bot + .6} ${x} ${bot + .6} Q${f1(x + h + 1.4)} ${bot + .6} ${f1(x + h + .3)} ${bot - 4} L${f1(x + h)} ${top}Z" fill="${c}"/>
-      <path d="M${f1(x - h)} ${top} L${f1(x - h - .3)} ${bot - 4} Q${f1(x - h - 1.4)} ${bot + .6} ${x} ${bot + .6} Q${f1(x + h + 1.4)} ${bot + .6} ${f1(x + h + .3)} ${bot - 4} L${f1(x + h)} ${top}" fill="none" ${ln}/>
-      ${far ? "" : `<path d="M${f1(x - 1.6)} ${bot - 2.4} v2.4 M${f1(x + 1.6)} ${bot - 2.4} v2.4" stroke="${OL}" stroke-width="1.1" stroke-linecap="round"/>`}</g>`;
-  }
-  function sitBody(o, w) {
-    const hx = 16 * w, lw = 7.8 * (.75 + .25 * w), lx = 7.4 * (.75 + .25 * w);
-    const tail = o.tail === "down" ? `M${f1(60 + 16 * w)} 105 C${f1(78 + 18 * w)} 111 ${f1(70 + 10 * w)} 112 ${f1(56 - 6 * w)} 110` : `M${f1(60 + 17 * w)} 102 C${f1(74 + 22 * w)} 104 ${f1(84 + 16 * w)} 92 ${f1(82 + 14 * w)} 76 C${f1(81 + 14 * w)} 68 ${f1(76 + 13 * w)} 66 ${f1(77 + 13 * w)} 71`;
-    const back = `<g class="dx-tail">${furTail(tail, 5.8)}${o.tail === "down" ? "" : `<path d="M${f1(81 + 14 * w)} 74 C${f1(80 + 14 * w)} 69 ${f1(77 + 13 * w)} 67 ${f1(77 + 13 * w)} 70" stroke="${FUR_L}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`}</g>`;
-    const body = `<g class="dx-torso">
-      <ellipse cx="${f1(60 - hx)}" cy="99.5" rx="${f1(9.6 * w)}" ry="${f1(8.8 + w)}" fill="${FUR}" ${ln}/><ellipse cx="${f1(60 + hx)}" cy="99.5" rx="${f1(9.6 * w)}" ry="${f1(8.8 + w)}" fill="${FUR}" ${ln}/>
-      <path d="M${f1(60 - 12 * w)} 78 Q60 71 ${f1(60 + 12 * w)} 78 C${f1(60 + 17 * w)} 87 ${f1(60 + 19 * w)} 97 ${f1(60 + 16.5 * w)} 104 Q${f1(60 + 13 * w)} 109 60 109 Q${f1(60 - 13 * w)} 109 ${f1(60 - 16.5 * w)} 104 C${f1(60 - 19 * w)} 97 ${f1(60 - 17 * w)} 87 ${f1(60 - 12 * w)} 78Z" fill="${FUR}" ${ln}/>
-      <path d="M${f1(60 - 10 * w)} 98 Q60 ${f1(104 + 4 * (w - 1))} ${f1(60 + 10 * w)} 98 Q${f1(60 + 9 * w)} 108 60 108.4 Q${f1(60 - 9 * w)} 108 ${f1(60 - 10 * w)} 98Z" fill="${FUR_D}" opacity=".5"/>
-      <path d="M${f1(60 - 8 * w)} 83 L${f1(60 - 5 * w)} 88 L${f1(60 - 3 * w)} 83.6 L${f1(60 - 1.2 * w)} 89 L60 83 L${f1(60 + 1.2 * w)} 89 L${f1(60 + 3 * w)} 83.6 L${f1(60 + 5 * w)} 88 L${f1(60 + 8 * w)} 83 Q${f1(60 + 9 * w)} 98 60 103 Q${f1(60 - 9 * w)} 98 ${f1(60 - 8 * w)} 83Z" fill="${FUR_L}"/>
-      <ellipse cx="${f1(60 - hx - 4 * w)}" cy="106.4" rx="6.4" ry="3.6" fill="${FUR_L}" ${ln}/><ellipse cx="${f1(60 + hx + 4 * w)}" cy="106.4" rx="6.4" ry="3.6" fill="${FUR_L}" ${ln}/>
-      <path d="M${f1(60 - hx - 8 * w)} 95 q3 -3 7 -3 M${f1(60 + hx + 8 * w)} 95 q-3 -3 -7 -3" stroke="${FUR_D}" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>`;
-    const legs = leg(f1(60 - lx), 84, 107.6, lw, "dx-pawl") + leg(f1(60 + lx), 84, 107.6, lw, "dx-pawr");
-    return { back, body, legs, head: "translate(60 12) scale(.9) translate(-60 -12)", shadow: 26 * w, outfitMap: "" };
-  }
-  function standBody(o, w, u) {
-    const T = f1(73.5 - 3 * (w - 1)), Bm = f1(99 + 9 * (w - 1)), Rr = f1(99 + 2 * (w - 1)), lw = 7 * (.8 + .2 * w);
-    const tail = o.tail === "down" ? `M97 88 C106 92 110 100 104 106` : `M97 84 C107 82 112 70 107 58 C105 53 100 54 101 59`;
-    const bodyPath = `M47 85 C47 ${T} 62 ${T} 74 ${T} C88 ${T} ${Rr} 75 ${Rr} 86 C${Rr} ${Bm} 90 ${Bm} 74 ${Bm} C58 ${Bm} 47 97 47 85Z`;
-    const back = leg(61, 90, 107.6, lw, "dx-pawr", true) + leg(85, 92, 107.6, lw, "dx-hindr", true) + `<g class="dx-tail">${furTail(tail, 5.8)}</g>`;
-    const body = `<g class="dx-torso"><defs><clipPath id="${u}bc"><path d="${bodyPath}"/></clipPath></defs><path d="${bodyPath}" fill="${FUR}" ${ln}/>
-      <path d="M58 ${f1(+Bm - 4)} Q74 ${f1(+Bm + 1)} 90 ${f1(+Bm - 5)}" stroke="${FUR_D}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
-      <path d="M80 ${f1(+T + 3)} q3 4 0 8 M86 ${f1(+T + 4)} q3 4 0 8" stroke="${FUR_D}" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".8"/>
-      <ellipse cx="89" cy="${f1(90 + 2 * (w - 1))}" rx="${f1(10 * (.85 + .15 * w))}" ry="${f1(10.5 * (.85 + .15 * w))}" fill="${FUR}" ${ln}/>
-      <path d="M49 82 Q50 92 57 96 Q53 88 55 80Z" fill="${FUR_L}"/>
-      <g class="dx-outfit" clip-path="url(#${u}bc)"></g></g>`;
-    const legs = leg(54, 90, 107.6, lw, "dx-pawl") + leg(92, 95, 107.6, lw + 1, "dx-hindl");
-    return { back, body, legs, head: "translate(47 87) scale(.82) translate(-60 -86)", shadow: 30 * w, outfitMap: `translate(48 ${T}) scale(${f1(50 / 38 * 100) / 100} ${f1((+Bm - +T) / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
-  }
-  function lieBody(o, w, u) {
-    const rx = f1(34 * (.85 + .15 * w)), ry = f1(12 * (.8 + .25 * w)), cy = f1(108.6 - +ry);
-    const bodyPath = `M${f1(66 - +rx)} 108 C${f1(66 - +rx)} ${f1(+cy - +ry * .9)} ${f1(66 + +rx * .6)} ${f1(+cy - +ry * 1.05)} ${f1(66 + +rx)} ${f1(+cy + 2)} C${f1(66 + +rx + 1)} 108.6 ${f1(66 + +rx * .5)} 108.8 66 108.8Z`;
-    const back = "";
-    const body = `<g class="dx-torso"><defs><clipPath id="${u}bc"><path d="${bodyPath}"/></clipPath></defs><path d="${bodyPath}" fill="${FUR}" ${ln}/>
-      <path d="M${f1(66 + +rx * .2)} ${f1(+cy - +ry * .2)} q4 4 0 8 M${f1(66 + +rx * .45)} ${f1(+cy - +ry * .1)} q4 4 0 8" stroke="${FUR_D}" stroke-width="1.4" fill="none" opacity=".8" stroke-linecap="round"/>
-      <g class="dx-outfit" clip-path="url(#${u}bc)"></g></g>
-      <g class="dx-tail">${furTail(`M${f1(66 + +rx - 2)} 106 C${f1(66 + +rx + 4)} 112 60 112.4 40 110`, 5.4)}</g>`;
-    const legs = `<g class="dx-pawl"><ellipse cx="38" cy="106.6" rx="6.6" ry="3.6" fill="${FUR_L}" ${ln}/></g><g class="dx-pawr"><ellipse cx="50" cy="107.4" rx="6.6" ry="3.4" fill="${FUR_L}" ${ln}/></g>`;
-    return { back, body, legs, head: "translate(44 106) scale(.78) translate(-60 -86)", shadow: +rx + 4, outfitMap: `translate(${f1(66 - +rx * .7)} ${f1(+cy - +ry)}) scale(${f1(+rx * 1.6 / 38 * 100) / 100} ${f1(+ry * 2 / 32 * 100) / 100}) translate(-41 -76)`, clip: `${u}bc` };
-  }
-  function drawHead(u, o) {
-    return `
+  // The kitten at full size, standing on y=108; o: { sc, eyes, tail, extraBack, extraFront, glasses }
+  function kitty(u, o) {
+    const tail = o.tail === "down"
+      ? `M76 100 C90 104 96 98 94 90`
+      : `M77 98 C94 96 98 78 92 66 C89 60 84 62 86 67`;
+    // Body parts are grouped (dx-tail, dx-torso, dx-pawl, dx-pawr, dx-head, dx-earl, dx-earr, dx-eyes) so the study pal can move them like a real cat
+    const body = `<g class="dx-tail"><path d="${tail}" stroke="${OL}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="${tail}" stroke="${FUR}" stroke-width="5.6" fill="none" stroke-linecap="round"/>
+      ${o.tail === "down" ? "" : `<path d="M90 70 C89 66 86 64 86 67" stroke="${FUR_L}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`}
+      </g><g class="dx-torso"><path d="M37 92 Q37 76 60 75 Q83 76 83 92 Q83 109 60 109 Q37 109 37 92Z" fill="${FUR}" ${ln}/>
+      <path d="M44 98 Q60 112 76 98 Q74 108 60 108.5 Q46 108 44 98Z" fill="${FUR_D}" opacity=".55"/>
+      <path d="M48 84 L52 89 L54 84.5 L57 90 L60 84 L63 90 L66 84.5 L68 89 L72 84 Q74 100 60 106 Q46 100 48 84Z" fill="${FUR_L}"/>
+      <path d="M55 96 q5 3 10 0" stroke="${FUR_D}" stroke-width="1.2" fill="none" opacity=".7"/>`;
+    const paws = `<g class="dx-pawl"><ellipse cx="49.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/><path d="M47 104 v3 M52 104 v3" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/></g>
+      <g class="dx-pawr"><ellipse cx="70.5" cy="105.2" rx="8" ry="5" fill="${FUR_L}" ${ln}/><path d="M68 104 v3 M73 104 v3" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/></g>`;
+    const head = `
       <g class="dx-earl"><path d="M35 47 L36.5 15 L43.5 21.5 L41.5 25 L46.5 25.5 L56 33Z" fill="${FUR}" ${ln}/><path d="M39 40 L40 23 L42.5 25.5 L46 27.5 L51 33Z" fill="${PINK}"/></g>
       <g class="dx-earr"><path d="M85 47 L83.5 15 L64 33Z" fill="${FUR}" ${ln}/><path d="M81 40 L80 22.5 L69 33Z" fill="${PINK}"/></g>
       <path d="M32.5 58 L25 61 L31.5 65 L24.5 69.5 L32 71.5 L28.5 76 L37 75.5 Q43 85 60 85.5 Q77 85 83 75.5 L91.5 76 L88 71.5 L95.5 69.5 L88.5 65 L95 61 L87.5 58 Q88 33 60 32 Q32 33 32.5 58Z" fill="${FUR}" ${ln}/>
@@ -174,24 +133,11 @@
       <path d="M58.2 67.6 L61.8 67.6 L60 69.8Z" fill="${PINK_D}" stroke="${OL}" stroke-width="1" stroke-linejoin="round"/>
       ${mouth(o.eyes)}
       <path d="M33 66 L22 64 M33 69 L22 70.5 M87 66 L98 64 M87 69 L98 70.5" stroke="${OL}" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>`;
-  }
-
-  // The kitten at full size, standing on y=108. o: { sc, eyes, tail, glasses, pose, w, outfit, neck, front, over, back }
-  function kitty(u, o) {
-    const w = Math.min(1.5, Math.max(.75, +o.w || 1)), pose = o.pose || "sit";
-    const P = pose === "stand" ? standBody(o, w, u) : pose === "lie" ? lieBody(o, w, u) : sitBody(o, w);
     const glasses = o.glasses ? `<circle cx="48.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><circle cx="71.5" cy="60" r="10" fill="#bfe6ff" fill-opacity=".18" stroke="${OL}" stroke-width="2"/><path d="M58.5 58.5 Q60 56.5 61.5 58.5" stroke="${OL}" stroke-width="2" fill="none"/><path d="M41 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><path d="M64 54.5 l3 -2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>` : "";
-    const sc = o.sc, chonk = 1 + (w - 1) * .08;
-    // outfits are drawn for the sitting torso; on the standing/lying body they're mapped onto its side and clipped to it
-    let body = P.body;
-    if (pose === "sit") body += o.outfit || "";
-    else if (o.outfit) body = body.replace('<g class="dx-outfit" clip-path="url(#' + P.clip + ')"></g>', `<g class="dx-outfit" clip-path="url(#${P.clip})"><g transform="${P.outfitMap}">${o.outfit}</g></g>`);
-    const neck = o.neck || "", headT = P.head ? ` transform="${P.head}"` : "";
-    const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${glasses}${o.front || ""}</g></g></g>`;
-    const inner = `<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
-      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}`;
+    const sc = o.sc;
     return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
-      ${o.flip ? `<g transform="translate(120 0) scale(-1 1)">${inner}</g>` : inner}`;
+      <ellipse cx="60" cy="109" rx="${30 * sc}" ry="3.6" fill="#000" opacity=".12"/>
+      <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${body}${o.mid || ""}</g>${paws}<g class="dx-head">${head}${glasses}${o.front || ""}</g></g>${o.over || ""}`;
   }
   const collar = () => `<path d="M43 80.5 Q60 89 77 80.5" stroke="${OL}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M43 80.5 Q60 89 77 80.5" stroke="#26365e" stroke-width="3.6" fill="none" stroke-linecap="round"/>
     <path d="M60 85 v1.6" stroke="${OL}" stroke-width="1.2"/><rect x="56.4" y="86.4" width="7.2" height="9" rx="2.6" fill="#c9d1db" stroke="${OL}" stroke-width="1.3"/><path d="M58.4 89.6 h3.2 M58.4 92.2 h3.2" stroke="#7d8794" stroke-width=".9"/><path d="M57.6 88 l1.4 -.6" stroke="#fff" stroke-width=".9" stroke-linecap="round"/>`;
@@ -222,9 +168,8 @@
     const worn = slot => E[slot] === "none" ? "" : W && E[slot] && W.byId[E[slot]] ? W.byId[E[slot]].svg : null;
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
-    const L = look || {};
-    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, w: L.w || load().weight || 1,
-      outfit: pick("outfit"), neck: pick("neck") + pick("badge"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
+    const svg = kitty(u, { sc: g.sc, eyes: (look && look.eyes) || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses,
+      mid: pick("outfit") + pick("neck") + pick("badge"), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
 
@@ -380,10 +325,6 @@ body.bb-on{padding-bottom:96px}
 .sh-tile.cl.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
 .cl-empty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--c-fill);border-radius:16px;padding:16px;margin:6px 16px 4px}
 .cl-empty span{font-size:13.5px;color:var(--c-muted)}
-.cl-weight{margin:4px 16px 10px;background:var(--c-fill);border-radius:16px;padding:12px 14px}
-.cl-wtop{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}.cl-wtop span{color:var(--c-acc);font-weight:600}
-.cl-wrow{display:flex;align-items:center;gap:10px;margin:8px 0 6px;font-size:20px}.cl-wrow input{flex:1;accent-color:var(--c-acc)}
-.cl-wbtns{display:flex;gap:6px;flex-wrap:wrap}.cl-wbtns button{border:0;border-radius:980px;padding:6px 12px;background:var(--c-bg,#fff);color:var(--c-acc);font:600 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
 .cl-reset{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 16px 0}
 .pal-prog{text-align:center;padding:0 22px}
 .bb-shop.still{animation:none}
@@ -470,21 +411,7 @@ body.bb-on{padding-bottom:96px}
 @media (prefers-reduced-motion:reduce){.bb-pal{transition:none}.bb-pal .bb-palart,.bb-pal .bb-toy,.bb-pal .bb-toy *,.bb-greet .gwrap,.bb-greet .gdex,.bb-greet .gbubble{animation:none!important}}
 /* Dexter's body parts: pivot points */
 .dx-head{transform-origin:60px 84px}.dx-tail{transform-origin:78px 98px}.dx-earl{transform-origin:45px 36px}.dx-earr{transform-origin:75px 36px}
-.dx-pawl{transform-origin:52.6px 86px}.dx-pawr{transform-origin:67.4px 86px}.dx-hindl{transform-origin:92px 95px}.dx-hindr{transform-origin:85px 92px}
-.pose-stand .dx-pawl{transform-origin:54px 90px}.pose-stand .dx-pawr{transform-origin:61px 90px}.pose-stand .dx-torso{transform-origin:74px 108px}.pose-stand .dx-tail{transform-origin:97px 84px}
-.pose-lie .dx-pawl{transform-origin:38px 106px}.pose-lie .dx-pawr{transform-origin:50px 107px}.pose-lie .dx-torso{transform-origin:66px 108px}.pose-lie .dx-tail{transform-origin:96px 106px}
-/* walking on four legs: diagonal pairs swing together, the body bobs, the tail streams */
-.bb-pal.moving .dx-pawl,.bb-pal.moving .dx-hindr{animation:bbStride .36s ease-in-out infinite alternate}
-.bb-pal.moving .dx-pawr,.bb-pal.moving .dx-hindl{animation:bbStride .36s ease-in-out -.36s infinite alternate-reverse}
-.bb-pal.moving .dx-torso{animation:bbBob .18s ease-in-out infinite alternate}.bb-pal.moving .dx-tail{animation:bbTailStream .72s ease-in-out infinite}
-.bb-pal.moving .bb-palart{animation:bbBob .18s ease-in-out infinite alternate}
-@keyframes bbStride{from{transform:rotate(-22deg)}to{transform:rotate(20deg)}}
-@keyframes bbBob{from{transform:translateY(0)}to{transform:translateY(-1.6px)}}
-/* hunting on all fours: crouch low, hind legs tense, a little butt wiggle before the pounce */
-.pose-stand.act-mouse .dx-hindl,.pose-stand.act-mouse .dx-hindr{animation:bbHindTense 3.4s ease-in-out infinite}
-.pose-stand.act-laser .dx-hindl{animation:bbHindTense 2.4s ease-in-out infinite}
-@keyframes bbHindTense{0%,30%,100%{transform:none}38%{transform:rotate(14deg) scaleY(.9)}46%{transform:rotate(-18deg)}56%{transform:none}}
-.pose-lie .dx-torso{animation:bbBreathe 3.2s ease-in-out infinite}.dx-torso{transform-origin:60px 109px}.dx-eyes{transform-origin:60px 60px}.dx-blink{transform-origin:60px 61px}
+.dx-pawl{transform-origin:49.5px 108px}.dx-pawr{transform-origin:70.5px 108px}.dx-torso{transform-origin:60px 109px}.dx-eyes{transform-origin:60px 60px}.dx-blink{transform-origin:60px 61px}
 /* every awake game: blinks, and a lazy ear flick now and then */
 .bb-pal:not(.act-nap) .dx-blink,.bb-greet .dx-blink{animation:bbBlink 4.6s ease-in-out infinite}
 .bb-pal .dx-earr{animation:bbEarFlick 6.2s ease-in-out infinite}
@@ -775,7 +702,6 @@ body.bb-on{padding-bottom:96px}
           ${own ? (worn ? `<button type="button" class="sh-act ghost" id="bcOff">Take it off</button>` : `<button type="button" class="sh-act" id="bcPin">Pin it on ${esc(name(s))}</button>`) : `<a class="sh-act" style="display:inline-block;text-decoration:none" href="/read/index.html#${it.earn}">Read the chapter</a>`}
         </div></div>`;
     }
-    const weightLabel = w => w <= .86 ? "Slim" : w <= 1.06 ? "Just right" : w <= 1.21 ? "Well fed" : w <= 1.36 ? "Chubby" : "Absolute chonk";
     function closetHTML(s, k) {
       const g = FORM_GEAR[k], cur = s.equip;
       const rows = W.SLOTS.filter(sl => sl.key !== "badge" || s.owned.some(id => id.startsWith("badge-"))).map(sl => {
@@ -788,11 +714,7 @@ body.bb-on{padding-bottom:96px}
           ${mine.map(it => opt(it.id, esc(it.name), `<svg viewBox="${W.VIEW[it.slot]}" aria-hidden="true">${it.svg}</svg>`, `<span class="tag">${esc(it.set)}</span>`)).join("")}
         </div>`;
       }).join("");
-      const wt = s.weight || 1;
-      return `<div class="cl-weight"><div class="cl-wtop"><b>Weight</b><span id="clWLabel">${weightLabel(wt)}</span></div>
-          <div class="cl-wrow"><span aria-hidden="true">🐈</span><input type="range" id="clWeight" min="75" max="150" step="5" value="${Math.round(wt * 100)}" aria-label="${esc(name(s))}'s weight"><span aria-hidden="true">🍙</span></div>
-          <div class="cl-wbtns"><button type="button" data-w="85">Slim</button><button type="button" data-w="100">Just right</button><button type="button" data-w="125">Chubby</button><button type="button" data-w="150">Chonk</button></div></div>
-        <div class="sh-bar"><p class="sh-hint">Tap to dress Dexter. Mix any items you own, keep his own gear, or take it all off.</p></div>
+      return `<div class="sh-bar"><p class="sh-hint">Tap to dress Dexter. Mix any items you own, keep his own gear, or take it all off.</p></div>
         ${s.owned.length ? "" : `<div class="cl-empty"><b>Your closet is empty</b><span>Earn gold with right answers and buy hats, outfits and accessories in the Shop.</span><button type="button" class="sh-act" id="goShop">Visit the Shop</button></div>`}
         ${rows}
         <div class="cl-reset"><button type="button" class="sh-act ghost" id="clDefault">Dexter's own look</button><button type="button" class="sh-act ghost" id="clBare">Take everything off</button></div>`;
@@ -837,10 +759,6 @@ body.bb-on{padding-bottom:96px}
       }
       if (st.tab === "closet") {
         const set = fn => keepScroll(() => { const t = load(); fn(t); save(t); paint(); paintDock() });
-        // weight: the stage updates live while dragging; the rest of the page when you let go
-        const setW = (v, done) => { const t = load(); t.weight = Math.min(1.5, Math.max(.75, v / 100)); save(t); $("clWLabel").textContent = weightLabel(t.weight); $("clWeight").value = Math.round(t.weight * 100); const stg = shop.querySelector(".sh-stage"); if (stg) stg.innerHTML = art(stageOf(t.pts), t.equip, { eyes: stageOf(t.pts) === 0 ? "closed" : "wide" }); if (done) paintDock() };
-        $("clWeight").oninput = e => setW(+e.target.value); $("clWeight").onchange = e => setW(+e.target.value, true);
-        shop.querySelectorAll("[data-w]").forEach(b => b.onclick = () => setW(+b.dataset.w, true));
         shop.querySelectorAll(".sh-tile.cl").forEach(b => b.onclick = () => set(t => { if (b.dataset.val === "") delete t.equip[b.dataset.slot]; else t.equip[b.dataset.slot] = b.dataset.val }));
         if ($("goShop")) $("goShop").onclick = () => { st.tab = "shop"; paint() };
         $("clDefault").onclick = () => set(t => { t.equip = {} });
@@ -906,16 +824,6 @@ body.bb-on{padding-bottom:96px}
   const ACTS = ["yarn", "butterfly", "mouse", "laser", "feather", "leaf", "box", "tail"];
   const ACT_LABEL = { yarn: "playing with his yarn ball", butterfly: "chasing a butterfly", mouse: "hunting a toy mouse", laser: "chasing a laser dot", feather: "swatting a feather toy", leaf: "pouncing on a falling leaf", box: "sitting in a box", tail: "chasing his tail", nap: "taking a cat nap" };
   let act = ACTS[Math.random() * ACTS.length | 0], lastMove = Date.now(), mood = null, moodT = 0;
-  // Body pose per game: on all fours to hunt the mouse, chase the laser or his tail; curled up to nap; sitting otherwise.
-  // While he travels (to an answer, or back to his spot) he stands and trots, facing the way he's going.
-  const ACT_POSE = { mouse: "stand", laser: "stand", tail: "stand", nap: "lie" };
-  let moving = false, facing = -1, walkT = 0;
-  function walkTo(pos, then) {
-    const dx = palAt ? pos.x - palAt.x : 0, far = !palAt || Math.hypot(dx, pos.y - palAt.y) > 14;
-    if (far) { const f = dx > 2 ? 1 : dx < -2 ? -1 : facing; if (!moving || f !== facing) { moving = true; facing = f; paintPal() } }
-    place(pos);
-    clearTimeout(walkT); walkT = setTimeout(() => { if (moving && !visiting) { moving = false; paintPal() } if (then) then() }, far ? 600 : 0);
-  }
   const ACT_EYES = { yarn: "open", butterfly: "wide", mouse: "focus", laser: "dilated", feather: "dilated", leaf: "wide", box: "sleepy", tail: "dilated", nap: "sleep" };
   function eyesNow(k) {
     if (k === 0) return mood || (act === "nap" ? "sleep" : "closed");   // the newborn's eyes stay shut unless he's reacting
@@ -947,11 +855,7 @@ body.bb-on{padding-bottom:96px}
     return { x: innerWidth - S - 14, y: innerHeight - S - 18 };
   }
   function place(pos) { const p = $("bbPal"); palAt = pos; if (p) p.style.transform = `translate(${Math.round(pos.x)}px,${Math.round(pos.y)}px)` }
-  function settle() {
-    if (!palOn || visiting) return;
-    const h = home(); if (palAt && Math.abs(h.x - palAt.x) < 1 && Math.abs(h.y - palAt.y) < 1) return;
-    if (!palAt || document.body.classList.contains("bb-scrolling")) place(h); else walkTo(h);
-  }
+  function settle() { if (palOn && !visiting) place(home()) }
   function checkPal() {
     if (off()) { palOn = false; const p = $("bbPal"); if (p) p.remove(); document.body.classList.remove("bb-palon"); return }
     if (!palOn && document.querySelector(".opt")) { palOn = true; document.body.classList.add("bb-palon"); paintPal(); place(home()) }
@@ -964,9 +868,7 @@ body.bb-on{padding-bottom:96px}
     p.style.setProperty("--ps", palSize() + "px");
     p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]} · drag to move him`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
-    const pose = moving ? "stand" : ACT_POSE[act] || "sit";
-    ["sit", "stand", "lie"].forEach(x => p.classList.toggle("pose-" + x, x === pose)); p.classList.toggle("moving", moving);
-    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? (k ? "open" : "closed") : eyesNow(k), pose, flip: pose === "stand" && facing > 0 })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: eyesNow(k) })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
   function visit() {
@@ -975,8 +877,7 @@ body.bb-on{padding-bottom:96px}
     const pos = cr && cr.right + S + 28 <= innerWidth ? { x: cr.right + 16, y: r.top + r.height / 2 - S * .6 } : { x: Math.min(r.right - S * .8, innerWidth - S - 6), y: r.top + r.height / 2 - S * .85 };
     pos.y = Math.min(Math.max(pos.y, 8), innerHeight - S - 8);
     clearTimeout(visiting); p.classList.remove("run"); void p.offsetWidth; p.classList.add("run");
-    moving = true; facing = palAt && pos.x > palAt.x + 2 ? 1 : -1; paintPal(); place(pos);
-    setTimeout(() => { if (visiting) { moving = false; paintPal() } }, 650);   // arrives: back to his game's pose to react
+    place(pos);
     visiting = setTimeout(() => { visiting = 0; p.classList.remove("run"); settle() }, 2300);
   }
   // ===== Moving Dexter: she can drag him (or use arrow keys) anywhere and he stays there. Saved on this device as a
