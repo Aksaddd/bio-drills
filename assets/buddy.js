@@ -595,6 +595,7 @@ body.bb-on{padding-bottom:96px}
 @keyframes bcSpin{from{transform:rotateY(540deg) scale(.2);opacity:0}to{transform:none;opacity:1}}
 .sh-tabs.sub{margin-top:4px}
 .sh-tile .cl-ic{display:grid;place-items:center;height:58px;color:var(--c-muted)} .sh-tile .cl-ic svg{width:30px;height:30px}
+.sh-tile.clb>svg{height:56px;width:56px;margin:2px auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}.sh-tile.clb.lock{opacity:.75}.sh-cap .cl-bcount{font-weight:500;color:var(--c-muted);margin-left:6px;font-size:.85em;text-transform:none;letter-spacing:0}
 .sh-tile.cl.on{border-color:#34c759;background:color-mix(in srgb,#34c759 12%,var(--c-fill))}
 .sh-tile.cl.on::after{content:"✓";position:absolute;top:6px;right:8px;font-weight:800;color:#248a3d}
 .cl-empty{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--c-fill);border-radius:16px;padding:16px;margin:6px 16px 4px}
@@ -847,7 +848,7 @@ body.bb-on{padding-bottom:96px}
     let d = $("bbDock");
     if (off()) { if (d) d.remove(); document.body.classList.remove("bb-on"); return }
     const s = load(), k = stageOf(s.pts), C = 2 * Math.PI * 30, mult = XP() ? XP().multiplier(s.streak) : 1;
-    if (!d) { d = document.createElement("button"); d.id = "bbDock"; d.type = "button"; d.className = "bb-dock"; d.onclick = () => openPal("closet"); document.body.appendChild(d); makeMovable(d, () => 64, (x, y) => { d.style.left = x + "px"; d.style.top = y + "px"; d.style.right = d.style.bottom = "auto" }) }
+    if (!d) { d = document.createElement("button"); d.id = "bbDock"; d.type = "button"; d.className = "bb-dock"; d.onclick = () => openPal("cats"); document.body.appendChild(d); makeMovable(d, () => 64, (x, y) => { d.style.left = x + "px"; d.style.top = y + "px"; d.style.right = d.style.bottom = "auto" }) }
     document.body.classList.add("bb-on"); dockSpot(d);
     d.setAttribute("aria-label", `Study buddy: ${name(s)}, level ${level(s.pts)}, ${fmt(s.pts)} XP${s.streak >= 3 ? `, ${s.streak} in a row, XP times ${mult}` : ""}. Open`);
     d.innerHTML = `<svg class="bb-ring" viewBox="0 0 64 64"><circle class="t" cx="32" cy="32" r="30"/><circle class="f" cx="32" cy="32" r="30" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - ringPct(s.pts))}"/></svg>
@@ -1072,6 +1073,14 @@ body.bb-on{padding-bottom:96px}
     const weightLabel = w => w <= .86 ? "Slim" : w <= 1.06 ? "Just right" : w <= 1.21 ? "Well fed" : w <= 1.36 ? "Chubby" : "Absolute chonk";
     function closetHTML(s, k) {
       const g = FORM_GEAR[k], cur = s.equip;
+      // reading badges sit with the accessories: tap one to pin it on the collar (or take it off); same pins as the Badge Case
+      const badgeRow = () => {
+        const B = W.ITEMS.filter(i => i.slot === "badge"), got = B.filter(i => s.owned.includes(i.id)), pins = cur.badges || [];
+        return `<p class="sh-cap">Badges <small class="cl-bcount">${got.length}/${B.length} earned · ${pins.length} on the collar</small></p><div class="sh-grid">
+          ${got.map(i => { const on = pins.includes(i.id), n = Math.max(1, completions(i.earn)); return `<button type="button" class="sh-tile cl clb${on ? " on" : ""}" data-badge="${i.id}" aria-pressed="${on}" aria-label="${esc(i.name)}: ${on ? "on the collar, tap to take off" : "tap to pin on the collar"}">${badgeSVG(i, n)}<b>${esc(i.name)}</b><span class="tag">${on ? "📌 On collar" : esc(W.tier(n).name)}</span></button>` }).join("")}
+          ${got.length < B.length ? `<button type="button" class="sh-tile cl clb lock" id="clMoreBadges"><span class="cl-ic">🔒</span><b>${B.length - got.length} more to earn</b><span class="tag">Finish Read &amp; Learn chapters</span></button>` : ""}
+        </div>`;
+      };
       const rows = W.SLOTS.filter(sl => sl.key !== "badge").map(sl => {   // badges are pinned from the Badges tab
         const mine = W.ITEMS.filter(i => i.slot === sl.key && s.owned.includes(i.id));
         const hasOwn = sl.key === "face" ? !!g.glasses : !!g[sl.key];
@@ -1080,7 +1089,7 @@ body.bb-on{padding-bottom:96px}
           ${hasOwn ? opt(undefined, "Dexter's own", `<span class="cl-ic">${OWN_ICON}</span>`, `<span class="tag">This form's gear</span>`) : ""}
           ${opt("none", "None", `<span class="cl-ic">${NONE_ICON}</span>`, `<span class="tag">${sl.key === "neck" ? "Just his collar" : hasOwn ? "Take it off" : "Nothing here"}</span>`)}
           ${mine.map(it => opt(it.id, esc(it.name), `<svg viewBox="${W.VIEW[it.slot]}" aria-hidden="true">${it.svg}</svg>`, `<span class="tag">${esc(it.set)}</span>`)).join("")}
-        </div>`;
+        </div>${sl.key === "held" ? badgeRow() : ""}`;
       }).join("");
       const wt = s.weight || 1;
       return `<div class="cl-weight"><div class="cl-wtop"><b>Weight</b><span id="clWLabel">${weightLabel(wt)}</span></div>
@@ -1156,6 +1165,8 @@ body.bb-on{padding-bottom:96px}
         $("clBare").onclick = () => set(t => { t.equip = Object.assign(Object.fromEntries(W.SLOTS.filter(x => x.key !== "badge").map(x => [x.key, "none"])), { badges: t.equip.badges || [] }) });
         shop.querySelectorAll("[data-collar]").forEach(b => b.onclick = () => set(t => { t.collar = b.dataset.collar }));
         $("clBadges").onclick = () => { st.tab = "badges"; paint() };
+        shop.querySelectorAll("[data-badge]").forEach(b => b.onclick = () => set(t => { const id = b.dataset.badge, l = t.equip.badges || []; const nl = l.includes(id) ? l.filter(x => x !== id) : l.concat(id); t.equip.badges = W.ITEMS.filter(i => i.slot === "badge" && nl.includes(i.id)).map(i => i.id) }));
+        if ($("clMoreBadges")) $("clMoreBadges").onclick = () => { st.tab = "badges"; paint() };
         return;
       }
       const it = st.sel ? W.byId[st.sel] : null;
@@ -1711,7 +1722,7 @@ body.bb-on{padding-bottom:96px}
     if (!palOn || off()) return;
     const s = load(), k = stageOf(s.pts), mult = XP() ? XP().multiplier(s.streak) : 1;
     let p = $("bbPal");
-    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("closet"); document.body.appendChild(p); makeMovable(p, palSize, (x, y) => place({ x, y })); if (palAt) place(palAt) }
+    if (!p) { p = document.createElement("button"); p.id = "bbPal"; p.type = "button"; p.className = "bb-pal"; p.onclick = () => openPal("cats"); document.body.appendChild(p); makeMovable(p, palSize, (x, y) => place({ x, y })); if (palAt) place(palAt) }
     p.style.setProperty("--ps", palSize() + "px");
     p.setAttribute("aria-label", `Study buddy ${name(s)}, level ${level(s.pts)}, ${ACT_LABEL[act]}. Open closet and shop`); p.title = `${name(s)} is ${ACT_LABEL[act]} · drag to move him`;
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
