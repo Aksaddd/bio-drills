@@ -172,12 +172,12 @@
   //   runes   a slowly turning rune circle behind him (Lab Cat: half ring, Professor: full ring of glyphs)
   // All drawn with SVG <animate>, so they move wherever he appears.
   const MYST = [
-    { c: "#c4b5fd", c2: "#f5f3ff", aura: .5, r: 38, motes: 4, gem: "#c4b5fd" },
-    { c: "#7dd3fc", c2: "#e0f2fe", aura: .5, r: 41, motes: 5, gem: "#67e8f9", wisp: true },
-    { c: "#a78bfa", c2: "#ede9fe", aura: .5, r: 44, motes: 6, gem: "#a78bfa", wisp: true, marks: true },
-    { c: "#f0abfc", c2: "#fdf4ff", aura: .52, r: 47, motes: 7, gem: "#e879f9", wisp: true, marks: true, spirits: 1 },
-    { c: "#60a5fa", c2: "#e0f2fe", aura: .55, r: 50, motes: 8, gem: "#38bdf8", wisp: true, marks: true, spirits: 2, runes: 1 },
-    { c: "#fbbf24", c2: "#fef3c7", aura: .6, r: 55, motes: 9, gem: "#fde047", wisp: true, marks: true, spirits: 3, runes: 2 }
+    { c: "#c4b5fd", c2: "#f5f3ff", aura: .34, r: 36, motes: 4, gem: "#c4b5fd" },
+    { c: "#7dd3fc", c2: "#e0f2fe", aura: .34, r: 39, motes: 5, gem: "#67e8f9", wisp: true },
+    { c: "#a78bfa", c2: "#ede9fe", aura: .36, r: 42, motes: 6, gem: "#a78bfa", wisp: true, marks: true },
+    { c: "#f0abfc", c2: "#fdf4ff", aura: .38, r: 45, motes: 7, gem: "#e879f9", wisp: true, marks: true, spirits: 1 },
+    { c: "#60a5fa", c2: "#e0f2fe", aura: .4, r: 48, motes: 8, gem: "#38bdf8", wisp: true, marks: true, spirits: 1, runes: 1 },
+    { c: "#fbbf24", c2: "#fef3c7", aura: .42, r: 52, motes: 9, gem: "#fde047", wisp: true, marks: true, spirits: 2, runes: 2 }
   ];
   const MOTES = [[22, 40], [98, 34], [14, 78], [104, 72], [34, 18], [88, 14], [8, 56], [112, 96], [26, 100]];
   function mystic(u, k, P, w) {
@@ -187,10 +187,11 @@
       <ellipse cx="60" cy="74" rx="${M.r}" ry="${M.r * 1.02}" fill="url(#${u}aura)">${anim("opacity", ".75;1;.75", 3.2)}</ellipse>`;
     let runes = "";
     if (M.runes) {
-      const n = M.runes > 1 ? 8 : 4, R = 46, glyph = (i) => ["M-2 1.6 L0 -2 L2 1.6Z", "M-1.8 -1.8 L1.8 1.8 M1.8 -1.8 L-1.8 1.8", "M0 -2.2 V2.2 M-2 0 H2", "M-2 0 A2 2 0 1 0 2 0 A2 2 0 1 0 -2 0"][i % 4];
-      runes = `<g opacity=".75"><animateTransform attributeName="transform" type="rotate" from="0 60 66" to="360 60 66" dur="40s" repeatCount="indefinite"/>
+      const n = M.runes > 1 ? 8 : 4, R = 46;
+      const paw = `<ellipse cx="0" cy="1" rx="1.7" ry="1.4" fill="${M.c}"/><circle cx="-1.7" cy="-1.2" r=".7" fill="${M.c}"/><circle cx="-.6" cy="-2" r=".7" fill="${M.c}"/><circle cx=".6" cy="-2" r=".7" fill="${M.c}"/><circle cx="1.7" cy="-1.2" r=".7" fill="${M.c}"/>`;
+      runes = `<g opacity=".5"><animateTransform attributeName="transform" type="rotate" from="0 60 66" to="360 60 66" dur="40s" repeatCount="indefinite"/>
         <circle cx="60" cy="66" r="${R}" fill="none" stroke="${M.c}" stroke-width=".8" stroke-dasharray="${M.runes > 1 ? "3 2.4" : "3 2.4 3 60"}" opacity=".9"/>${M.runes > 1 ? `<circle cx="60" cy="66" r="${R - 4}" fill="none" stroke="${M.c}" stroke-width=".5" opacity=".6"/>` : ""}
-        ${Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 - (M.runes > 1 ? 0 : Math.PI / 2), x = 60 + Math.cos(a) * R, y = 66 + Math.sin(a) * R; return `<g transform="translate(${f1(x)} ${f1(y)})"><circle r="3.4" fill="${M.c2}" stroke="${M.c}" stroke-width=".7"/><path d="${glyph(i)}" stroke="${M.c}" stroke-width=".9" fill="none" stroke-linecap="round"/></g>` }).join("")}</g>`;
+        ${Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 - (M.runes > 1 ? 0 : Math.PI / 2), x = 60 + Math.cos(a) * R, y = 66 + Math.sin(a) * R; return `<g transform="translate(${f1(x)} ${f1(y)}) rotate(${f1(a * 180 / Math.PI + 90)})">${paw}</g>` }).join("")}</g>`;
     }
     let spirits = "";
     if (M.spirits && P.tail) {
@@ -200,8 +201,8 @@
     }
     const wisp = M.wisp && P.tail ? (() => { const [x, y] = P.tail.tip; return `<g transform="translate(${f1(x)} ${f1(y)})"><circle r="5.4" fill="${M.c}" opacity=".35">${anim("r", "4.6;6.4;4.6", 1.6)}</circle>
       <path d="M0 2.6 C-3.2 1 -2.6 -3 0 -6.4 C0.6 -3.4 3.4 -2.4 2.6 0.6 C2.2 2.2 1 2.8 0 2.6Z" fill="${M.c2}" stroke="${M.c}" stroke-width=".8">${anim("opacity", ".7;1;.7", .9)}</path></g>` })() : "";
-    const motes = MOTES.slice(0, M.motes).map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.6 : 2.2}" fill="${M.c2}" stroke="${M.c}" stroke-width=".6" opacity="0">${anim("opacity", "0;1;0", 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}${anim("cy", `${y};${y - 7};${y}`, 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}</circle>`).join("");
-    const gem = `<g transform="translate(60 46.6)"><circle r="4.6" fill="${M.gem}" opacity=".35">${anim("r", "3.6;5.4;3.6", 2.2)}</circle><path d="M0 -3.4 L2.4 0 L0 3.4 L-2.4 0Z" fill="${M.gem}" stroke="${OL}" stroke-width=".9" stroke-linejoin="round"/><path d="M0 -2.4 L1 -.4 L0 0Z" fill="#fff" opacity=".85"/></g>`;
+    const motes = MOTES.slice(0, M.motes).map(([x, y], i) => i % 3 === 2 ? `<g opacity="0" transform="translate(${x} ${y})"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -7;0 0" dur="${2.6 + (i % 4) * .5}s" begin="${(i * .45).toFixed(2)}s" repeatCount="indefinite"/><ellipse cx="0" cy="1" rx="1.9" ry="1.5" fill="${M.c2}" stroke="${M.c}" stroke-width=".5"/>${[[-1.9, -1.3], [-.7, -2.3], [.7, -2.3], [1.9, -1.3]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r=".75" fill="${M.c2}" stroke="${M.c}" stroke-width=".4"/>`).join("")}</g>${anim("opacity", "0;1;0", 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}</g>` : `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1.6 : 2.2}" fill="${M.c2}" stroke="${M.c}" stroke-width=".6" opacity="0">${anim("opacity", "0;1;0", 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}${anim("cy", `${y};${y - 7};${y}`, 2.6 + (i % 4) * .5, (i * .45).toFixed(2))}</circle>`).join("");
+    const gem = `<g transform="translate(60 46.6) scale(.78)"><circle r="4.6" fill="${M.gem}" opacity=".35">${anim("r", "3.6;5.4;3.6", 2.2)}</circle><path d="M0 -3.4 L2.4 0 L0 3.4 L-2.4 0Z" fill="${M.gem}" stroke="${OL}" stroke-width=".9" stroke-linejoin="round"/><path d="M0 -2.4 L1 -.4 L0 0Z" fill="#fff" opacity=".85"/></g>`;
     const marks = M.marks ? `<g opacity=".9">${anim("opacity", ".55;1;.55", 2.4)}<path d="M33.6 61 l5.6 1.2 M33.4 65 l5 .2 M86.4 61 l-5.6 1.2 M86.6 65 l-5 .2" stroke="${M.c}" stroke-width="2.2" stroke-linecap="round"/><path d="M33.6 61 l5.6 1.2 M33.4 65 l5 .2 M86.4 61 l-5.6 1.2 M86.6 65 l-5 .2" stroke="#fff" stroke-width=".8" stroke-linecap="round"/></g>` : "";
     return { back: aura + runes, spirits, wisp, front: motes, head: marks + gem };
   }

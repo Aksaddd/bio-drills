@@ -105,9 +105,9 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Every form:** a glowing forehead gem, a soft pulsing aura that grows and changes color, and floating sparks of light.
   - **Kitten and up:** a spirit flame on his tail tip.
   - **Pouncer and up:** luminous cheek marks.
-  - **Fighter, Lab Cat, Professor:** 1, 2 and 3 ghostly spirit tails that sway beside his real one.
-  - **Lab Cat:** a turning half ring of runes.
-  - **Professor:** a full golden rune circle of glyphs.
+  - **Fighter and Lab Cat:** one ghostly spirit tail; **Professor:** two, like the twin-tailed cat of folklore, that sway beside his real one.
+  - **Lab Cat:** a turning half ring of glowing paw prints.
+  - **Professor:** a full golden ring of paw prints. The aura is kept light so he always reads as a cat first.
 - **Expressions:** Dexter's eyes (and mouth) show his mood. Everyday eyes for the yarn; wide, sparkly wonder eyes with raised brows and a little "o" mouth for the butterfly and the leaf; big dilated pupils while hunting the laser, feather and his tail; lowered, focused lids and angled brows while stalking the mouse; heavy content lids in the box; relaxed closed eyes when napping. A right answer gives happy ^ ^ eyes and an open smile; a wrong one gives droopy eyes, worried brows, a tear and a wobbly frown. He greets you with happy eyes and looks sparkly-eyed at himself in the Closet and Shop. The newborn keeps his eyes shut except to react. The code is `eye()`, `mouth()` and `ACT_EYES` in `assets/buddy.js`.
 - Both respect *Reduce motion* and switch off with *Show study buddy* in Settings. The code is in `assets/buddy.js` (search for "Study pal" and "Greeting").
 
