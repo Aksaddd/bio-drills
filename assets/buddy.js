@@ -1163,7 +1163,8 @@ body.bb-on{padding-bottom:96px}
     { x: 58, y: 420, z: 76, pose: "lie" }, { x: 142, y: 416, z: 74, pose: "sit" }, { x: 112, y: 560, z: 88, pose: "sit" }, { x: 204, y: 582, z: 86, pose: "sit" },
     { x: 72, y: 612, z: 78, pose: "lie" }, { x: 248, y: 486, z: 62, pose: "lie" },
     // on the café's cat tree (bottom right): top perch ×2, hammock, cubby roof, base
-    { x: 283, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 321, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 328, y: 542, z: 56, pose: "lie", tree: 1 }, { x: 279, y: 563, z: 54, pose: "sit", tree: 1 }, { x: 319, y: 612, z: 56, pose: "sit", tree: 1 }
+    { x: 283, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 321, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 328, y: 542, z: 56, pose: "lie", tree: 1 }, { x: 279, y: 563, z: 54, pose: "sit", tree: 1 }, { x: 319, y: 612, z: 56, pose: "sit", tree: 1 },
+    { x: 278, y: 591, z: 40, pose: "sit", tree: 1, inside: 1 }   // inside the cubby house, peeking out of the doorway
   ];
   const CAFE_SCENE = `<defs>
       <linearGradient id="cfWall" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fbeedd"/><stop offset="1" stop-color="#f1d9bd"/></linearGradient>
@@ -1217,12 +1218,15 @@ body.bb-on{padding-bottom:96px}
     R.forEach((r, i) => { r.spot = order[i] });
     cafe = document.createElement("div"); cafe.className = "cf-veil"; cafe.setAttribute("role", "dialog"); cafe.setAttribute("aria-modal", "true"); cafe.setAttribute("aria-label", "The Cat Café");
     cafe.innerHTML = `<div class="cf-room"><div class="cf-top"><span><b>☕ The Cat Café</b><small>Tap a cat to meet them</small></span><button type="button" class="cf-x" aria-label="Leave the café">✕</button></div>
-      <svg class="cf-scene" viewBox="0 0 360 640" preserveAspectRatio="xMidYMax slice">${CAFE_SCENE}<g transform="translate(246 462) scale(.56)">${TREE_SVG.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "")}</g><g class="cf-cats"></g><g class="cf-fx"></g></svg>
+      <svg class="cf-scene" viewBox="0 0 360 640" preserveAspectRatio="xMidYMax slice">${CAFE_SCENE}<g transform="translate(246 462) scale(.56)">${TREE_SVG.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "")}</g><defs><clipPath id="cfHole"><circle cx="277.9" cy="572.9" r="10.4"/></clipPath></defs><g class="cf-cats"></g><g class="cf-fx"></g></svg>
       <div class="cf-sheet" hidden></div></div>`;
     document.body.appendChild(cafe);
     const G = cafe.querySelector(".cf-cats"), sheet = cafe.querySelector(".cf-sheet");
     const drawCat = (r, walking) => {
       const sp = CAFE_SPOTS[r.spot], pose = walking ? "stand" : sp.pose, k = stageOf(r.pts | 0);
+      if (sp.inside && !walking) {   // just the face in the dark doorway; glowing eyes, sometimes dozing
+        return art(k, r.equip || { badges: [] }, { breed: r.breed, color: r.color, collar: r.collar || "navy", eyes: ["wide", "open", "sleepy", "happy"][Math.random() * 4 | 0], pose: "sit", boxed: true, plain: true }).replace("<svg ", `<svg x="-40" y="-72" width="80" height="80" `);
+      }
       const eyes = walking ? "open" : pose === "lie" ? (Math.random() < .5 ? "sleep" : "sleepy") : ["open", "wide", "happy", "sleepy"][Math.random() * 4 | 0];
       const svg = art(k, r.equip || { badges: [] }, { breed: r.breed, color: r.color, collar: r.collar || "navy", w: r.weight || 1, eyes, pose, flip: walking && r.face > 0, plain: !r.mine }).replace("<svg ", `<svg x="-40" y="-72" width="80" height="80" `);
       const tag = r.mine ? `<g transform="translate(0 8)"><rect x="-22" y="-6" width="44" height="12" rx="6" fill="#fff" stroke="#3a2a1e" stroke-width="1"/><text y="3" font-size="7.5" font-weight="700" text-anchor="middle" fill="#3a2a1e" font-family="-apple-system,sans-serif">${esc((r.nick || "Dexter").slice(0, 10))} ♥</text></g>` : "";
@@ -1231,7 +1235,8 @@ body.bb-on{padding-bottom:96px}
     R.forEach((r, i) => {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g"); g.setAttribute("class", "cf-cat"); g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
       g.setAttribute("aria-label", r.mine ? `${r.nick || "Dexter"}, your ${breedName(r.breed, r.color)}` : `Meet ${/^[AEIOU]/i.test(breedName(r.breed, r.color)) ? "an" : "a"} ${breedName(r.breed, r.color)}`);
-      const sp = CAFE_SPOTS[r.spot]; g.style.transform = `translate(${sp.x}px,${sp.y}px) scale(${sp.z / 80})`; g.innerHTML = drawCat(r); G.appendChild(g); r.g = g;
+      const sp = CAFE_SPOTS[r.spot]; g.style.transform = `translate(${sp.x}px,${sp.y}px) scale(${sp.z / 80})`; g.innerHTML = drawCat(r);
+      const w = document.createElementNS("http://www.w3.org/2000/svg", "g"); if (sp.inside) w.setAttribute("clip-path", "url(#cfHole)"); w.appendChild(g); G.appendChild(w); r.g = g; r.w = w;
       const open = () => meet(r); g.addEventListener("click", open); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open() } });
     });
     // life in the café: cats wander between spots, blink, and chirp
@@ -1240,10 +1245,10 @@ body.bb-on{padding-bottom:96px}
     const life = setInterval(() => {
       if (!cafe || !document.body.contains(cafe)) { clearInterval(life); return }
       if (!sheet.hidden) return;
-      const r = R[Math.random() * R.length | 0];
-      if (Math.random() < .55) { const f = free(); if (!f.length) return; const to = f[Math.random() * f.length | 0], a = CAFE_SPOTS[r.spot], b = CAFE_SPOTS[to];
-        r.face = b.x > a.x ? 1 : -1; r.g.innerHTML = drawCat(r, true); r.spot = to; r.g.classList.add("walk"); r.g.style.transform = `translate(${b.x}px,${b.y}px) scale(${b.z / 80})`;
-        setTimeout(() => { r.g.classList.remove("walk"); r.g.innerHTML = drawCat(r) }, 2400);
+      const ins = R.find(x => CAFE_SPOTS[x.spot].inside), r = ins && Math.random() < .25 ? ins : R[Math.random() * R.length | 0];   // the cat in the house comes out now and then
+      if (r === ins || Math.random() < .55) { const f = free(); if (!f.length) return; const hole = f.find(i => CAFE_SPOTS[i].inside); const to = hole != null && Math.random() < .35 ? hole : f[Math.random() * f.length | 0], a = CAFE_SPOTS[r.spot], b = CAFE_SPOTS[to];
+        r.face = b.x > a.x ? 1 : -1; r.w.removeAttribute("clip-path"); r.g.innerHTML = drawCat(r, true); r.spot = to; r.g.classList.add("walk"); r.g.style.transform = `translate(${b.x}px,${b.y}px) scale(${b.z / 80})`;
+        setTimeout(() => { r.g.classList.remove("walk"); if (CAFE_SPOTS[r.spot].inside) { r.w.setAttribute("clip-path", "url(#cfHole)"); bubble(r, "mrrp ♥") } r.g.innerHTML = drawCat(r) }, 2400);
       } else {
         const onTree = R.filter(x => CAFE_SPOTS[x.spot].tree);
         if (onTree.length > 1 && Math.random() < .5) { const [a, b] = onTree.sort(() => Math.random() - .5); bubble(a, "♥"); bubble(b, ["mrrp!", "purr…", "♥"][Math.random() * 3 | 0]); [a, b].forEach(x => { x.g.classList.remove("play"); void x.g.getBBox(); x.g.classList.add("play"); setTimeout(() => x.g.classList.remove("play"), 900) }) }
