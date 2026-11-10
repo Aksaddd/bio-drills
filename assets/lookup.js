@@ -109,7 +109,14 @@
     }
     return null;
   }
+  // an underlined key term in the reading (<b>) is looked up whole: "abscisic acid (ABA)", "seedless vascular plants" …
+  function phraseVariants(t) {
+    const base = t.replace(/[.:;,!?]+$/, "").trim(), noPar = base.replace(/\s*\([^)]*\)/g, "").trim(), par = (base.match(/\(([^)]+)\)/) || [])[1];
+    return [...new Set([base, noPar, par].filter(Boolean))];
+  }
   function lookup(hit) {
+    const term = hit.el && hit.el.closest("b");
+    if (term && term.closest(".rd-prose, .q, .explain, .rd-lead")) for (const v of phraseVariants(term.textContent)) { const r = find(v); if (r && r.def) return r }
     const { words, at } = hit;
     if (at >= 0) for (const n of [3, 2]) for (let s = Math.max(0, at - n + 1); s <= at && s + n <= words.length; s++) {
       const r = find(words.slice(s, s + n).join(" ")); if (r && IDX.lex.has(norm(r.term))) return r;

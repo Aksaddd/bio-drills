@@ -64,6 +64,7 @@ Finishing a Read & Learn chapter earns that chapter's badge:
 
 On every page, double-tap any word (double-click on a computer) to get a card with its definition, its word parts (each root's meaning and Greek or Latin origin, linked to the Word Roots page) and its literal meaning. The word is highlighted while the card is open; tap anywhere to close it. Links and buttons keep their normal taps, but the words of an answered question can be looked up. Plurals and Latin plurals work (sporangia, hyphae, sori, stomata), as do multi-word terms (abscisic acid, alternation of generations, systemic acquired resistance).
 
+- In the reading, every underlined key term (`<b>` in `read/chapters.js`) has a definition. Double-tapping any word in it looks up the whole term, e.g. *abscisic acid (ABA)* or *seedless vascular plants*. Emphasis that isn't vocabulary uses `<strong>`: bold, no underline.
 - `assets/lexicon.js`: the course dictionary, about 160 terms with definitions and word parts.
 - `assets/lookup.js`: the engine. When a word isn't in the dictionary, it uses the Word Roots list (`roots/roots.js` example terms), then the glossary, then finds known roots inside the word. The data loads on the first hold. A one-time tip (`bio-lookup-tip`) points the feature out.
 

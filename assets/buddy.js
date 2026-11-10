@@ -188,7 +188,7 @@
     else if (o.outfit) body = body.replace('<g class="dx-outfit" clip-path="url(#' + P.clip + ')"></g>', `<g class="dx-outfit" clip-path="url(#${P.clip})"><g transform="${P.outfitMap}">${o.outfit}</g></g>`);
     const neck = o.neck || "", headT = P.head ? ` transform="${P.head}"` : "";
     const headG = `<g${headT}><g transform="translate(60 0) scale(${chonk} 1) translate(-60 0)">${neck ? `<g class="dx-neck">${neck}</g>` : ""}<g class="dx-head">${drawHead(u, o)}${glasses}${o.front || ""}</g></g></g>`;
-    const inner = `<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
+    const inner = o.boxed ? headG : `<ellipse cx="60" cy="109" rx="${f1(P.shadow * sc)}" ry="3.6" fill="#000" opacity=".12"/>
       <g transform="translate(60 109) scale(${sc}) translate(-60 -109)">${o.back || ""}${P.back}${P.body === body ? P.body : body}${P.legs}</g>${headG}${o.over || ""}`;
     return `<defs><radialGradient id="${u}iris" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#9a6a24"/><stop offset=".32" stop-color="#b98a35"/><stop offset=".55" stop-color="#7d9a3c"/><stop offset=".8" stop-color="#3f8a45"/><stop offset="1" stop-color="#2a6436"/></radialGradient></defs>
       ${o.flip ? `<g transform="translate(120 0) scale(-1 1)">${inner}</g>` : inner}`;
@@ -227,7 +227,7 @@
     const pick = slot => { const w = worn(slot); return w !== null ? w : g[slot] ? g[slot]() : "" };
     const face = worn("face");
     const L = look || {};
-    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, w: L.w || load().weight || 1,
+    const svg = kitty(u, { sc: g.sc, eyes: L.eyes || g.eyes || "open", tail: g.tail, glasses: face === null && !!g.glasses, pose: L.pose, flip: L.flip, boxed: L.boxed, w: L.w || load().weight || 1,
       outfit: pick("outfit"), neck: pick("neck") + pinnedBadge(E), front: (face || "") + (g.extra ? g.extra() : "") + pick("hat"), over: L.pose === "stand" || L.pose === "lie" ? (g.over || "") : pick("held") + (g.over || "") });
     return `<svg viewBox="0 0 120 120" aria-hidden="true">${svg}</svg>`;
   }
@@ -409,6 +409,7 @@ body.bb-on{padding-bottom:96px}
 .bb-pal .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18))}
 .bb-pal .bb-toy{position:absolute;z-index:1;pointer-events:none}
 .bb-pal .bb-toy svg{display:block;width:100%;height:100%}
+.bb-pal.act-box .bb-lv{z-index:3;bottom:6%}.bb-pal.act-box .bb-streak{z-index:3}
 .bb-pal .bb-boxfront{position:absolute;z-index:2;left:2%;right:2%;bottom:-3%;height:40%}
 .bb-pal .bb-boxfront svg{display:block;width:100%;height:100%}
 .act-yarn .bb-toy{width:27%;height:27%;left:2%;bottom:3%;animation:bbBat 2.6s ease-in-out infinite}
@@ -981,7 +982,7 @@ body.bb-on{padding-bottom:96px}
     ACTS.concat("nap").forEach(a => p.classList.toggle("act-" + a, a === act));
     const pose = moving ? "stand" : ACT_POSE[act] || "sit";
     ["sit", "stand", "lie"].forEach(x => p.classList.toggle("pose-" + x, x === pose)); p.classList.toggle("moving", moving);
-    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? (k ? "open" : "closed") : eyesNow(k), pose, flip: pose === "stand" && facing > 0 })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
+    p.innerHTML = `<span class="bb-toy">${TOYS[act]}</span><span class="bb-palart">${art(k, null, { eyes: moving && !mood ? (k ? "open" : "closed") : eyesNow(k), pose, flip: pose === "stand" && facing > 0, boxed: act === "box" && !moving })}</span>${act === "box" ? `<span class="bb-boxfront">${BOX_FRONT}</span>` : ""}<span class="bb-lv">Lv ${level(s.pts)}</span>${s.streak >= 3 ? `<span class="bb-streak" title="${s.streak} right in a row">${FLAME}×${mult}</span>` : ""}`;
   }
   // When she picks an answer, Dexter scurries to it (beside it on wide screens, peeking over its edge on phones)
   function visit() {
