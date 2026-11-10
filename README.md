@@ -136,6 +136,7 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Answers:** they hop with happy eyes on a right answer. After a miss, one comes over for a comforting nuzzle.
   - **Interactions:** about every 13 seconds one interacts with him: a nuzzle with hearts, grooming his head (he closes his eyes happily), a crouch-and-pounce game (he hops), or a chase lap around him while he watches.
   - **Tapping one** opens the Cats tab.
+  - **Moving companions:** drag any companion on its own (or focus it and use the arrow keys). It stays where it's dropped, even when the cat in training runs to an answer, and the spot is saved per cat (`spots` in `bio-dexter-cats-v1`). *↺ Back beside him* in the Cats tab returns one cat; Progress → *Put him back* returns everyone.
 - **Tiny kittens you raise:** every cat starts at Level 1 as a tiny kitten (`baby` form in `FORM_GEAR[0]`).
   - **Look:** a small body, big sparkly eyes (16% larger), smaller ears, rosy cheeks, no grown-up brows and a stubby tail. Awake and curious; asleep only for naps.
   - **Growth:** cats grow with every bit of XP, not just at evolutions (`sizeFor()`): 62% size at 0 XP, a little bigger after each right answer, then a jump at each evolution, up to 126% at Level 100. The study pal, companions, the Closet preview and the greeting all use it.

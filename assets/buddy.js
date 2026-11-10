@@ -557,6 +557,7 @@ body.bb-on{padding-bottom:96px}
 .ct-cat svg{width:64px;height:64px}.ct-cat b{display:block;font-size:16px}.ct-cat small{display:block;color:var(--c-muted);font-size:12.5px;line-height:1.3}
 .ct-btns{display:flex;flex-direction:column;gap:6px;align-items:stretch}.ct-btns .sh-act{padding:7px 12px;font-size:13px}
 .ct-tag{font:700 11.5px -apple-system,sans-serif;color:#248a3d;background:#fff;border-radius:999px;padding:4px 9px;text-align:center}
+.ct-unpin{border:0;background:none;color:var(--c-acc);font:600 12px -apple-system,sans-serif;cursor:pointer;padding:0}
 .ct-along{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--c-muted);cursor:pointer}.ct-along input{width:18px;height:18px;accent-color:var(--c-acc)}
 .ct-h{margin:14px 16px 6px;text-align:left;font:700 16px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif}.ct-h small{display:block;font:400 13px -apple-system,sans-serif;color:var(--c-muted);margin-top:2px}
 .ct-cafe{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:calc(100% - 32px);margin:4px 16px 14px;border:0;border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:#4a2f1d;background:linear-gradient(135deg,#ffe8c7,#f9c99a);box-shadow:0 6px 18px rgba(201,120,40,.25)}
@@ -633,7 +634,9 @@ body.bb-on{padding-bottom:96px}
 .bb-mate.leap .bb-palart{animation:bbLeap .8s cubic-bezier(.3,.7,.4,1)}
 @keyframes bbLeap{0%{transform:none}30%{transform:translateY(8%) scaleY(.88)}60%{transform:translateY(-34%) scaleY(1.06)}100%{transform:none}}
 .bb-mate{position:fixed;left:0;top:0;z-index:57;width:var(--ps,62px);height:var(--ps,62px);border:0;padding:0;margin:0;background:none;cursor:pointer;transition:transform .9s cubic-bezier(.3,1.1,.5,1);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.bb-mate .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}.bb-mate .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
+.bb-mate .bb-palart{position:absolute;inset:0;transform-origin:50% 92%}
+.bb-mate.drag{transition:none;cursor:grabbing;z-index:130}.bb-mate.drag .bb-palart{transform:translateY(-6px) scale(1.1) rotate(-5deg);filter:drop-shadow(0 12px 14px rgba(0,0,0,.22))}
+.bb-mate,.bb-mate *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.bb-mate{touch-action:none}.bb-mate .bb-palart svg{width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
 .bb-mate .bb-mname{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font:700 9.5px -apple-system,BlinkMacSystemFont,sans-serif;background:rgba(255,255,255,.92);color:#3a3a3c;border-radius:999px;padding:1px 6px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .bb-mate:not(.act-nap) .dx-blink{animation:bbBlink 5.2s ease-in-out 1.3s infinite}
 .bb-mate.hop .bb-palart{animation:bbHop .6s cubic-bezier(.3,1.6,.5,1)}
@@ -875,7 +878,7 @@ body.bb-on{padding-bottom:96px}
         <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half.</p>
         <p><b>Win streaks multiply XP and gold:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes anything away. Each evolution adds ${EVOLVE_BONUS} gold.</p>
       </details>
-      <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys).</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
+      <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys). Each companion cat can be dragged to its own spot too.</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button></div>
     </div>`;
   }
@@ -1033,7 +1036,7 @@ body.bb-on{padding-bottom:96px}
           ${art(k2, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes: "happy", plain: true })}
           <span><b>${esc(c.nick || "Dexter")}</b><small>${esc(breedName(c.breed, c.color))} · Lv ${level(c.pts | 0)} · ${esc(STAGES[k2].form)}</small></span>
           <span class="ct-btns">${c.active ? `<span class="ct-tag">✓ Training</span>` : `<button type="button" class="sh-act" data-train="${c.id}">Train</button>
-            <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>`}</span></div>` }).join("")}</div>
+            <label class="ct-along"><input type="checkbox" data-along="${c.id}"${c.along ? " checked" : ""}${!c.along && H.along.length >= MAX_ALONG ? " disabled" : ""}> On screen</label>${c.along && H.spots && H.spots[c.id] ? `<button type="button" class="ct-unpin" data-unpin="${c.id}">↺ Back beside him</button>` : ""}`}</span></div>` }).join("")}</div>
         <button type="button" class="ct-cafe" id="ctCafe"><span class="ic" aria-hidden="true">☕</span><span><b>Visit the Cat Café</b><small>${full ? `Your home is full (${MAX_CATS} cats), but your cats love to hang out here.` : "Meet cats of every breed, pick a coat color, and bring one home to study."}</small></span><i aria-hidden="true">›</i></button>`;
     }
     // Badge case: one badge per Read & Learn chapter, like a trainer's case. Earned badges can be pinned on Dexter.
@@ -1104,11 +1107,12 @@ body.bb-on{padding-bottom:96px}
       if (st.tab === "progress") {
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
-        if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
+        if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); const H = household(); H.spots = {}; saveHouse(H); paint(); placeMates() };
         return;
       }
       if (st.tab === "cats") {
         shop.querySelectorAll("[data-train]").forEach(b => b.onclick = () => keepScroll(() => { trainCat(b.dataset.train); paint(); paintDock(); refreshMates() }));
+        shop.querySelectorAll("[data-unpin]").forEach(b => b.onclick = () => keepScroll(() => { setMateSpot(b.dataset.unpin, null); paint(); placeMates() }));
         shop.querySelectorAll("[data-along]").forEach(b => b.onchange = () => keepScroll(() => { const H = household(); const id = b.dataset.along; H.along = b.checked ? H.along.concat(id).slice(0, MAX_ALONG) : H.along.filter(x => x !== id); saveHouse(H); paint(); refreshMates() }));
         $("ctCafe").onclick = () => { closeShop(); openCafe() };
         return;
@@ -1435,6 +1439,9 @@ body.bb-on{padding-bottom:96px}
   const MATE_ACTS = ["yarn", "feather", "leaf", "tail", "butterfly"];
   let mates = [], mateT = 0, playT = 0;
   const mateSize = c => Math.round((innerWidth >= 900 ? 96 : 72) * sizeFor(c.pts) * .9);
+  // each companion can be dragged anywhere; its spot is saved in the household (H.spots), like Dexter's own spot
+  const mateSpot = id => { const H = household(); return H.spots && H.spots[id] || null };
+  function setMateSpot(id, v) { const H = household(); H.spots = H.spots || {}; if (v) H.spots[id] = v; else delete H.spots[id]; saveHouse(H) }
   function clearMates() { mates.forEach(m => m.el.remove()); mates = []; clearInterval(mateT); clearInterval(playT); mateT = playT = 0 }
   function refreshMates() {
     clearMates();
@@ -1444,6 +1451,11 @@ body.bb-on{padding-bottom:96px}
       const c = list.find(x => x.id === id); if (!c) return;
       const el = document.createElement("button"); el.type = "button"; el.className = "bb-mate"; el.setAttribute("aria-label", `${c.nick || "Dexter"} is here too. Open your cats`);
       el.onclick = () => openPal("cats"); document.body.appendChild(el);
+      const me = { id }; el.title = `${c.nick || "Dexter"} · drag to move`;
+      makeMovable(el, () => mateSize(c), (x, y) => { const m = mates.find(z => z.el === el); if (m) { m.at = { x, y }; el.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)` } }, {
+        origin: () => { const m = mates.find(z => z.el === el); return m && m.at ? m.at : { x: 0, y: 0 } },
+        drop: (x, y) => { setMateSpot(me.id, xySpot(x, y, mateSize(c))); const m = mates.find(z => z.el === el); if (m) { fx(el, ["📍"], 1); paintMate(m) } }
+      });
       const free = [1, 2, 3, 4].filter(x => x !== palSlot && !mates.some(m => m.slot === x));
       mates.push({ c, el, i, slot: free[0], act: MATE_ACTS[(i * 2 + Math.random() * MATE_ACTS.length | 0) % MATE_ACTS.length], pose: "sit", eyes: null, moving: false, face: -1 });
     });
@@ -1463,6 +1475,9 @@ body.bb-on{padding-bottom:96px}
     m.el.innerHTML = `<span class="bb-palart">${art(k, c.equip || { badges: [] }, { breed: c.breed, color: c.color, collar: c.collar, w: c.weight, eyes, pose, flip: pose === "stand" && m.face > 0 })}</span><span class="bb-mname">${esc(c.nick || "Dexter")}</span>`;
   }
   function matePos(m, at) {
+    const own = mateSpot(m.c.id);
+    if (own) { const q = spotXY(own, mateSize(m.c)), P = palAt || q; m.side = P.x >= q.x ? 1 : -1; m.pinned = true; return q }
+    m.pinned = false;
     if (treeBox && m.slot != null) { const q = slotPos(m.slot, mateSize(m.c)), P = slotPos(palSlot, palSize()); m.side = P.x >= q.x ? 1 : -1; return q }
     const S = palSize(), sz = mateSize(m.c), A = at || palAt; if (!A) return null;
     // stand on the open side: to his right if there's room (on wide screens that's the margin, away from the questions)
@@ -1474,7 +1489,7 @@ body.bb-on{padding-bottom:96px}
   function placeMates(at) { mates.forEach(m => { if (m.busy === "chase") return; const q = matePos(m, at); if (q) { m.at = q; m.el.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px)`; m.el.style.setProperty("--side", m.side) } }) }
   function matesMove(to) {   // trot after the cat in training (on the tree they stay home and watch)
     if (treeBox) return;
-    mates.forEach(m => { const q = matePos(m, to); if (!q || !m.at || Math.hypot(q.x - m.at.x, q.y - m.at.y) < 14) return; m.moving = true; m.face = q.x > m.at.x ? 1 : -1; paintMate(m);
+    mates.forEach(m => { if (mateSpot(m.c.id)) return; const q = matePos(m, to); if (!q || !m.at || Math.hypot(q.x - m.at.x, q.y - m.at.y) < 14) return; m.moving = true; m.face = q.x > m.at.x ? 1 : -1; paintMate(m);
       clearTimeout(m.walkT); m.walkT = setTimeout(() => { m.moving = false; paintMate(m) }, 1000 + m.i * 150) });
   }
   const fx = (el, chars, n = 3) => { const r = el.getBoundingClientRect(); for (let i = 0; i < n; i++) { const f = document.createElement("span"); f.className = "bb-fx"; f.textContent = chars[i % chars.length]; f.style.left = (r.left + r.width * (.3 + Math.random() * .4)) + "px"; f.style.top = (r.top + r.height * .15) + "px"; f.style.animationDelay = (i * .25) + "s"; document.body.appendChild(f); setTimeout(() => f.remove(), 2200) } };
@@ -1570,12 +1585,12 @@ body.bb-on{padding-bottom:96px}
     if (!sp) { d.style.left = d.style.top = d.style.right = d.style.bottom = ""; return }
     const q = spotXY(sp, 64); d.style.left = q.x + "px"; d.style.top = q.y + "px"; d.style.right = d.style.bottom = "auto";
   }
-  function makeMovable(el, size, moveTo) {
+  function makeMovable(el, size, moveTo, opts = {}) {
     let g = null, dragged = 0;
     el.addEventListener("pointerdown", e => {
       if (e.button) return;
       e.preventDefault();   // no text selection or native link drag from what's under him (a tap still clicks)
-      const o = el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop };   // layout box, ignoring any scale
+      const o = opts.origin ? opts.origin() : el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop };   // layout box, ignoring any scale
       g = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: o.x, oy: o.y, moved: false };
       try { el.setPointerCapture(e.pointerId) } catch (err) { }   // keep getting moves even when a fast flick leaves him behind
     });
@@ -1585,7 +1600,7 @@ body.bb-on{padding-bottom:96px}
       if (!g.moved) {
         if (Math.hypot(dx, dy) < 8) return;   // a tap still opens the Closet; only a real drag moves him
         g.moved = true;
-        clearTimeout(visiting); visiting = 0; el.classList.add("drag", "run");
+        if (!opts.drop) { clearTimeout(visiting); visiting = 0 } el.classList.add("drag", "run");
       }
       const q = clampXY(g.ox + dx, g.oy + dy, size()); g.x = q.x; g.y = q.y; moveTo(q.x, q.y);
     });
@@ -1594,7 +1609,7 @@ body.bb-on{padding-bottom:96px}
       const was = g; g = null;
       if (!was.moved) return;
       dragged = Date.now(); el.classList.remove("drag", "run");
-      if (was.x !== undefined) { setSpot(xySpot(was.x, was.y, size())); say("I'll sit here!") }
+      if (was.x !== undefined) { if (opts.drop) opts.drop(was.x, was.y); else { setSpot(xySpot(was.x, was.y, size())); say("I'll sit here!") } }
     };
     el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
     el.addEventListener("dragstart", e => e.preventDefault());   // no native drag-and-drop ghost (it would cancel our drag)
@@ -1602,8 +1617,8 @@ body.bb-on{padding-bottom:96px}
     el.addEventListener("keydown", e => {   // arrow keys nudge him (Shift for bigger steps)
       const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!k) return;
       e.preventDefault(); e.stopPropagation();
-      const S = size(), o = el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop }, step = e.shiftKey ? 80 : 24;
-      const q = clampXY(o.x + k[0] * step, o.y + k[1] * step, S); moveTo(q.x, q.y); setSpot(xySpot(q.x, q.y, S));
+      const S = size(), o = opts.origin ? opts.origin() : el.id === "bbPal" && palAt ? palAt : { x: el.offsetLeft, y: el.offsetTop }, step = e.shiftKey ? 80 : 24;
+      const q = clampXY(o.x + k[0] * step, o.y + k[1] * step, S); moveTo(q.x, q.y); (opts.drop ? opts.drop(q.x, q.y) : setSpot(xySpot(q.x, q.y, S)));
     });
   }
   const queue = () => { if (rafQ) return; rafQ = requestAnimationFrame(() => { rafQ = 0; checkPal(); settle() }) };
