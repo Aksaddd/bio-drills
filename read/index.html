@@ -52,6 +52,88 @@
 .rd-score{font:800 44px var(--display);letter-spacing:-.03em;color:var(--good)}
 .rd-end .rd-more{justify-content:center}
 .rd-nav{display:flex;justify-content:space-between;gap:10px}
+.rd-emo{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:linear-gradient(145deg,var(--accent-soft),#fff)}
+.rd-ch.done .rd-emo{background:linear-gradient(145deg,var(--good-soft),#fff);position:relative}
+.rd-ch.done .rd-emo::after{content:"✓";position:absolute;right:-4px;bottom:-4px;width:18px;height:18px;border-radius:50%;background:var(--good);color:#fff;font:700 11px/18px var(--body);text-align:center}
+.rd-stickers{display:flex;gap:6px;flex-wrap:wrap;font-size:22px}.rd-stickers span{opacity:.18;filter:grayscale(1)}.rd-stickers span.got{opacity:1;filter:none;animation:pop .4s}
+/* activities */
+.pl{margin:16px 0;border-radius:16px;background:var(--sunk);padding:14px;display:flex;flex-direction:column;gap:10px;font:400 15px/1.4 var(--body)}
+.pl--fig,.pl--flipbook{background:transparent;padding:0}
+.pl-head{display:flex;gap:10px;align-items:center}.pl-head b{display:block;font:650 16px/1.25 var(--display)}.pl-head small{display:block;color:var(--muted);font-size:13px}
+.pl-ico{width:34px;height:34px;flex:none;border-radius:10px;background:var(--paper);display:grid;place-items:center;font-size:18px;box-shadow:var(--shadow)}
+.pl-tip{margin:0;color:var(--muted);font-size:13px}.pl-cap{margin:0;color:var(--muted);font-size:13.5px}
+figure.pl-fig{margin:0;display:grid;gap:8px;grid-template-columns:1fr}
+figure.pl-fig.many{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.pl-zoom{border:0;padding:0;background:#fff;border-radius:12px;overflow:hidden;cursor:zoom-in;display:block;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.pl-zoom img{display:block;width:100%;height:auto;max-height:420px;object-fit:contain}
+figure.pl-fig figcaption{grid-column:1/-1;font:400 14px/1.45 var(--body);color:var(--muted)}
+.pl-src{display:block;font-size:11.5px;opacity:.8;margin-top:2px}
+.pl-frames{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:800/526}
+.pl-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s}.pl-frames img.on{opacity:1}
+.pl-flab{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font:600 13px var(--body);padding:4px 10px;border-radius:999px}
+.pl-bookbar{display:flex;gap:12px;align-items:center}.pl-bookbar input{flex:1;accent-color:var(--accent)}
+.pl-btn{border:0;border-radius:980px;padding:9px 15px;font:600 14px var(--body);background:var(--paper);color:var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pl-btn.pri,.pl-btn.on{background:var(--accent);color:#fff}
+.pl-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pl-chip{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:8px 12px;font:500 14px/1.3 var(--body);cursor:pointer;text-align:left;transition:transform .12s,border-color .12s}
+.pl-chip:hover{border-color:var(--accent)}.pl-chip.sel{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,113,227,.18)}
+.pl-chip.paired{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,var(--paper));cursor:default}
+.pl-bank,.pl-pool{display:flex;flex-wrap:wrap;gap:8px}
+.pl-shake{animation:shake .4s ease}.pop{animation:pop .35s ease}
+.pl-lab{position:relative;border-radius:12px;overflow:hidden;background:#fff}.pl-lab img{display:block;width:100%;height:auto}
+.pl-pin{position:absolute;transform:translate(-50%,-50%);min-width:26px;height:26px;border-radius:999px;border:2px solid #fff;background:var(--accent);color:#fff;font:700 13px var(--body);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);padding:0 6px;animation:plPulse 2s ease-in-out infinite}
+.pl-pin.ok{background:var(--good);font:600 clamp(8.5px,1.6vw,11.5px)/1.15 var(--body);height:auto;padding:3px 6px;max-width:30%;animation:pinPop .35s;cursor:default}
+.pl-pin.pl-shake{animation:pinShake .4s}
+@keyframes pinShake{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(calc(-50% - 6px),-50%)}75%{transform:translate(calc(-50% + 5px),-50%)}}
+@keyframes pinPop{0%{transform:translate(-50%,-50%) scale(.6)}60%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%)}}
+@keyframes plPulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 0 0 rgba(0,113,227,.45)}50%{box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 0 7px rgba(0,113,227,0)}}
+.pl-seq{margin:0;padding-left:26px;display:flex;flex-direction:column;gap:6px}.pl-seq:empty{display:none}
+.pl-seq li{background:var(--good-soft);border-radius:10px;padding:7px 10px;font-weight:500}
+.pl-match{display:grid;grid-template-columns:1fr 1.5fr;gap:10px}.pl-col{display:flex;flex-direction:column;gap:8px}
+.pl-pairs{display:flex;flex-direction:column;gap:6px}.pl-pair{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;background:var(--paper);border-radius:10px;padding:8px 10px}.pl-pair span{color:var(--muted)}
+.pl-bins{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:10px}
+.pl-bin{background:var(--paper);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:90px}
+.pl-binh{border:2px dashed var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:8px;font:650 14px var(--body);cursor:pointer}
+.pl-bin-in{display:flex;flex-wrap:wrap;gap:5px}.pl-card{background:var(--good-soft);border-radius:8px;padding:4px 8px;font-size:13px}
+.pl-tablewrap{overflow-x:auto}.pl-table{border-collapse:separate;border-spacing:4px;width:100%;font-size:13.5px}.pl-table th{font-weight:600;text-align:center;padding:2px}.pl-table tr th:first-child{text-align:left}
+.pl-cell{width:100%;min-width:44px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);cursor:pointer;font-size:18px}
+.pl-cell.on::after{content:"✓";color:var(--accent);font-weight:700}.pl-cell.ok{background:var(--good-soft);border-color:var(--good)}.pl-cell.ok::after{color:var(--good)}.pl-cell.bad{background:var(--bad-soft);border-color:var(--bad)}
+.pl-msg{color:var(--bad);font-size:13.5px}
+.pl-flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.pl-flip{position:relative;min-height:112px;border:0;background:transparent;perspective:800px;cursor:pointer;padding:0;font:inherit;color:inherit}
+.pl-flip span{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .5s;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.pl-flip .f{background:var(--paper);font:650 15.5px/1.3 var(--display)}.pl-flip .b{background:var(--accent);color:#fff;font-size:13.5px;transform:rotateY(180deg)}
+.pl-flip.on .f{transform:rotateY(-180deg)}.pl-flip.on .b{transform:rotateY(0)}
+.pl-done{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--good-soft);color:var(--good);border-radius:10px;padding:8px 12px;font:650 14px var(--body)}
+.pl-again{border:0;background:none;color:var(--accent);font:600 13.5px var(--body);cursor:pointer}
+.pl-sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:640px){.pl-sim{grid-template-columns:1fr}.pl-match,.pl-pair{grid-template-columns:1fr 1.2fr}}
+.pl-stage{background:var(--paper);border-radius:12px;padding:8px;position:relative}
+.pl-side{display:flex;flex-direction:column;gap:10px}.pl-out{margin:0;font-size:14.5px;min-height:2.6em}
+.pl-coleo{width:100%;display:block}.pl-bend{transform-origin:50px 88px;transform-box:view-box;transition:transform 1.6s cubic-bezier(.3,.7,.3,1)}
+.pl-trials{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pl-trial{border:1.5px solid var(--line);background:var(--paper);border-radius:10px;padding:7px 9px;text-align:left;cursor:pointer;position:relative;font:inherit;color:inherit}
+.pl-trial b{display:block;font-size:13.5px}.pl-trial small{color:var(--muted);font-size:11.5px}.pl-trial.sel{border-color:var(--accent)}
+.pl-trial i{position:absolute;right:8px;top:6px;font-style:normal;font-weight:700}.pl-trial.right i{color:var(--good)}.pl-trial.wrong i{color:var(--bad)}
+.pl-predict{background:var(--accent-soft);border-radius:12px;padding:10px}.pl-q{margin:0 0 8px;font-weight:600}
+.pl-seeds{width:100%;display:block}.pl-seeds .sprout{opacity:0;transform:scale(.3);transform-origin:0 0;transform-box:fill-box;transition:all .6s}
+.pl-phyto .germ .sprout{opacity:1;transform:none}
+.pl-gauge{display:flex;align-items:center;gap:8px;font:600 12.5px var(--body);color:var(--muted);padding:6px 4px 2px}.pl-gauge b{flex:1;height:8px;border-radius:4px;background:#ffd1d1;overflow:hidden}.pl-gauge i{display:block;height:100%;width:8%;background:#d70015;transition:width .6s}
+.pl-btn.pl-r{background:#ff3b30;color:#fff}.pl-btn.pl-fr{background:#8e1b3d;color:#fff}
+.pl-f{display:inline-block;border-radius:6px;padding:1px 7px;font:700 12px var(--body);color:#fff}.pl-f.r{background:#ff3b30}.pl-f.fr{background:#8e1b3d}
+.pl-flashes{min-height:22px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;color:var(--muted)}
+.pl-quiz{background:var(--paper);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;font-size:14px}.pl-qmsg{font-size:13.5px;color:var(--muted)}
+.pl-day{position:relative;display:flex;height:26px;border-radius:8px;overflow:hidden;margin:6px 4px}.pl-day .d{background:#ffe680}.pl-day .n{background:#4b5563}
+.pl-day em{position:absolute;top:-2px;bottom:-2px;width:5px;margin-left:-2px;border-radius:2px}.pl-day em.r{background:#ff3b30}.pl-day em.fr{background:linear-gradient(#ff3b30 50%,#8e1b3d 50%)}
+.pl-hours{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:0 4px}
+.pl-plants{display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:center}.pl-plant svg{width:70px;height:94px;display:block;margin:4px auto 0}
+.pl-plant b{display:block;font-size:13px}.pl-plant small{color:var(--muted);font-size:12px}.pl-plant.on small{color:var(--good);font-weight:600}
+.pl-plant .bloom{opacity:0;transform:scale(.2);transform-origin:30px 26px;transition:all .6s cubic-bezier(.3,1.5,.5,1)}.pl-plant.on .bloom{opacity:1;transform:none}.pl-plant.on .bud{opacity:0}
+.pl-slider{display:flex;gap:10px;align-items:center;font-weight:600;font-size:14px}.pl-slider input{flex:1;accent-color:var(--accent)}
+.pl-missions{margin:0;padding-left:22px;font-size:14px;display:flex;flex-direction:column;gap:4px}.pl-missions li.ok{color:var(--good)}.pl-missions li.ok::marker{content:"✓  "}
+.pl-conf{position:fixed;z-index:200;width:8px;height:12px;border-radius:2px;pointer-events:none;animation:plConf 1.2s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes plConf{to{transform:translate(var(--dx),calc(var(--dy) + 260px)) rotate(var(--r));opacity:0}}
+[data-theme="dark"] .pl-zoom,[data-theme="dark"] .pl-lab,[data-theme="dark"] .pl-stage{background:#fff}
 </style>
 </head><body>
 <div class="wrap" id="app">
@@ -66,6 +148,7 @@
 <script src="../drill/shared.js"></script>
 <script src="../drill/questions.js"></script>
 <script src="chapters.js"></script>
+<script src="play.js"></script>
 <script>
 // Read & Learn: read a short passage, then answer the questions about it right there, then keep reading.
 // Answers are saved here (bio-read-v1) and also recorded in the drill's progress, so the drill knows what you've learned.
@@ -73,7 +156,9 @@
   const B = window.BANK, R = window.READ, KEY = "bio-read-v1", $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const plain = s => String(s).replace(/<[^>]*>/g, "");
-  const NEED = 3;   // questions to answer in a section before "Keep reading" (the rest are bonus)
+  const NEED = 3;
+  const EMO = { land: "🌿", vascular: "🌴", seed: "🌸", signals: "🌱", hormones: "🍅", light: "🌙", stress: "🌵", fungi: "🍄" };
+  const acts = c => c.sections.reduce((n, s) => n + (s.play || []).filter(b => b.t !== "fig").length, 0);   // questions to answer in a section before "Keep reading" (the rest are bonus)
   let st = {}; try { st = JSON.parse(localStorage.getItem(KEY) || "{}") || {} } catch (e) { }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)) } catch (e) { } };
   const chState = c => st[c.id] || (st[c.id] = { at: 0, a: {} });
@@ -108,12 +193,13 @@
     $("backLink").textContent = "← All drills"; $("backLink").href = "../index.html";
     const next = R.find(c => !chState(c).finished) || R[0];
     $("view").innerHTML = `<p class="rd-lead">Read the course one short passage at a time. After each passage, answer a few questions about what you just read, then keep reading. Start here, before the drills.</p>
-      <div class="rd-how"><b>How it works:</b> each chapter is a few short passages (about a minute each). Answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
+      <div class="rd-stickers" aria-label="Chapter stickers">${R.map(c => `<span class="${chState(c).finished ? "got" : ""}" title="${esc(c.title)}">${EMO[c.id]}</span>`).join("")}</div>
+      <div class="rd-how"><b>How it works:</b> the figures come straight from the lecture slides, and every passage has something to do: label a diagram, put steps in order, match, sort, or run one of the lecture's experiments yourself. A perfect first try earns Dexter XP. Then answer ${NEED} questions to unlock the next passage; any extra ones are bonus practice. Your answers count toward the Multiple-Choice Drill and earn Dexter XP and gold like any other answer.</div>
       <div class="rd-list">${R.map((c, i) => {
         const p = chProgress(c), S = chState(c), mins = Math.max(2, Math.round(words(c) / 200));
         const go = S.finished ? "Read again" : p.answered || S.at ? "Continue" : c === next ? "Start" : "Read";
-        return `<a class="rd-ch${S.finished ? " done" : ""}" href="#${c.id}"><span class="rd-num">${S.finished ? "✓" : i + 1}</span>
-          <span><h3>${esc(c.title)}</h3><p>${c.ch} · ${c.sections.length} passages · ${totalQs(c)} questions · about ${mins} min${p.answered ? ` · ${p.right} of ${p.answered} right` : ""}</p><span class="rd-bar"><i style="width:${p.pct}%"></i></span></span>
+        return `<a class="rd-ch${S.finished ? " done" : ""}" href="#${c.id}"><span class="rd-emo" aria-hidden="true">${EMO[c.id] || "📖"}</span>
+          <span><h3>${esc(c.title)}</h3><p>${c.ch} · ${c.sections.length} passages · ${acts(c)} activities · ${totalQs(c)} questions · ~${mins} min${p.answered ? ` · ${p.right} of ${p.answered} right` : ""}</p><span class="rd-bar"><i style="width:${p.pct}%"></i></span></span>
           <span class="rd-go">${go} ›</span></a>`;
       }).join("")}</div>`;
   }
@@ -152,19 +238,56 @@
     const nextC = R[ci + 1];
     $("view").innerHTML = `<div class="rd-head"><p class="rd-kicker">${c.ch} · Chapter ${ci + 1} of ${R.length}</p><p class="rd-lead">${c.intro}</p></div>
       <div class="rd-sticky"><span>Passage ${Math.min(S.at + 1, c.sections.length)} of ${c.sections.length}</span><span class="rd-bar"><i style="width:${p.pct}%"></i></span><span>${p.right}/${p.answered} right</span></div>
-      ${shown.map((s, i) => `<section class="rd-sec" id="sec${i}"><p class="rd-step">Passage ${i + 1}</p><h2>${s.h}</h2><div class="rd-prose">${s.html}</div>${checkHTML(c, s, i)}</section>`).join("")}
-      ${S.finished ? endHTML(c, nextC) : S.at + 1 < c.sections.length ? `<div class="rd-locked">🔒 ${c.sections.length - S.at - 1} more passage${c.sections.length - S.at - 1 > 1 ? "s" : ""}: answer the questions above to keep reading</div>` : ""}`;
+      ${shown.map((s, i) => `<section class="rd-sec" id="sec${i}"><p class="rd-step">Passage ${i + 1}</p><h2>${s.h}</h2><div class="rd-prose">${s.html}</div>${(s.play || []).map((b, j) => window.ReadPlay.html(b, i + "-" + j, (S.w || {})[i + "-" + j])).join("")}${checkHTML(c, s, i)}</section>`).join("")}
+      ${S.finished ? endHTML(c, nextC, ci) : S.at + 1 < c.sections.length ? `<div class="rd-locked">🔒 ${c.sections.length - S.at - 1} more passage${c.sections.length - S.at - 1 > 1 ? "s" : ""}: answer the questions above to keep reading</div>` : ""}`;
     wire(c);
   }
-  function endHTML(c, nextC) {
+  function endHTML(c, nextC, ci) {
     const p = chProgress(c), ids = c.sections.flatMap(s => s.qs), missedHere = ids.filter(id => chState(c).a[id] && !chState(c).a[id].ok).length;
-    return `<section class="rd-sec rd-end card" id="end"><p class="rd-step">Chapter complete</p><h2>${esc(c.title)}</h2>
+    return `<section class="rd-sec rd-end card" id="end"><p class="rd-step">Chapter complete · sticker earned</p><div style="font-size:54px;line-height:1">${EMO[c.id]}</div><h2>${esc(c.title)}</h2>
       ${p.answered ? `<div class="rd-score">${Math.round(100 * p.right / p.answered)}%</div><p class="rd-lead">${p.right} of ${p.answered} right${missedHere ? ` · ${missedHere} to review in the drill's Missed tab` : ""}</p>` : `<p class="rd-lead">You read the whole chapter. Try its questions in the drill next.</p>`}
       <div class="rd-more">${nextC ? `<a class="btn" href="#${nextC.id}">Next: ${esc(nextC.title)} ›</a>` : `<a class="btn" href="../mock/index.html">Take a Mock Exam ›</a>`}<a class="btn ghost" href="../drill/index.html">Practice in the drill</a><button class="btn ghost" data-act="reset">Read it again</button></div></section>`;
   }
   function wire(c) {
     const S = chState(c), view = $("view");
-    view.querySelectorAll(".rd-q:not(.past) .opt").forEach(b => b.onclick = () => {
+    c.sections.forEach((s, i) => (s.play || []).forEach((b, j) => {
+      const key = i + "-" + j, el = view.querySelector(`.pl[data-k="${key}"]`); if (!el) return;
+      window.ReadPlay.wire(el, b, key, (node, perfect, note, quiet) => {
+        S.w = S.w || {}; const first = !S.w[key];
+        if (first || perfect && !S.w[key].perfect) S.w[key] = { perfect, t: Date.now() }; save();
+        const fresh = document.querySelector(`.pl[data-k="${key}"]`) || node;
+        if (!quiet) window.ReadPlay.confetti(fresh);
+        if (perfect && first) window.dispatchEvent(new CustomEvent("bio:correct", { detail: { kind: "root", from: "read", missed: false } }));
+        setTimeout(() => { const n = document.querySelector(`.pl[data-k="${key}"]`); if (!n) return; n.outerHTML = window.ReadPlay.html(b, key, S.w[key]); wireOne(c, i, j) }, quiet ? 0 : 1500);
+      });
+    }));
+    wireQs(c, view);
+    view.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(c, b.dataset.act));
+    view.querySelectorAll(".rd-q .zoom").forEach(z => z.onclick = () => { $("lbImg").src = z.dataset.src; $("lbImg").alt = z.dataset.alt; $("lightbox").hidden = false });
+  }
+  function wireOne(c, i, j) {   // re-wire a single activity after it re-renders in its finished state
+    const S = chState(c), b = c.sections[i].play[j], key = i + "-" + j, el = document.querySelector(`.pl[data-k="${key}"]`);
+    if (el) window.ReadPlay.wire(el, b, key, (node, perfect) => { if (perfect && !S.w[key].perfect) { S.w[key] = { perfect, t: Date.now() }; save() } window.ReadPlay.confetti(node) });
+  }
+  function act(c, a) {
+    const S = chState(c);
+    if (a === "reset") { st[c.id] = { at: 0, a: {}, w: S.w }; save(); chapter(c); scrollTo(0, 0); return }
+    if (S.at >= c.sections.length - 1) { S.finished = true; save(); chapter(c); go("end"); return }
+    S.at++; save(); chapter(c); go("sec" + S.at);
+  }
+  function refreshCheck(c, si) {   // after an answer, redraw only that passage's questions (activities keep their state)
+    const sec = $("sec" + si); if (!sec) return chapter(c);
+    const box = sec.querySelector(".rd-check"), t = document.createElement("div"); t.innerHTML = checkHTML(c, c.sections[si], si);
+    box.replaceWith(t.firstElementChild);
+    const p = chProgress(c), bar = document.querySelector(".rd-sticky");
+    if (bar) { bar.querySelector(".rd-bar i").style.width = p.pct + "%"; bar.lastElementChild.textContent = `${p.right}/${p.answered} right` }
+    const nb = sec.querySelector(".rd-check"); wireQs(c, nb);
+    nb.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(c, b.dataset.act));
+    nb.querySelectorAll(".zoom").forEach(z => z.onclick = () => { $("lbImg").src = z.dataset.src; $("lbImg").alt = z.dataset.alt; $("lightbox").hidden = false });
+  }
+  function wireQs(c, root) {
+    const S = chState(c), view = $("view");
+    root.querySelectorAll(".rd-q:not(.past) .opt").forEach(b => b.onclick = () => {
       const box = b.closest(".rd-q"), id = box.dataset.id, x = B.q[id];
       const o = CUR[id], p = o[+b.dataset.t], good = p === x.ok;
       box.querySelectorAll(".opt").forEach(e => { e.disabled = true; if (o[+e.dataset.t] === x.ok) e.classList.add("right") });
@@ -173,18 +296,11 @@
       const h = drillRecord(id, good);
       window.dispatchEvent(new CustomEvent(good ? "bio:correct" : "bio:wrong", { detail: { kind: "drill", from: B.storageKey, id, q: x, prev: h.prev, prevHist: h.prevHist } }));
       const y = box.getBoundingClientRect().top;
-      setTimeout(() => { rerender(c); const nb = view.querySelector(`.rd-q[data-id="${id}"]`); if (nb) scrollBy(0, nb.getBoundingClientRect().top - y) }, 450);
+      const si = +box.closest(".rd-sec").id.slice(3);
+      setTimeout(() => { refreshCheck(c, si); const nb = view.querySelector(`.rd-q[data-id="${id}"]`); if (nb) scrollBy(0, nb.getBoundingClientRect().top - y) }, 450);
     });
-    view.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
-      const a = b.dataset.act;
-      if (a === "reset") { st[c.id] = { at: 0, a: {} }; save(); chapter(c); scrollTo(0, 0); return }
-      if (S.at >= c.sections.length - 1) { S.finished = true; save(); chapter(c); go("end"); return }
-      S.at++; save(); chapter(c); go("sec" + S.at);
-    });
-    view.querySelectorAll(".zoom").forEach(z => z.onclick = () => { $("lbImg").src = z.dataset.src; $("lbImg").alt = z.dataset.alt; $("lightbox").hidden = false });
   }
   const go = id => requestAnimationFrame(() => { const e = $(id); if (e) e.scrollIntoView({ behavior: "smooth", block: "start" }) });
-  function rerender(c) { chapter(c) }
   $("lbClose").onclick = () => $("lightbox").hidden = true; $("lightbox").onclick = e => { if (e.target.id === "lightbox") $("lightbox").hidden = true };
 
   function route() {
