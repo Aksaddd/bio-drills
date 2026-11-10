@@ -616,7 +616,7 @@ body.bb-on{padding-bottom:96px}
 .cf-cat{cursor:pointer;transition:transform 2.3s ease-in-out;outline:none}.cf-cat:hover>svg,.cf-cat:focus>svg{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #ffd84a)}
 .cf-cat .dx-blink{animation:bbBlink 5s ease-in-out infinite}.cf-cat .dx-tail{animation:bbTailSway 3.4s ease-in-out infinite}.cf-cat .dx-earr{animation:bbEarFlick 7s ease-in-out infinite}
 .cf-cat.walk .dx-pawl,.cf-cat.walk .dx-hindr{animation:bbStride .36s ease-in-out infinite alternate}.cf-cat.walk .dx-pawr,.cf-cat.walk .dx-hindl{animation:bbStride .36s ease-in-out -.36s infinite alternate-reverse}
-.cf-bub{animation:bbFade .3s}
+.cf-bub{animation:bbFade .3s}.cf-cat.play>svg{animation:bbHop .8s cubic-bezier(.3,1.6,.5,1)}
 .cf-sheet{position:absolute;z-index:3;left:0;right:0;bottom:0;background:#fffaf3;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25);animation:bbUp .3s;max-height:78%;overflow:auto;color:#3a2a1e}
 .cf-close{position:absolute;top:10px;right:12px;border:0;background:#f1e4d3;width:32px;height:32px;border-radius:50%;cursor:pointer;color:#4a2f1d}
 .cf-meet{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}.cf-meet>svg{width:120px;height:120px;background:radial-gradient(circle,#ffe9c9,#fffaf3 70%);border-radius:50%}
@@ -875,7 +875,6 @@ body.bb-on{padding-bottom:96px}
         <p><b>What makes a question harder:</b> EXCEPT/NOT wording, putting steps in order, reading an experiment or a figure, comparing two things or explaining why, five answer choices, long and similar answers, high-value Bio-pardy clues, and questions <i>you</i> missed before. A question you've already gotten right 3+ times earns half.</p>
         <p><b>Win streaks multiply XP and gold:</b> ${X ? X.STREAKS.slice(0, -1).reverse().map(([n, m]) => `${n} in a row ×${m}`).join(" · ") : ""}. A wrong answer resets the streak but never takes anything away. Each evolution adds ${EVOLVE_BONUS} gold.</p>
       </details>
-      <div class="bb-spot"><b>Cat tree</b>${treeOn() ? "On: your cats live on a cat tree on question pages." : "Off: your cats sit on their own."}<br><button type="button" id="bbTreeT">${treeOn() ? "Hide the cat tree" : "Show the cat tree"}</button></div>
       <div class="bb-spot"><b>Where ${esc(name(s))} sits</b>${getSpot() ? `Right where you put him. He still runs over to each answer you pick, then goes back to his spot.` : `Next to your questions. He runs over to each answer you pick.`}<small>Drag ${esc(name(s))} anywhere on the screen to move him (or focus him and use the arrow keys).</small>${getSpot() ? `<button type="button" id="bbSpotReset">Put him back beside my questions</button>` : ""}</div>
       <div class="bb-acts"><button type="button" id="bbRename">Rename</button><button type="button" id="bbHide">Hide buddy</button></div>
     </div>`;
@@ -1106,7 +1105,6 @@ body.bb-on{padding-bottom:96px}
         $("bbRename").onclick = () => { const n = prompt("Name your study buddy:", s.nick || "Dexter"); if (n === null) return; const t = load(); t.nick = n.trim().slice(0, 24); save(t); paintDock(); paint() };
         $("bbHide").onclick = () => { setEnabled(false); closeShop() };
         if ($("bbSpotReset")) $("bbSpotReset").onclick = () => { setSpot(null); paint() };
-        $("bbTreeT").onclick = () => { try { treeOn() ? localStorage.setItem(TREE_KEY, "0") : localStorage.removeItem(TREE_KEY) } catch (e) { } palSlot = 0; layoutTree(); settle(); refreshMates(); paint() };
         return;
       }
       if (st.tab === "cats") {
@@ -1158,8 +1156,10 @@ body.bb-on{padding-bottom:96px}
   // when they aren't studying. Tap a cat to meet them: pick a coat color, name them, and bring them home to study.
   const CAFE_SPOTS = [
     { x: 102, y: 250, z: 80, pose: "lie" }, { x: 270, y: 210, z: 56, pose: "sit" }, { x: 304, y: 268, z: 54, pose: "lie" }, { x: 318, y: 350, z: 68, pose: "sit" },
-    { x: 58, y: 420, z: 76, pose: "lie" }, { x: 142, y: 416, z: 74, pose: "sit" }, { x: 112, y: 560, z: 88, pose: "sit" }, { x: 232, y: 578, z: 88, pose: "sit" },
-    { x: 72, y: 612, z: 78, pose: "lie" }, { x: 325, y: 452, z: 62, pose: "sit" }, { x: 248, y: 486, z: 62, pose: "lie" }, { x: 330, y: 614, z: 72, pose: "sit" }
+    { x: 58, y: 420, z: 76, pose: "lie" }, { x: 142, y: 416, z: 74, pose: "sit" }, { x: 112, y: 560, z: 88, pose: "sit" }, { x: 204, y: 582, z: 86, pose: "sit" },
+    { x: 72, y: 612, z: 78, pose: "lie" }, { x: 248, y: 486, z: 62, pose: "lie" },
+    // on the café's cat tree (bottom right): top perch ×2, hammock, cubby roof, base
+    { x: 283, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 321, y: 500, z: 58, pose: "sit", tree: 1 }, { x: 328, y: 542, z: 56, pose: "lie", tree: 1 }, { x: 279, y: 563, z: 54, pose: "sit", tree: 1 }, { x: 319, y: 612, z: 56, pose: "sit", tree: 1 }
   ];
   const CAFE_SCENE = `<defs>
       <linearGradient id="cfWall" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fbeedd"/><stop offset="1" stop-color="#f1d9bd"/></linearGradient>
@@ -1198,8 +1198,7 @@ body.bb-on{padding-bottom:96px}
     <g transform="translate(248 432)"><ellipse cx="0" cy="0" rx="30" ry="7" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="2"/><path d="M0 7 V48 M-12 50 H12" stroke="#3a2a1e" stroke-width="3" stroke-linecap="round"/>
       <path d="M-8 -2 V-14 H8 V-2Z" fill="#fff" stroke="#3a2a1e" stroke-width="1.6"/><path d="M8 -12 q5 0 5 4 q0 4 -5 4" stroke="#3a2a1e" stroke-width="1.6" fill="none"/><ellipse cx="0" cy="-14" rx="8" ry="2.4" fill="#c98f5a"/><path d="M-2 -14.4 q2 -2 4 0 q-2 2.4 -2 2.4 q0 0 -2 -2.4Z" fill="#fff"/>
       ${[0, 1].map(i => `<path d="M${-3 + i * 6} -18 q-3 -5 0 -10" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0"><animate attributeName="opacity" values="0;.8;0" dur="2.8s" begin="${i * 1.1}s" repeatCount="indefinite"/></path>`).join("")}</g>
-    <g transform="translate(72 604)"><path d="M-44 0 Q-44 22 0 24 Q44 22 44 0Z" fill="#c99a5b" stroke="#3a2a1e" stroke-width="2.2"/><path d="M-40 6 Q0 14 40 6 M-36 14 Q0 22 36 14" stroke="#a87a3e" stroke-width="1.6" fill="none"/><ellipse cx="0" cy="0" rx="44" ry="10" fill="#f4e1c1" stroke="#3a2a1e" stroke-width="2"/></g>
-    <g transform="translate(325 452)"><rect x="-6" y="0" width="12" height="160" fill="#dcbf8f" stroke="#3a2a1e" stroke-width="1.8"/><ellipse cx="0" cy="2" rx="30" ry="6" fill="#7aa3cf" stroke="#3a2a1e" stroke-width="1.8"/><rect x="-28" y="154" width="56" height="10" rx="4" fill="url(#cfWood)" stroke="#3a2a1e" stroke-width="1.8"/></g>`;
+    <g transform="translate(72 604)"><path d="M-44 0 Q-44 22 0 24 Q44 22 44 0Z" fill="#c99a5b" stroke="#3a2a1e" stroke-width="2.2"/><path d="M-40 6 Q0 14 40 6 M-36 14 Q0 22 36 14" stroke="#a87a3e" stroke-width="1.6" fill="none"/><ellipse cx="0" cy="0" rx="44" ry="10" fill="#f4e1c1" stroke="#3a2a1e" stroke-width="2"/></g>`;
   function cafeResidents() {
     const { list } = catList(), chill = list.filter(c => !c.active && !c.along).slice(0, 3);
     const day = Math.floor(Date.now() / 864e5);
@@ -1209,11 +1208,12 @@ body.bb-on{padding-bottom:96px}
   let cafe = null;
   function openCafe() {
     if (cafe) cafe.remove();
-    const R = cafeResidents(), spots = CAFE_SPOTS.map((_, i) => i), order = spots.slice().sort(() => Math.random() - .5);
+    const R = cafeResidents(), spots = CAFE_SPOTS.map((_, i) => i), tree = spots.filter(i => CAFE_SPOTS[i].tree), rest = spots.filter(i => !CAFE_SPOTS[i].tree);
+    const order = tree.sort(() => Math.random() - .5).slice(0, 3).concat(rest.sort(() => Math.random() - .5), tree.slice(3));
     R.forEach((r, i) => { r.spot = order[i] });
     cafe = document.createElement("div"); cafe.className = "cf-veil"; cafe.setAttribute("role", "dialog"); cafe.setAttribute("aria-modal", "true"); cafe.setAttribute("aria-label", "The Cat Café");
     cafe.innerHTML = `<div class="cf-room"><div class="cf-top"><span><b>☕ The Cat Café</b><small>Tap a cat to meet them</small></span><button type="button" class="cf-x" aria-label="Leave the café">✕</button></div>
-      <svg class="cf-scene" viewBox="0 0 360 640" preserveAspectRatio="xMidYMax slice">${CAFE_SCENE}<g class="cf-cats"></g><g class="cf-fx"></g></svg>
+      <svg class="cf-scene" viewBox="0 0 360 640" preserveAspectRatio="xMidYMax slice">${CAFE_SCENE}<g transform="translate(246 462) scale(.56)">${TREE_SVG.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "")}</g><g class="cf-cats"></g><g class="cf-fx"></g></svg>
       <div class="cf-sheet" hidden></div></div>`;
     document.body.appendChild(cafe);
     const G = cafe.querySelector(".cf-cats"), sheet = cafe.querySelector(".cf-sheet");
@@ -1240,7 +1240,11 @@ body.bb-on{padding-bottom:96px}
       if (Math.random() < .55) { const f = free(); if (!f.length) return; const to = f[Math.random() * f.length | 0], a = CAFE_SPOTS[r.spot], b = CAFE_SPOTS[to];
         r.face = b.x > a.x ? 1 : -1; r.g.innerHTML = drawCat(r, true); r.spot = to; r.g.classList.add("walk"); r.g.style.transform = `translate(${b.x}px,${b.y}px) scale(${b.z / 80})`;
         setTimeout(() => { r.g.classList.remove("walk"); r.g.innerHTML = drawCat(r) }, 2400);
-      } else bubble(r, ["mrrp?", "meow!", "purr…", "♥", "mew", "zzz"][Math.random() * 6 | 0]);
+      } else {
+        const onTree = R.filter(x => CAFE_SPOTS[x.spot].tree);
+        if (onTree.length > 1 && Math.random() < .5) { const [a, b] = onTree.sort(() => Math.random() - .5); bubble(a, "♥"); bubble(b, ["mrrp!", "purr…", "♥"][Math.random() * 3 | 0]); [a, b].forEach(x => { x.g.classList.remove("play"); void x.g.getBBox(); x.g.classList.add("play"); setTimeout(() => x.g.classList.remove("play"), 900) }) }
+        else bubble(r, ["mrrp?", "meow!", "purr…", "♥", "mew", "zzz"][Math.random() * 6 | 0]);
+      }
     }, 2600);
     const close = () => { clearInterval(life); if (cafe) { cafe.remove(); cafe = null } };
     cafe.querySelector(".cf-x").onclick = close;
@@ -1379,7 +1383,7 @@ body.bb-on{padding-bottom:96px}
   // roof of a cubby house, and the base. Toys: a swinging pom-pom, a toy mouse and a ball. The cat in training heads
   // off to answers and comes back; the others stay on the tree, hop between floors and play. Settings: Progress tab.
   const TREE_KEY = KEY + "-tree";
-  const treeOn = () => { try { return localStorage.getItem(TREE_KEY) !== "0" } catch (e) { return true } };
+  const treeOn = () => false;   // the tree lives in the Cat Café now; on study pages the cats float beside the questions
   const T_SLOTS = [{ x: 66, y: 39, pose: "sit" }, { x: 134, y: 39, pose: "sit" }, { x: 146, y: 113, pose: "lie" }, { x: 58, y: 150, pose: "sit" }, { x: 130, y: 246, pose: "sit" }];
   const T_ADJ = { 0: 1, 1: 0, 2: 1, 3: 4, 4: 3 };
   let treeBox = null, palSlot = 0;

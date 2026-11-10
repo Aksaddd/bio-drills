@@ -123,11 +123,9 @@ The catalog is `assets/wardrobe.js`. Items are drawn once in Dexter's full-size 
   - **Who's there:** one cat of every breed (coat colors rotate daily), plus your own cats who aren't studying.
   - **Life in the café:** cats blink, swish their tails, chirp ("mrrp?") and wander between spots.
   - **Meeting a cat:** tap a guest to pick a coat color and a name, then *Bring to study* (adopt and train) or *Adopt · come along*. Tap one of your cats to study with it, bring it along, or let it keep chilling.
-- **The cat tree:** on question pages the cats live on a cat tree standing on the bottom of the screen, in the margin beside the questions when there's room, otherwise the bottom corner (`TREE_SVG` / `layoutTree()`).
-  - **Floors:** a carpeted top perch for two, a hammock (cats lie in it), a cubby house with a roof perch, and the base.
-  - **Toys:** a swinging pom-pom, a toy mouse and a ball.
-  - **Movement:** the cat in training runs to answers and comes back. The others stay on the tree, hop between floors and swap places with each other. Before an interaction, a companion hops next to him.
-  - **Settings:** dragging him moves the tree along the floor. Progress → *Cat tree* turns it off. On phones the page gets bottom padding so content can scroll above the tree.
+- **The cat tree (in the Café):** a big multi-floor cat tree stands in the café's corner: a carpeted top perch for two, a pink hammock, a cubby house with a roof perch and a base, plus a swinging pom-pom, a toy mouse and a ball (`TREE_SVG`).
+  - Its floors are lounging spots: cats nap in the hammock, sit on the perches and wander on and off. Cats on the tree play together now and then, hopping with hearts and chirps.
+  - On study pages there's no tree (`treeOn()` is false): the companions float beside the cat in training so the questions stay uncluttered.
 - **A household of cats:** the **Cats** tab in the companion's panel lists every cat in the household. A free adoption picks from 9 breeds, each the same chibi cat with its own coat, eyes and markings: Golden (Dexter), Orange Tabby, Silver Tabby, Black Cat, Tuxedo, Siamese, Calico, Russian Blue, Snow White (`BREEDS` / `setCoat()` in `assets/buddy.js`). Up to 6 cats.
   - **Training:** one cat is *in training* and earns the XP. *Train* switches with one tap.
   - **What's per cat:** XP, level, evolution, name, breed, outfit, collar color, pinned badges and weight.
